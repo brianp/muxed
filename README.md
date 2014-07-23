@@ -1,4 +1,4 @@
-muxed
+Muxed
 =====
 
-A tmux window manager.
+A tmux project manager.
