@@ -9,8 +9,16 @@ fn verify_command(command: &str) -> bool {
     }
 }
 
-fn run_command(command: &str) {
-    println!("{}", command);
+fn run_command(command: &str, value: &str) {
+    match command {
+        "new"  => creator::new(value),
+        "open" => editor::new(value)
+    }
+}
+
+#[test]
+fn run_command_prints_value() {
+  assert_eq!(run_command("value"), false);
 }
 
 pub fn init(args: Vec<String>) {
@@ -39,7 +47,7 @@ pub fn init(args: Vec<String>) {
         return;
     }
 
-    run_command(input.as_slice());
+    run_command(input.as_slice(), matches.free[1].clone().as_slice());
 }
 
 #[test]
