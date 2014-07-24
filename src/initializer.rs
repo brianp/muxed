@@ -40,3 +40,19 @@ pub fn init(args: Vec<String>) {
 
     run_command(input.as_slice());
 }
+
+#[test]
+fn verify_command_new_returns_true() {
+  assert_eq!(verify_command("new"), true);
+}
+
+#[test]
+fn verify_command_open_returns_true() {
+  assert_eq!(verify_command("open"), true);
+}
+
+#[test]
+fn verify_command_value_returns_false() {
+  assert_eq!(verify_command("value"), false);
+}
+
