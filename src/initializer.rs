@@ -1,13 +1,8 @@
-use getopts::{getopts};
+use getopts::{getopts,OptGroup,Matches};
 use help;
+use creator;
+use editor;
 
-fn verify_command(command: &str) -> bool {
-    match command {
-        "new"  => true,
-        "open" => true,
-        _      => false
-    }
-}
 
 fn run_command(command: &str, value: &str) {
     match command {
@@ -36,6 +31,8 @@ pub fn init(args: Vec<String>) {
     }
 
     let input = if !matches.free.is_empty() && !matches.free.len() == 2 {
+fn validate_command(matches: Matches) -> bool {
+    let command = if matches.free.len() == 2 {
         matches.free[0].clone()
     } else {
         help::print_usage(program.as_slice(), opts);
@@ -45,23 +42,35 @@ pub fn init(args: Vec<String>) {
     if !verify_command(input.as_slice()) {
         help::print_usage(program.as_slice(), opts);
         return;
+    return match command {
+        "new"  => true,
+        "open" => true,
+        _      => false
     }
+}
 
     run_command(input.as_slice(), matches.free[1].clone().as_slice());
+#[test]
+fn validate_command_new_returns_true() {
+    let matches = get_matches([String::from_str("new muxed")], help::opts());
+    assert_eq!(validate_command(matches), true);
 }
 
 #[test]
-fn verify_command_new_returns_true() {
-  assert_eq!(verify_command("new"), true);
+fn validate_command_open_returns_true() {
+    let matches = get_matches([String::from_str("open muxed")], help::opts());
+    assert_eq!(validate_command(matches), true);
 }
 
 #[test]
-fn verify_command_open_returns_true() {
-  assert_eq!(verify_command("open"), true);
+fn validate_command_value_returns_false() {
+    let matches = get_matches([String::from_str("value")], help::opts());
+    assert_eq!(validate_command(matches), false);
 }
 
 #[test]
-fn verify_command_value_returns_false() {
-  assert_eq!(verify_command("value"), false);
+#[should_fail]
+fn get_matches_returns_failure_with_bad_opts() {
+    get_matches([String::from_str("-m")], help::opts());
 }
 
