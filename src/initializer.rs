@@ -27,7 +27,7 @@ pub fn init(args: Vec<String>) {
         return;
     }
 
-    let input = if !matches.free.is_empty() {
+    let input = if !matches.free.is_empty() && !matches.free.len() == 2 {
         matches.free[0].clone()
     } else {
         help::print_usage(program.as_slice(), opts);
