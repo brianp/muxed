@@ -16,9 +16,12 @@ pub fn init(args: Vec<String>) {
     run_command(matches);
 }
 
+fn get_matches(tail: &[String], opts: &[OptGroup]) -> Matches {
+    return match getopts(tail, opts) {
         Ok(m) => { m }
         Err(f) => { fail!(f.to_string()) }
     }
+}
 
 fn validate_command(matches: Matches) -> bool {
     let command = if matches.free.len() == 2 {
