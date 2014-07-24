@@ -8,19 +8,12 @@ pub fn init(args: Vec<String>) {
     let opts = help::opts();
     let matches = get_matches(args.tail(), opts.clone());
 
-fn run_command(command: &str, value: &str) {
-    match command {
-        "new"  => creator::new(value),
-        "open" => editor::new(value)
     if matches.opt_present("h") || !validate_command(matches) {
         help::print_usage(program.as_slice(), opts);
         return;
     }
-}
 
-#[test]
-fn run_command_prints_value() {
-  assert_eq!(run_command("value"), false);
+    run_command(matches);
 }
 
         Ok(m) => { m }
@@ -36,6 +29,17 @@ fn validate_command(matches: Matches) -> bool {
         "new"  => true,
         "open" => true,
         _      => false
+    }
+}
+
+fn run_command(matches: Matches) {
+    let command = matches.free[0].clone();
+    let value = matches.free[1].clone();
+
+    match command {
+        "new"  => creator::new(value),
+        "open" => editor::new(value),
+        _      => fail!()
     }
 }
 
