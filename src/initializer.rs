@@ -35,7 +35,8 @@ pub fn init(args: Vec<String>) {
     };
 
     if !verify_command(input.as_slice()) {
-      return;
+        help::print_usage(program.as_slice(), opts);
+        return;
     }
 
     run_command(input.as_slice());
