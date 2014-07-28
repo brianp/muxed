@@ -27,7 +27,7 @@ fn validate_command(matches: &Matches) -> bool {
     let command = if matches.free.len() == 2 {
         matches.free[0].as_slice()
     } else {
-      return false
+        return false
     };
 
     return match command {
@@ -44,7 +44,7 @@ fn run_command(matches: &Matches) {
     match command {
         "new"  => creator::new(value),
         "open" => editor::new(value),
-        _      => fail!()
+        _      => println!("Nope")
     }
 }
 
@@ -71,4 +71,3 @@ fn validate_command_value_returns_false() {
 fn get_matches_returns_failure_with_bad_opts() {
     get_matches([String::from_str("-m")], help::opts());
 }
-
