@@ -1,8 +1,11 @@
-LIBNAME := $(shell rustc --print-file-name src/main.rs)
+LIBNAME := muxed
 
-all: muxed
-
-muxed: $(LIBNAME)
-
-$(LIBNAME): src/main.rs src/*.rs
+all: src/main.rs src/*.rs
 	rustc -o $@ $<
+
+clean:
+	rm -rf build/
+
+test: src/main.rs
+	@mkdir -p build
+	rustc --test --dep-info build/$(notdir $<).d $< -o $@
