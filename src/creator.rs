@@ -1,6 +1,7 @@
-use std::io::File;
+use std::io::{File,fs};
 use std::path::posix::Path;
 use std::os::{homedir};
+use std::rand::random;
 
 pub fn new<'r>(name: &str) {
     let home_unwrap = homedir().unwrap();
