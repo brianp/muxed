@@ -14,7 +14,7 @@ pub fn new(name: &str) {
     };
 
     let path = format!("{}/{}", muxed_dir.display(), name);
-      
+
     File::create(&Path::new(path));
 }
 
