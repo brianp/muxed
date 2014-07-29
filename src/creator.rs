@@ -5,7 +5,16 @@ use std::rand::random;
 
 pub fn new(name: &str) {
     let home_unwrap = homedir().unwrap();
-    let path = format!("{}/.muxed/{}", home_unwrap.display(), name);
+    let home        = home_unwrap.display();
+
+    let muxed_dir = if muxed_dir_exists(&"muxed".to_string()) {
+      Path::new(format!("{}/.muxed/", home))
+    } else {
+      create_muxed_dir(&"muxed".to_string())
+    };
+
+    let path = format!("{}/{}", muxed_dir.display(), name);
+      
     File::create(&Path::new(path));
 }
 
