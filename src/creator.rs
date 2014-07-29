@@ -15,6 +15,30 @@ fn create_muxed_dir(name: &String) -> Path {
     fs::mkdir(path, ::std::io::UserRWX);
     path.clone()
 }
+
+fn muxed_dir_exists(name: &String) -> bool {
+    let home_unwrap = homedir().unwrap();
+    let path = &Path::new(format!("{}/.{}", home_unwrap.display(), name));
+    path.exists()
+}
+
+#[test]
+fn muxed_dir_exists_returns_false() {
+  let dir = format!("test_dir_{}", random::<f64>());
+  assert!(!muxed_dir_exists(&dir));
+}
+
+#[test]
+fn muxed_dir_exists_returns_true() {
+  let dir = format!("test_dir_{}", random::<f64>());
+  create_muxed_dir(&dir);
+  assert!(muxed_dir_exists(&dir));
+
+  let home_unwrap = homedir().unwrap();
+  let muxed_path  = &Path::new(format!("{}/.{}/", home_unwrap.display(), dir.as_slice()));
+  fs::rmdir_recursive(muxed_path);
+}
+
 #[test]
 fn creates_muxed_dir() {
     let name        = format!("test_project_{}", random::<f64>());
