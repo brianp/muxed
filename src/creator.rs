@@ -10,9 +10,11 @@ pub fn new<'r>(name: &str) {
 
 #[test]
 fn new_writes_file_to_muxed_dir() {
-    let name = "test_project";
+    let name = format!("test_project_{}", random::<f64>());
     let home_unwrap = homedir().unwrap();
     let path = &Path::new(format!("{}/.muxed/{}", home_unwrap.display(), name));
     new(name);
+    new(name.as_slice());
     assert!(path.exists());
+    fs::unlink(path);
 }
