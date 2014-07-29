@@ -1,7 +1,10 @@
+#![allow(experimental)]
+
 use std::io::{File,fs};
 use std::path::posix::Path;
 use std::os::{homedir};
 use std::rand::random;
+use std::finally::Finally;
 
 pub fn new(name: &str) {
     let home_unwrap = homedir().unwrap();
@@ -67,4 +70,17 @@ fn new_writes_file_to_muxed_dir() {
     new(name.as_slice());
     assert!(path.exists());
     fs::unlink(path);
+}
+
+#[test]
+#[should_fail]
+fn new_doesnt_overwrite_existing_file() {
+    let name = format!("test_project_{}", random::<f64>());
+    let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
+    new(name.as_slice());
+    (|| {
+        new(name.as_slice());
+    }).finally(|| {
+        fs::unlink(path);
+    })
 }
