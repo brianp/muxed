@@ -3,7 +3,7 @@ use std::path::posix::Path;
 use std::os::{homedir};
 use std::rand::random;
 
-pub fn new<'r>(name: &str) {
+pub fn new(name: &str) {
     let home_unwrap = homedir().unwrap();
     let path = format!("{}/.muxed/{}", home_unwrap.display(), name);
     File::create(&Path::new(path));
