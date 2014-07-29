@@ -3,6 +3,11 @@ use help;
 use creator;
 use editor;
 
+/// The initializer module parses arguments and verfies commands are valid
+/// before passing them for execution.
+
+/// The init method accepts a `Vec<String>` of arguments. If an argument or
+/// command does not match valid input print the help screen.
 pub fn init(args: Vec<String>) {
     let program = args[0].clone();
     let opts = help::opts();
@@ -16,6 +21,9 @@ pub fn init(args: Vec<String>) {
     run_command(matches);
 }
 
+/// Accept the current arguments and match them using getopts.
+/// # Errors
+/// Will fail if arguments are not found.
 fn get_matches(tail: &[String], opts: &[OptGroup]) -> Matches {
     return match getopts(tail, opts) {
         Ok(m) => { m }
@@ -23,6 +31,8 @@ fn get_matches(tail: &[String], opts: &[OptGroup]) -> Matches {
     }
 }
 
+/// Validate the free text passed to the application. If the free text can match
+/// an application command return `true` otherwise `false`.
 fn validate_command(matches: &Matches) -> bool {
     let command = if matches.free.len() == 2 {
         matches.free[0].as_slice()
@@ -37,6 +47,12 @@ fn validate_command(matches: &Matches) -> bool {
     }
 }
 
+/// Once the free text has been validated use the command to execute the
+/// operation.
+/// # Errors
+/// prints out “Nope”.
+/// # TODO:
+/// Fix the fallthrough execution path to not print “Nope”.
 fn run_command(matches: &Matches) {
     let command = matches.free[0].as_slice();
     let value = matches.free[1].as_slice();
