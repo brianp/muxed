@@ -1,6 +1,8 @@
 LIBNAME := muxed
 
-all: src/main.rs src/*.rs
+all: $(LIBNAME)
+
+$(LIBNAME): src/main.rs src/*.rs
 	rustc -o $@ $<
 
 clean:
