@@ -6,12 +6,13 @@ use std::os::{homedir};
 use std::rand::random;
 use std::finally::Finally;
 
+static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
-    let muxed_dir = if muxed_dir_exists(&"muxed".to_string()) {
-      Path::new(format!("{}/.muxed/", homedir_string()))
+    let muxed_dir = if muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
+      Path::new(format!("{}/.{}/", homedir_string(), &DEFAULT_MUXED_DIR.to_string()))
     } else {
-      create_muxed_dir(&"muxed".to_string())
+      create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
     };
 
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
