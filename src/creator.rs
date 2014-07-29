@@ -14,9 +14,12 @@ pub fn new(name: &str) {
       create_muxed_dir(&"muxed".to_string())
     };
 
-    let path = format!("{}/{}", muxed_dir.display(), name);
-
-    File::create(&Path::new(path));
+    let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
+    if !path.exists() {
+      File::create(&Path::new(path));
+    } else {
+      println!("Project already exists.");
+    }
 }
 
 fn create_muxed_dir(name: &String) -> Path {
