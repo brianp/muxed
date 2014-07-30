@@ -1,6 +1,7 @@
 #![allow(experimental)]
 
 use std::io::{File,fs};
+use std::io::process::Command;
 use std::path::posix::Path;
 use std::os::{homedir};
 use std::rand::random;
@@ -18,7 +19,12 @@ pub fn new(name: &str) {
 
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
     if !path.exists() {
-      File::create(&Path::new(path));
+      File::create(path);
+
+      let mut process = match Command::new("$EDITOR").arg(format!("{}", path.display())).spawn() {
+        Ok(p) => p,
+        Err(e) => fail!("failed to execute process: {}", e),
+      };
     } else {
       println!("Project already exists.");
     }
