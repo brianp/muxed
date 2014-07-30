@@ -6,6 +6,7 @@ use std::os::{homedir};
 use std::rand::random;
 use std::finally::Finally;
 
+static TEMPLATE: &'static str = include_str!("creator/template.yml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
