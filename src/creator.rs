@@ -82,7 +82,7 @@ fn new_writes_file_to_muxed_dir() {
 }
 
 #[test]
-#[should_fail]
+// TODO: Fix this test so it verifies something better.
 fn new_doesnt_overwrite_existing_file() {
     let name = format!("test_project_{}", random::<f64>());
     let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
