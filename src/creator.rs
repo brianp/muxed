@@ -19,15 +19,19 @@ pub fn new(name: &str) {
 
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
     if !path.exists() {
-      File::create(path);
-
-      let mut process = match Command::new("$EDITOR").arg(format!("{}", path.display())).spawn() {
-        Ok(p) => p,
-        Err(e) => fail!("failed to execute process: {}", e),
-      };
+      create_project_file(path)
     } else {
       println!("Project already exists.");
     }
+}
+
+fn create_project_file(path: &Path) {
+    File::create(path);
+
+    let output = match Command::new("cat").arg("foot.txt").output() {
+        Ok(output) => output,
+        Err(e) => fail!("failed to execute process: {}", e),
+    };
 }
 
 fn create_muxed_dir(name: &String) -> Path {
