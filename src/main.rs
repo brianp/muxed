@@ -1,7 +1,7 @@
+//! Muxed. A tmux project manager with no runtime dependencies.
+
 extern crate getopts;
 use std::os;
-
-/// Muxed. A tmux project manager with no runtime dependencies.
 
 mod initializer;
 mod help;
