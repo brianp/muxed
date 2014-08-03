@@ -1,10 +1,10 @@
+//! The initializer module parses arguments and verfies commands are valid
+//! before passing them for execution.
+
 use getopts::{getopts,OptGroup,Matches};
 use help;
 use creator;
 use editor;
-
-/// The initializer module parses arguments and verfies commands are valid
-/// before passing them for execution.
 
 /// The init method accepts a `Vec<String>` of arguments. If an argument or
 /// command does not match valid input print the help screen.

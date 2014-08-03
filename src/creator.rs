@@ -1,3 +1,5 @@
+//! The initializer module parses arguments and verfies commands are valid
+//! The creator module handles creating the muxed directory and project files.
 #![allow(experimental)]
 
 use std::io::{File,fs};
@@ -25,6 +27,8 @@ pub fn new(name: &str) {
     }
 }
 
+/// Copy and create the new project file from a template. Attempt to open the
+/// users default editor to make changes.
 fn create_project_file(path: &Path) {
     match File::create(path).write(TEMPLATE.as_bytes()) {
         Ok(()) => (), // succeeded
@@ -33,6 +37,7 @@ fn create_project_file(path: &Path) {
 //    Command::new("vim").arg(format!("{}", path.display())).detached();
 }
 
+/// Create the muxed directory and return the path if creation is successful.
 fn create_muxed_dir(name: &String) -> Path {
     let path = &Path::new(format!("{}/.{}", homedir_string(), name));
     match fs::mkdir(path, ::std::io::UserRWX) {
@@ -43,16 +48,19 @@ fn create_muxed_dir(name: &String) -> Path {
     path.clone()
 }
 
+/// Return a boolean if the ~/.muxed/ dir exists.
 fn muxed_dir_exists(name: &String) -> bool {
     let path = &Path::new(format!("{}/.{}", homedir_string(), name));
     path.exists()
 }
 
+/// Return the users current homedir as a string.
 fn homedir_string() -> String {
     let home_unwrap = homedir().unwrap();
     format!("{}", home_unwrap.display())
 }
 
+/// Test helper to standardize how random files and directories are generated.
 #[cfg(test)]
 fn random_name() -> String {
   format!("test_{}", random::<f64>())
