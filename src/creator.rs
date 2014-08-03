@@ -1,7 +1,7 @@
 #![allow(experimental)]
 
 use std::io::{File,fs};
-use std::io::process::Command;
+//use std::io::process::Command;
 use std::path::posix::Path;
 use std::os::{homedir};
 use std::rand::random;
