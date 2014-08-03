@@ -26,7 +26,10 @@ pub fn new(name: &str) {
 }
 
 fn create_project_file(path: &Path) {
-    File::create(path);
+    match File::create(path).write(TEMPLATE.as_bytes()) {
+        Ok(()) => (), // succeeded
+        Err(e) => println!("failed to write to my diary: {}", e),
+    }
 //    Command::new("vim").arg(format!("{}", path.display())).detached();
 }
 
