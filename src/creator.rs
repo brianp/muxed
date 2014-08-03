@@ -53,6 +53,11 @@ fn homedir_string() -> String {
     format!("{}", home_unwrap.display())
 }
 
+#[cfg(test)]
+fn random_name() -> String {
+  format!("test_{}", random::<f64>())
+}
+
 #[test]
 fn muxed_dir_exists_returns_false() {
   let dir = format!("test_dir_{}", random::<f64>());
