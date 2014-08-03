@@ -55,7 +55,7 @@ fn validate_command(matches: &Matches) -> bool {
 /// Fix the fallthrough execution path to not print “Nope”.
 fn run_command(matches: &Matches) {
     let command = matches.free[0].as_slice();
-    let value = matches.free[1].as_slice();
+    let value   = matches.free[1].as_slice();
 
     match command {
         "new"  => creator::new(value),
