@@ -35,7 +35,11 @@ fn create_project_file(path: &Path) {
 
 fn create_muxed_dir(name: &String) -> Path {
     let path = &Path::new(format!("{}/.{}", homedir_string(), name));
-    fs::mkdir(path, ::std::io::UserRWX);
+    match fs::mkdir(path, ::std::io::UserRWX) {
+        Ok(()) => (), // succeeded
+        Err(_e) => println!("Failed to create project {}", path.filename()),
+    }
+
     path.clone()
 }
 
