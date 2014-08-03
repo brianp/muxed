@@ -27,11 +27,7 @@ pub fn new(name: &str) {
 
 fn create_project_file(path: &Path) {
     File::create(path);
-
-    let output = match Command::new("cat").arg("foot.txt").output() {
-        Ok(output) => output,
-        Err(e) => fail!("failed to execute process: {}", e),
-    };
+//    Command::new("vim").arg(format!("{}", path.display())).detached();
 }
 
 fn create_muxed_dir(name: &String) -> Path {
