@@ -60,25 +60,23 @@ fn random_name() -> String {
 
 #[test]
 fn muxed_dir_exists_returns_false() {
-  let dir = format!("test_dir_{}", random::<f64>());
-  assert!(!muxed_dir_exists(&dir));
+  assert!(!muxed_dir_exists(&random_name()));
 }
 
 #[test]
 fn muxed_dir_exists_returns_true() {
-  let dir = format!("test_dir_{}", random::<f64>());
+  let dir = random_name();
   create_muxed_dir(&dir);
   assert!(muxed_dir_exists(&dir));
 
-  let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir.as_slice()));
+  let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
   fs::rmdir_recursive(muxed_path);
 }
 
 #[test]
 fn creates_muxed_dir() {
-    let name        = format!("test_project_{}", random::<f64>());
-    let dir         = format!("test_dir_{}", random::<f64>());
-    let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir.as_slice()));
+    let dir = random_name();
+    let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
     create_muxed_dir(&dir);
     assert!(muxed_path.exists());
     fs::rmdir_recursive(muxed_path);
@@ -86,7 +84,7 @@ fn creates_muxed_dir() {
 
 #[test]
 fn new_writes_file_to_muxed_dir() {
-    let name = format!("test_project_{}", random::<f64>());
+    let name = random_name();
     let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
     new(name.as_slice());
     assert!(path.exists());
@@ -96,7 +94,7 @@ fn new_writes_file_to_muxed_dir() {
 #[test]
 // TODO: Fix this test so it verifies something better.
 fn new_doesnt_overwrite_existing_file() {
-    let name = format!("test_project_{}", random::<f64>());
+    let name = random_name();
     let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
     new(name.as_slice());
     (|| {
