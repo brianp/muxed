@@ -70,7 +70,10 @@ fn muxed_dir_exists_returns_true() {
   assert!(muxed_dir_exists(&dir));
 
   let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
-  fs::rmdir_recursive(muxed_path);
+  match fs::rmdir_recursive(muxed_path) {
+      Ok(()) => (), // succeeded
+      Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
+  }
 }
 
 #[test]
@@ -79,7 +82,10 @@ fn creates_muxed_dir() {
     let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
     create_muxed_dir(&dir);
     assert!(muxed_path.exists());
-    fs::rmdir_recursive(muxed_path);
+    match fs::rmdir_recursive(muxed_path) {
+        Ok(()) => (), // succeeded
+        Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
+    }
 }
 
 #[test]
@@ -88,7 +94,10 @@ fn new_writes_file_to_muxed_dir() {
     let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
     new(name.as_slice());
     assert!(path.exists());
-    fs::unlink(path);
+    match fs::unlink(path) {
+        Ok(()) => (), // succeeded
+        Err(e) => println!("Failed to unlink the path {} with error {}", path.display(), e),
+    }
 }
 
 #[test]
@@ -100,6 +109,9 @@ fn new_doesnt_overwrite_existing_file() {
     (|| {
         new(name.as_slice());
     }).finally(|| {
-        fs::unlink(path);
+        match fs::unlink(path) {
+            Ok(()) => (), // succeeded
+            Err(e) => println!("Failed to unlink the path {} with error {}", path.display(), e),
+        }
     })
 }
