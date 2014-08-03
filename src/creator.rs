@@ -28,7 +28,7 @@ pub fn new(name: &str) {
 fn create_project_file(path: &Path) {
     match File::create(path).write(TEMPLATE.as_bytes()) {
         Ok(()) => (), // succeeded
-        Err(e) => println!("Failed to create project {}", path.filename()),
+        Err(_e) => println!("Failed to create project {}", path.filename()),
     }
 //    Command::new("vim").arg(format!("{}", path.display())).detached();
 }
