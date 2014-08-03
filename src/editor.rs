@@ -1,3 +1,3 @@
-pub fn new(name: &str) {
+pub fn new(_name: &str) {
   println!("editor");
 }
