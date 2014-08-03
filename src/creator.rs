@@ -4,8 +4,8 @@ use std::io::{File,fs};
 //use std::io::process::Command;
 use std::path::posix::Path;
 use std::os::{homedir};
-use std::rand::random;
-use std::finally::Finally;
+#[cfg(test)] use std::rand::random;
+#[cfg(test)] use std::finally::Finally;
 
 static TEMPLATE: &'static str = include_str!("creator/template.yml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
