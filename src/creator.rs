@@ -31,7 +31,7 @@ pub fn new(name: &str) {
 /// users default editor to make changes.
 fn create_project_file(path: &Path) {
     match File::create(path).write(TEMPLATE.as_bytes()) {
-        Ok(()) => (), // succeeded
+        Ok(()) => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
     //Command::new("vim").arg(format!("{}", path.display())).detached();
@@ -41,7 +41,7 @@ fn create_project_file(path: &Path) {
 fn create_muxed_dir(name: &String) -> Path {
     let path = &Path::new(format!("{}/.{}", homedir_string(), name));
     match fs::mkdir(path, ::std::io::UserRWX) {
-        Ok(()) => (), // succeeded
+        Ok(()) => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
 
