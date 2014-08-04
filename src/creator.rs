@@ -14,16 +14,16 @@ static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
     let muxed_dir = if muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
-      Path::new(format!("{}/.{}/", homedir_string(), &DEFAULT_MUXED_DIR.to_string()))
+        Path::new(format!("{}/.{}/", homedir_string(), &DEFAULT_MUXED_DIR.to_string()))
     } else {
-      create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
+        create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
     };
 
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
     if !path.exists() {
-      create_project_file(path)
+        create_project_file(path)
     } else {
-      println!("Project already exists.");
+        println!("Project already exists.");
     }
 }
 
@@ -34,7 +34,7 @@ fn create_project_file(path: &Path) {
         Ok(()) => (), // succeeded
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
-//    Command::new("vim").arg(format!("{}", path.display())).detached();
+    //Command::new("vim").arg(format!("{}", path.display())).detached();
 }
 
 /// Create the muxed directory and return the path if creation is successful.
@@ -63,25 +63,25 @@ fn homedir_string() -> String {
 /// Test helper to standardize how random files and directories are generated.
 #[cfg(test)]
 fn random_name() -> String {
-  format!("test_{}", random::<f64>())
+    format!("test_{}", random::<f64>())
 }
 
 #[test]
 fn muxed_dir_exists_returns_false() {
-  assert!(!muxed_dir_exists(&random_name()));
+    assert!(!muxed_dir_exists(&random_name()));
 }
 
 #[test]
 fn muxed_dir_exists_returns_true() {
-  let dir = random_name();
-  create_muxed_dir(&dir);
-  assert!(muxed_dir_exists(&dir));
+    let dir = random_name();
+    create_muxed_dir(&dir);
+    assert!(muxed_dir_exists(&dir));
 
-  let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
-  match fs::rmdir_recursive(muxed_path) {
-      Ok(()) => (), // succeeded
-      Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
-  }
+    let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
+    match fs::rmdir_recursive(muxed_path) {
+        Ok(()) => (), // succeeded
+        Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
+    }
 }
 
 #[test]
