@@ -6,6 +6,8 @@ use std::io::{File,fs};
 //use std::io::process::Command;
 use std::path::posix::Path;
 use std::os::{homedir};
+use libc::funcs::c95::stdlib::system;
+use std::i8::parse_bytes;
 #[cfg(test)] use std::rand::random;
 #[cfg(test)] use std::finally::Finally;
 
@@ -34,7 +36,8 @@ fn create_project_file(path: &Path) {
         Ok(()) => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
-    //Command::new("vim").arg(format!("{}", path.display())).detached();
+    //let methods = parse_bytes(format!("$EDITOR {}", path.display()).as_bytes(), 1).unwrap();
+    //system("vim ~/.muxed/muxed");
 }
 
 /// Create the muxed directory and return the path if creation is successful.
