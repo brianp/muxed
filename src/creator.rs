@@ -5,7 +5,7 @@
 use std::io::{File,fs};
 use std::io::process::Command;
 use std::path::posix::Path;
-use std::os::{homedir};
+use std::os::homedir;
 use libc::funcs::c95::stdlib::system;
 #[cfg(test)] use std::rand::random;
 #[cfg(test)] use std::finally::Finally;
