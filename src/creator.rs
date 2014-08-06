@@ -22,7 +22,12 @@ pub fn new(name: &str) {
 
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
     if !path.exists() {
-        create_project_file(path)
+        create_project_file(path);
+
+        match default_editor_set() {
+            true  => open_project_file(path),
+            false => println!("Default editor is not set.")
+        }
     } else {
         println!("Project already exists.");
     }
