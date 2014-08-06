@@ -37,10 +37,12 @@ fn default_editor_set() -> Result<Ok, Err> {
   println!("{}", output)
 }
 
-fn open_project_file(path: &Path) {
+#[cfg(not(test))] fn open_project_file(path: &Path) {
     let method = format!("$EDITOR {}", path.display()).to_c_str();
     unsafe { system(method.unwrap()); };
 }
+
+#[cfg(test)] fn open_project_file(_path: &Path) { }
 
 /// Copy and create the new project file from a template. Attempt to open the
 /// users default editor to make changes.
