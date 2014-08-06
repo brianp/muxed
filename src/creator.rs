@@ -14,10 +14,9 @@ static TEMPLATE: &'static str = include_str!("creator/template.yml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
-    let muxed_dir = if muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
-        Path::new(format!("{}/.{}/", homedir_string(), &DEFAULT_MUXED_DIR.to_string()))
-    } else {
-        create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
+    let muxed_dir = match muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
+        true  => Path::new(format!("{}/.{}/", homedir_string(), &DEFAULT_MUXED_DIR.to_string())),
+        false => create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
     };
 
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
