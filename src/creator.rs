@@ -51,9 +51,6 @@ fn create_project_file(path: &Path) {
         Ok(()) => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
-
-    let method = format!("$EDITOR {}", path.display()).to_c_str();
-    unsafe { system(method.unwrap()); };
 }
 
 /// Create the muxed directory and return the path if creation is successful.
