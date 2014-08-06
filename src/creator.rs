@@ -3,7 +3,7 @@
 #![allow(experimental)]
 
 use std::io::{File,fs};
-//use std::io::process::Command;
+use std::io::process::Command;
 use std::path::posix::Path;
 use std::os::{homedir};
 use libc::funcs::c95::stdlib::system;
@@ -28,6 +28,14 @@ pub fn new(name: &str) {
     }
 }
 
+fn default_editor_set() -> Result<Ok, Err> {
+  let output = match Command::new("which").arg("$EDITOR").output() {
+      Ok(output) => output,
+      Err(e) => fail!("failed to execute process: {}", e),
+  };
+
+  println!("{}", output)
+}
 /// Copy and create the new project file from a template. Attempt to open the
 /// users default editor to make changes.
 fn create_project_file(path: &Path) {
