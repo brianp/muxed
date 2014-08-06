@@ -32,6 +32,7 @@ pub fn new(name: &str) {
     }
 }
 
+/// Run `which $EDITOR` to see if a default editor is defined on the system.
 fn default_editor_set() -> bool {
   let output = match Command::new("which").arg("$EDITOR").output() {
       Ok(output) => output.output.to_string(),
@@ -41,6 +42,8 @@ fn default_editor_set() -> bool {
   !output.is_empty()
 }
 
+/// Open a project file with the default editor. Uses C directly to interact
+/// with the system.
 #[cfg(not(test))] fn open_project_file(path: &Path) {
     let method = format!("$EDITOR {}", path.display()).to_c_str();
     unsafe { system(method.unwrap()); };
