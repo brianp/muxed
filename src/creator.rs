@@ -43,12 +43,14 @@ fn default_editor_set() -> bool {
 }
 
 /// Open a project file with the default editor. Uses C directly to interact
-/// with the system.
+/// with the system. This method is overloaded below for the test config to not
+/// execture during testing.
 #[cfg(not(test))] fn open_project_file(path: &Path) {
     let method = format!("$EDITOR {}", path.display()).to_c_str();
     unsafe { system(method.unwrap()); };
 }
 
+/// Overloaded method for use in testing. Doesn't do anything at all.
 #[cfg(test)] fn open_project_file(_path: &Path) { }
 
 /// Copy and create the new project file from a template. Attempt to open the
