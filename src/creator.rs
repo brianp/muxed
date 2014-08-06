@@ -28,13 +28,13 @@ pub fn new(name: &str) {
     }
 }
 
-fn default_editor_set() -> Result<Ok, Err> {
+fn default_editor_set() -> bool {
   let output = match Command::new("which").arg("$EDITOR").output() {
-      Ok(output) => output,
+      Ok(output) => output.output.to_string(),
       Err(e) => fail!("failed to execute process: {}", e),
   };
 
-  println!("{}", output)
+  !output.is_empty()
 }
 
 #[cfg(not(test))] fn open_project_file(path: &Path) {
