@@ -25,7 +25,7 @@ pub fn new(name: &str) {
 
         match default_editor_set() {
             true  => open_project_file(path),
-            false => println!("Default editor is not set.")
+            false => println!("Default editor is not set. Please define $EDITOR in your ~/.bashrc or similar file.")
         }
     } else {
         println!("Project already exists.");
