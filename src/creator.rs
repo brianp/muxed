@@ -7,7 +7,6 @@ use std::io::{File,fs};
 use std::path::posix::Path;
 use std::os::{homedir};
 use libc::funcs::c95::stdlib::system;
-use std::i8::parse_bytes;
 #[cfg(test)] use std::rand::random;
 #[cfg(test)] use std::finally::Finally;
 
