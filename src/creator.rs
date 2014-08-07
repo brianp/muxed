@@ -3,12 +3,11 @@
 #![allow(experimental)]
 
 use std::io::{File,fs};
-use std::io::process::Command;
 use std::path::posix::Path;
 use std::os::homedir;
-use libc::funcs::c95::stdlib::system;
 #[cfg(test)] use std::rand::random;
 #[cfg(test)] use std::finally::Finally;
+use editor;
 
 static TEMPLATE: &'static str = include_str!("creator/template.yml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
@@ -23,35 +22,14 @@ pub fn new(name: &str) {
     if !path.exists() {
         create_project_file(path);
 
-        match default_editor_set() {
-            true  => open_project_file(path),
+        match editor::default_editor_set() {
+            true  => editor::open_project_file(path),
             false => println!("Default editor is not set. Please define $EDITOR in your ~/.bashrc or similar file.")
         }
     } else {
         println!("Project already exists.");
     }
 }
-
-/// Run `which $EDITOR` to see if a default editor is defined on the system.
-fn default_editor_set() -> bool {
-  let output = match Command::new("which").arg("$EDITOR").output() {
-      Ok(output) => output.output.to_string(),
-      Err(e) => fail!("failed to execute process: {}", e),
-  };
-
-  !output.is_empty()
-}
-
-/// Open a project file with the default editor. Uses C directly to interact
-/// with the system. This method is overloaded below for the test config to not
-/// execture during testing.
-#[cfg(not(test))] fn open_project_file(path: &Path) {
-    let method = format!("$EDITOR {}", path.display()).to_c_str();
-    unsafe { system(method.unwrap()); };
-}
-
-/// Overloaded method for use in testing. Doesn't do anything at all.
-#[cfg(test)] fn open_project_file(_path: &Path) { }
 
 /// Copy and create the new project file from a template. Attempt to open the
 /// users default editor to make changes.
