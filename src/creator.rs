@@ -18,7 +18,7 @@ pub fn new(name: &str) {
         false => create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
     };
 
-    let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
+    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), name));
     if !path.exists() {
         create_project_file(path);
 
@@ -102,7 +102,7 @@ fn creates_muxed_dir() {
 #[test]
 fn new_writes_file_to_muxed_dir() {
     let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
+    let path = &Path::new(format!("{}/.muxed/{}.toml", homedir_string(), name));
     new(name.as_slice());
     assert!(path.exists());
     match fs::unlink(path) {
