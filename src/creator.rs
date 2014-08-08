@@ -9,7 +9,7 @@ use std::os::homedir;
 #[cfg(test)] use std::finally::Finally;
 use editor;
 
-static TEMPLATE: &'static str = include_str!("creator/template.yml");
+static TEMPLATE: &'static str = include_str!("creator/template.toml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
