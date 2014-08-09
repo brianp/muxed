@@ -2,10 +2,11 @@
 //! The creator module handles creating the muxed directory and project files.
 #![allow(experimental)]
 
-use std::io::{File,fs};
+use std::io::File;
 use std::path::posix::Path;
 use std::os::homedir;
 use editor;
+#[cfg(test)] use std::io::fs;
 #[cfg(test)] use test_helper::random_name;
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
