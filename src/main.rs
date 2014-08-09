@@ -8,6 +8,7 @@ mod initializer;
 mod help;
 mod creator;
 mod editor;
+#[cfg(test)] mod test_helper;
 
 /// The main execution method.
 /// Uses getopts to fetch arguments and pass them to the initializer for

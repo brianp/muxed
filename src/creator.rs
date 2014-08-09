@@ -5,9 +5,8 @@
 use std::io::{File,fs};
 use std::path::posix::Path;
 use std::os::homedir;
-#[cfg(test)] use std::rand::random;
-#[cfg(test)] use std::finally::Finally;
 use editor;
+#[cfg(test)] use test_helper::random_name;
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
@@ -63,11 +62,6 @@ fn homedir_string() -> String {
     format!("{}", home_unwrap.display())
 }
 
-/// Test helper to standardize how random files and directories are generated.
-#[cfg(test)]
-fn random_name() -> String {
-    format!("test_{}", random::<f64>())
-}
 
 #[test]
 fn muxed_dir_exists_returns_false() {
