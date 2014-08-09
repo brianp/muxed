@@ -55,4 +55,3 @@ fn creates_muxed_dir() {
         Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
     }
 }
-
