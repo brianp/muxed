@@ -7,9 +7,8 @@ use std::path::posix::Path;
 use editor;
 use root;
 
-#[cfg(test)] use std::io::fs;
 #[cfg(test)] use std::finally::Finally;
-#[cfg(test)] use test_helper::random_name;
+#[cfg(test)] use test_helper::{random_name,cleanup_file};
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
@@ -48,6 +47,8 @@ fn creates_project_file() {
     let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
     create_project_file(path);
     assert!(path.exists());
+
+    cleanup_file(path);
 }
 
 #[test]
@@ -60,20 +61,16 @@ fn new_writes_file_to_muxed_dir() {
         Ok(()) => (), // succeeded
         Err(e) => println!("Failed to unlink the path {} with error {}", path.display(), e),
     }
+
+    cleanup_file(path);
 }
 
 #[test]
-// TODO: Fix this test so it verifies something better.
-fn new_doesnt_overwrite_existing_file() {
+fn new_writes_file_to_muxed_dir() {
     let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}", root::homedir_string(), name));
+    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
     new(name.as_slice());
-    (|| {
-        new(name.as_slice());
-    }).finally(|| {
-        match fs::unlink(path) {
-            Ok(()) => (), // succeeded
-            Err(e) => println!("Failed to unlink the path {} with error {}", path.display(), e),
-        }
-    })
+    assert!(path.exists());
+
+    cleanup_file(path);
 }
