@@ -32,11 +32,10 @@ pub fn new(name: &str) {
     }
 }
 
-/// Copy and create the new project file from a template. Attempt to open the
-/// users default editor to make changes.
+/// Copy and create the new project file from a template.
 fn create_project_file(path: &Path) {
     match File::create(path).write(TEMPLATE.as_bytes()) {
-        Ok(()) => (),
+        Ok(())  => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
 }
