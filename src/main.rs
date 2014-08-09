@@ -6,6 +6,7 @@ use std::os;
 
 mod initializer;
 mod help;
+mod root;
 mod creator;
 mod editor;
 #[cfg(test)] mod test_helper;

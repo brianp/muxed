@@ -6,6 +6,7 @@ use std::io::File;
 use std::path::posix::Path;
 use std::os::homedir;
 use editor;
+use root;
 #[cfg(test)] use std::io::fs;
 #[cfg(test)] use test_helper::random_name;
 
@@ -37,60 +38,6 @@ fn create_project_file(path: &Path) {
     match File::create(path).write(TEMPLATE.as_bytes()) {
         Ok(()) => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
-    }
-}
-
-/// Create the muxed directory and return the path if creation is successful.
-fn create_muxed_dir(name: &String) -> Path {
-    let path = &Path::new(format!("{}/.{}", homedir_string(), name));
-    match fs::mkdir(path, ::std::io::UserRWX) {
-        Ok(()) => (),
-        Err(_e) => println!("Failed to create project {}", path.filename()),
-    }
-
-    path.clone()
-}
-
-/// Return a boolean if the ~/.muxed/ dir exists.
-fn muxed_dir_exists(name: &String) -> bool {
-    let path = &Path::new(format!("{}/.{}", homedir_string(), name));
-    path.exists()
-}
-
-/// Return the users current homedir as a string.
-fn homedir_string() -> String {
-    let home_unwrap = homedir().unwrap();
-    format!("{}", home_unwrap.display())
-}
-
-
-#[test]
-fn muxed_dir_exists_returns_false() {
-    assert!(!muxed_dir_exists(&random_name()));
-}
-
-#[test]
-fn muxed_dir_exists_returns_true() {
-    let dir = random_name();
-    create_muxed_dir(&dir);
-    assert!(muxed_dir_exists(&dir));
-
-    let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
-    match fs::rmdir_recursive(muxed_path) {
-        Ok(()) => (), // succeeded
-        Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
-    }
-}
-
-#[test]
-fn creates_muxed_dir() {
-    let dir = random_name();
-    let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
-    create_muxed_dir(&dir);
-    assert!(muxed_path.exists());
-    match fs::rmdir_recursive(muxed_path) {
-        Ok(()) => (), // succeeded
-        Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
     }
 }
 
