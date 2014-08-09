@@ -42,8 +42,7 @@ fn create_project_file(path: &Path) {
 
 #[test]
 fn creates_project_file() {
-    let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
+    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), random_name()));
     create_project_file(path);
     assert!(path.exists());
 
@@ -52,12 +51,7 @@ fn creates_project_file() {
 
 #[test]
 fn errors_when_creating_project_file() {
-    let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
-    create_project_file(path);
-    assert!(path.exists());
-
-    cleanup_file(path);
+    assert!(false);
 }
 
 #[test]
