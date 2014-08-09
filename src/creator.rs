@@ -56,7 +56,12 @@ fn errors_when_creating_project_file() {
 
 #[test]
 fn create_copies_the_template_file() {
-    assert!(false);
+    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), random_name()));
+    create_project_file(path);
+    let data = File::open(path).read_to_end().unwrap();
+    assert_eq!(data.as_slice(), TEMPLATE.as_bytes());
+
+    cleanup_file(path);
 }
 
 #[test]
