@@ -12,3 +12,10 @@ pub fn cleanup_file(path: &Path) {
         Err(e) => println!("Failed to unlink the path {} with error {}", path.display(), e),
     }
 }
+
+pub fn cleanup_dir(path: &Path) {
+    match fs::rmdir_recursive(path) {
+        Ok(()) => (), // succeeded
+        Err(e) => println!("Failed to remove the path {} with error {}", path.display(), e),
+    }
+}

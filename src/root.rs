@@ -1,7 +1,7 @@
 use std::io::fs;
 use std::path::posix::Path;
 use std::os::homedir;
-#[cfg(test)] use test_helper::random_name;
+#[cfg(test)] use test_helper::{cleanup_dir,random_name};
 
 /// Create the muxed directory and return the path if creation is successful.
 pub fn create_muxed_dir(name: &String) -> Path {
@@ -38,10 +38,7 @@ fn muxed_dir_exists_returns_true() {
     assert!(muxed_dir_exists(&dir));
 
     let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
-    match fs::rmdir_recursive(muxed_path) {
-        Ok(()) => (), // succeeded
-        Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
-    }
+    cleanup_dir(muxed_path);
 }
 
 #[test]
@@ -50,8 +47,5 @@ fn creates_muxed_dir() {
     let muxed_path  = &Path::new(format!("{}/.{}/", homedir_string(), dir));
     create_muxed_dir(&dir);
     assert!(muxed_path.exists());
-    match fs::rmdir_recursive(muxed_path) {
-        Ok(()) => (), // succeeded
-        Err(e) => println!("Failed to remove the path {} with error {}", muxed_path.display(), e),
-    }
+    cleanup_dir(muxed_path);
 }
