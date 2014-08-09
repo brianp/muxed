@@ -1,5 +1,5 @@
 use std::io::process::Command;
-use libc::funcs::c95::stdlib::system;
+#[cfg(not(test))] use libc::funcs::c95::stdlib::system;
 
 pub fn new(_name: &str) {
   println!("editor");

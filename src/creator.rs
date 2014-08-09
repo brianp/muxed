@@ -4,10 +4,11 @@
 
 use std::io::File;
 use std::path::posix::Path;
-use std::os::homedir;
 use editor;
 use root;
+
 #[cfg(test)] use std::io::fs;
+#[cfg(test)] use std::finally::Finally;
 #[cfg(test)] use test_helper::random_name;
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
