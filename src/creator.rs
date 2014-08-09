@@ -14,9 +14,9 @@ static TEMPLATE: &'static str = include_str!("creator/template.toml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
-    let muxed_dir = match muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
-        true  => Path::new(format!("{}/.{}/", homedir_string(), &DEFAULT_MUXED_DIR.to_string())),
-        false => create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
+    let muxed_dir = match root::muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
+        true  => Path::new(format!("{}/.{}/", root::homedir_string(), &DEFAULT_MUXED_DIR.to_string())),
+        false => root::create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
     };
 
     let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), name));
@@ -44,7 +44,7 @@ fn create_project_file(path: &Path) {
 #[test]
 fn new_writes_file_to_muxed_dir() {
     let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}.toml", homedir_string(), name));
+    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
     new(name.as_slice());
     assert!(path.exists());
     match fs::unlink(path) {
@@ -57,7 +57,7 @@ fn new_writes_file_to_muxed_dir() {
 // TODO: Fix this test so it verifies something better.
 fn new_doesnt_overwrite_existing_file() {
     let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}", homedir_string(), name));
+    let path = &Path::new(format!("{}/.muxed/{}", root::homedir_string(), name));
     new(name.as_slice());
     (|| {
         new(name.as_slice());
