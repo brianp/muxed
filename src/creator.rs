@@ -51,15 +51,11 @@ fn creates_project_file() {
 }
 
 #[test]
-fn new_writes_file_to_muxed_dir() {
+fn errors_when_creating_project_file() {
     let name = random_name();
     let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
-    new(name.as_slice());
+    create_project_file(path);
     assert!(path.exists());
-    match fs::unlink(path) {
-        Ok(()) => (), // succeeded
-        Err(e) => println!("Failed to unlink the path {} with error {}", path.display(), e),
-    }
 
     cleanup_file(path);
 }
