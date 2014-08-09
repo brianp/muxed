@@ -61,6 +61,11 @@ fn errors_when_creating_project_file() {
 }
 
 #[test]
+fn create_copies_the_template_file() {
+    assert!(false);
+}
+
+#[test]
 fn new_writes_file_to_muxed_dir() {
     let name = random_name();
     let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
