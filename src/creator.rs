@@ -34,7 +34,7 @@ pub fn new(name: &str) {
 
 /// Copy and create the new project file from a template.
 fn create_project_file(path: &Path) {
-    let filename = path.filename().unwrap().to_string();
+    let filename = project_filename(path);
     match File::create(path).write(modified_template(TEMPLATE, filename.as_slice()).as_bytes()) {
         Ok(())  => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
@@ -43,6 +43,10 @@ fn create_project_file(path: &Path) {
 
 fn modified_template(template: &str, project_name: &str) -> String {
     template.replace("{file_name}", project_name)
+}
+
+fn project_filename(path: &Path) -> String {
+    String::from_utf8(path.filename().unwrap().to_vec()).unwrap().replace(".toml", "")
 }
 
 #[test]
@@ -76,7 +80,7 @@ fn errors_when_creating_project_file() {
 #[test]
 fn create_copies_the_template_file() {
     let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), random_name()));
-    let filename = path.filename().unwrap().to_string();
+    let filename = project_filename(path);
     create_project_file(path);
     let data = File::open(path).read_to_end().unwrap();
     let template_expectation = modified_template(TEMPLATE, filename.as_slice());
