@@ -36,7 +36,7 @@ fn create_project_file(path: &Path) {
     let filename = project_filename(path);
     match File::create(path).write(modified_template(TEMPLATE, filename.as_slice()).as_bytes()) {
         Ok(())  => (),
-        Err(_e) => println!("Failed to create project {}", path.filename()),
+        Err(_e) => println!("Failed to create project {}", filename),
     }
 }
 
