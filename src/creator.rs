@@ -41,6 +41,20 @@ fn create_project_file(path: &Path) {
 }
 
 #[test]
+fn populates_template_values() {
+    let value = modified_template(TEMPLATE, "muxed project");
+    let result = value.as_slice().contains("muxed project");
+    assert!(result);
+}
+
+#[test]
+fn replaces_template_values() {
+    let value = modified_template(TEMPLATE, "muxed project");
+    let result = !value.as_slice().contains("{file_name}");
+    assert!(result);
+}
+
+#[test]
 fn creates_project_file() {
     let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), random_name()));
     create_project_file(path);
