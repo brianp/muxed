@@ -40,6 +40,10 @@ fn create_project_file(path: &Path) {
     }
 }
 
+fn modified_template(template: &str, project_name: &str) -> String {
+    template.replace("{file_name}", project_name)
+}
+
 #[test]
 fn populates_template_values() {
     let value = modified_template(TEMPLATE, "muxed project");
