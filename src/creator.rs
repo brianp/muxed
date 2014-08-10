@@ -49,6 +49,19 @@ fn project_filename(path: &Path) -> String {
 }
 
 #[test]
+fn returns_valid_string() {
+  let path = &Path::new(format!("{}/{}", "luke", "skywalker"));
+  assert_eq!(project_filename(path), String::from_str("skywalker"))
+}
+
+#[test]
+#[should_fail]
+fn errors_with_invalid_string() {
+  let path = &Path::new(format!("{}/{}", "luke", "1.2-"));
+  assert_eq!(project_filename(path), String::from_str("skywalker"))
+}
+
+#[test]
 fn populates_template_values() {
     let value = modified_template(TEMPLATE, "muxed project");
     let result = value.as_slice().contains("muxed project");
