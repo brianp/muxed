@@ -3,7 +3,8 @@ use std::io::fs;
 
 /// Test helper to standardize how random files and directories are generated.
 pub fn random_name() -> String {
-    format!("test_{}", random::<i8>())
+    let num: u16 = random::<u16>();
+    format!("test_{}", num)
 }
 
 pub fn cleanup_file(path: &Path) {
