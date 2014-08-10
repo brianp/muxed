@@ -34,7 +34,8 @@ pub fn new(name: &str) {
 
 /// Copy and create the new project file from a template.
 fn create_project_file(path: &Path) {
-    match File::create(path).write(TEMPLATE.as_bytes()) {
+    let filename = path.filename().unwrap().to_string();
+    match File::create(path).write(modified_template(TEMPLATE, filename.as_slice()).as_bytes()) {
         Ok(())  => (),
         Err(_e) => println!("Failed to create project {}", path.filename()),
     }
