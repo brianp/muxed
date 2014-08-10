@@ -7,7 +7,6 @@ use std::path::posix::Path;
 use editor;
 use root;
 
-#[cfg(test)] use std::finally::Finally;
 #[cfg(test)] use test_helper::{random_name,cleanup_file};
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
