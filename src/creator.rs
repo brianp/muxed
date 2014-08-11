@@ -55,10 +55,15 @@ fn returns_valid_string() {
 }
 
 #[test]
-#[should_fail]
-fn errors_with_invalid_string() {
-  let path = &Path::new(format!("{}/{}", "luke", "1.2-"));
-  assert_eq!(project_filename(path), String::from_str("skywalker"))
+fn accepts_periods_in_filenames() {
+  let path = &Path::new(format!("{}/{}", "luke", "skywalker1.2"));
+  assert_eq!(project_filename(path), String::from_str("skywalker1.2"))
+}
+
+#[test]
+fn accepts_dashes_in_filenames() {
+  let path = &Path::new(format!("{}/{}", "luke", "skywalker1-2"));
+  assert_eq!(project_filename(path), String::from_str("skywalker1-2"))
 }
 
 #[test]
