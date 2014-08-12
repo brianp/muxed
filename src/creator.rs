@@ -7,7 +7,7 @@ use std::path::posix::Path;
 use editor;
 use root;
 
-#[cfg(test)] use test_helper::{random_name,cleanup_file};
+#[cfg(test)] use test_helper::{random_name,cleanup_file,cleanup_dir};
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
 static DEFAULT_MUXED_DIR: &'static str = "muxed";
@@ -82,11 +82,12 @@ fn replaces_template_values() {
 
 #[test]
 fn creates_project_file() {
-    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), random_name()));
+    let muxed_dir = &root::create_muxed_dir(&format!("muxed_{}", random_name()));
+    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
     create_project_file(path);
     assert!(path.exists());
 
-    cleanup_file(path);
+    cleanup_dir(muxed_dir);
 }
 
 #[test]
@@ -96,22 +97,24 @@ fn errors_when_creating_project_file() {
 
 #[test]
 fn create_copies_the_template_file() {
-    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), random_name()));
+    let muxed_dir = &root::create_muxed_dir(&format!("muxed_{}", random_name()));
+    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
     let filename = project_filename(path);
     create_project_file(path);
     let data = File::open(path).read_to_end().unwrap();
     let template_expectation = modified_template(TEMPLATE, filename.as_slice());
     assert_eq!(data.as_slice(), template_expectation.as_bytes());
 
-    cleanup_file(path);
+    cleanup_dir(muxed_dir);
 }
 
 #[test]
 fn new_writes_file_to_muxed_dir() {
     let name = random_name();
-    let path = &Path::new(format!("{}/.muxed/{}.toml", root::homedir_string(), name));
+    let muxed_dir = &root::create_muxed_dir(&format!("muxed_{}", random_name()));
+    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), name));
     new(name.as_slice());
     assert!(path.exists());
 
-    cleanup_file(path);
+    cleanup_dir(path);
 }
