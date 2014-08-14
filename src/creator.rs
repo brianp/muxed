@@ -10,13 +10,9 @@ use root;
 #[cfg(test)] use test_helper::{random_name,cleanup_file,cleanup_dir};
 
 static TEMPLATE: &'static str = include_str!("creator/template.toml");
-static DEFAULT_MUXED_DIR: &'static str = "muxed";
 
 pub fn new(name: &str) {
-    let muxed_dir = match root::muxed_dir_exists(&DEFAULT_MUXED_DIR.to_string()) {
-        true  => Path::new(format!("{}/.{}/", root::homedir_string(), &DEFAULT_MUXED_DIR.to_string())),
-        false => root::create_muxed_dir(&DEFAULT_MUXED_DIR.to_string())
-    };
+    let muxed_dir = root::muxed_dir();
 
     let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), name));
     if !path.exists() {
