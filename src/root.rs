@@ -18,16 +18,17 @@ pub fn create_muxed_dir(name: &String) -> Path {
     path.clone()
 }
 
-/// Return a boolean if the ~/.muxed/ dir exists.
-pub fn muxed_dir_exists(name: &String) -> bool {
-    let path = &Path::new(format!("{}/.{}", homedir_string(), name));
-    path.exists()
-}
-
 /// Return the users current homedir as a string.
 pub fn homedir_string() -> String {
     let home_unwrap = homedir().unwrap();
     format!("{}", home_unwrap.display())
+}
+
+pub fn muxed_dir() -> Path {
+    match MUXED_DIR.exists() {
+        true  => MUXED_DIR,
+        false => create_muxed_dir(MUXED_DIR)
+    }
 }
 
 #[test]
