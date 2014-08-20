@@ -22,9 +22,10 @@ pub fn homedir_string() -> String {
 }
 
 pub fn muxed_dir() -> Path {
-    match MUXED_DIR.exists() {
-        true  => MUXED_DIR,
-        false => create_muxed_dir(MUXED_DIR)
+    let path = muxed_path();
+    match path.exists() {
+        true  => path,
+        false => create_muxed_dir(&path)
     }
 }
 
