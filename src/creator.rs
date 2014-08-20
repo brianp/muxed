@@ -78,7 +78,7 @@ fn replaces_template_values() {
 
 #[test]
 fn creates_project_file() {
-    let muxed_dir = &root::create_muxed_dir(&format!("muxed_{}", random_name()));
+    let muxed_dir = &root::muxed_dir();
     let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
     create_project_file(path);
     assert!(path.exists());
@@ -93,7 +93,7 @@ fn errors_when_creating_project_file() {
 
 #[test]
 fn create_copies_the_template_file() {
-    let muxed_dir = &root::create_muxed_dir(&format!("muxed_{}", random_name()));
+    let muxed_dir = &root::muxed_dir();
     let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
     let filename = project_filename(path);
     create_project_file(path);
@@ -107,8 +107,9 @@ fn create_copies_the_template_file() {
 #[test]
 fn new_writes_file_to_muxed_dir() {
     let name = random_name();
-    let muxed_dir = &root::create_muxed_dir(&format!("muxed_{}", random_name()));
+    let muxed_dir = &root::muxed_dir();
     let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), name));
+    println!("{}", path.display())
     new(name.as_slice());
     assert!(path.exists());
 

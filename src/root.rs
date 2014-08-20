@@ -53,3 +53,11 @@ fn muxed_dir_creates_dir() {
     assert!(muxed_path.exists());
     cleanup_dir(muxed_path);
 }
+
+//#[test]
+//fn muxed_dir_finds_existing_dir() {
+//    let muxed_path = &muxed_path();
+//    create_muxed_dir(muxed_path);
+//    assert_eq!(muxed_path.as_str().unwrap(), muxed_dir().as_str().unwrap());
+//    cleanup_dir(muxed_path);
+//}
