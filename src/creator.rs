@@ -86,10 +86,10 @@ fn creates_project_file() {
     cleanup_dir(muxed_dir);
 }
 
-#[test]
-fn errors_when_creating_project_file() {
-    //assert!(false);
-}
+//#[test]
+//fn errors_when_creating_project_file() {
+//    //assert!(false);
+//}
 
 #[test]
 fn create_copies_the_template_file() {
