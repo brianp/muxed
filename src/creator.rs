@@ -45,7 +45,7 @@ fn project_filename(path: &Path) -> String {
 }
 
 #[test]
-fn returns_valid_string() {
+fn returns_filename_as_string() {
   let path = &Path::new(format!("{}/{}", "luke", "skywalker"));
   assert_eq!(project_filename(path), String::from_str("skywalker"))
 }
@@ -70,7 +70,7 @@ fn populates_template_values() {
 }
 
 #[test]
-fn replaces_template_values() {
+fn removes_template_placeholders() {
     let value = modified_template(TEMPLATE, "muxed project");
     let result = !value.as_slice().contains("{file_name}");
     assert!(result);
