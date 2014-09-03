@@ -5,8 +5,6 @@ use std::os::homedir;
 
 static MUXED_NAME_STR: &'static str = "muxed";
 
-pub fn tester() { }
-pub fn tester(path: Path) { } 
 /// Create the muxed directory and return the path if creation is successful.
 pub fn create_muxed_dir(path: &Path) -> Path {
     match fs::mkdir(path, ::std::io::UserRWX) {
