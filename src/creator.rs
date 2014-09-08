@@ -13,8 +13,8 @@ static TEMPLATE: &'static str = include_str!("creator/template.toml");
 
 pub fn new(name: &str) {
     let muxed_dir = root::muxed_dir();
-
     let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), name));
+
     if !path.exists() {
         create_project_file(path);
 
