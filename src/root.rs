@@ -1,10 +1,11 @@
 use std::io::fs;
 use std::path::posix::Path;
 use std::os::homedir;
+#[cfg(test)] use sync::one::{Once, ONCE_INIT};
 #[cfg(test)] use test_helper::{cleanup_dir,random_name};
 
-#[cfg(not_test)] static MUXED_NAME_STR: &'static str = "muxed";
-#[cfg(test)]     static MUXED_NAME_STR: &'static String = format!("muxed_{}", random_name()).as_slice();
+static MUXED_NAME_STR: &'static str = "muxed";
+#[cfg(test)] static mut MUXED_ONCE: Once = ONCE_INIT;
 
 /// Create the muxed directory and return the path if creation is successful.
 pub fn create_muxed_dir(path: &Path) -> Path {
@@ -31,7 +32,13 @@ pub fn muxed_dir() -> Path {
 }
 
 #[cfg(test)] pub fn muxed_path() -> Path {
-    Path::new(format!("/tmp/.{}/", &MUXED_NAME_STR.to_string()))
+    let mut path = Path::new("");
+    unsafe {
+        MUXED_ONCE.doit(|| {
+            path = Path::new(format!("/tmp/.{}/", &MUXED_NAME_STR.to_string()));
+        });
+    }
+    path
 }
 
 #[cfg(not_test)] pub fn muxed_path() -> Path {
@@ -60,3 +67,4 @@ fn muxed_dir_creates_dir() {
 //    assert_eq!(muxed_path.as_str().unwrap(), muxed_dir().as_str().unwrap());
 //    cleanup_dir(muxed_path);
 //}
+

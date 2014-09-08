@@ -2,6 +2,7 @@
 
 extern crate getopts;
 extern crate libc;
+#[cfg(test)] extern crate sync;
 use std::os;
 
 mod initializer;
