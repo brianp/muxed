@@ -104,17 +104,16 @@ fn create_copies_the_template_file() {
     cleanup_dir(muxed_dir);
 }
 
-#[test]
-fn new_writes_file_to_muxed_dir() {
-    random_muxed_path();
-    let name = random_name();
-    let muxed_dir = root::muxed_dir();
-    let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
-
-    println!("{}", path.display());
-
-    new(name.as_slice());
-    assert!(path.exists());
-
-    cleanup_dir(path);
-}
+//#[test]
+//fn new_writes_file_to_muxed_dir() {
+//    let name = random_name();
+//    let muxed_dir = root::muxed_dir();
+//    let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
+//
+//    println!("{}", path.display());
+//
+//    new(name.as_slice());
+//    assert!(path.exists());
+//
+//    cleanup_dir(path);
+//}

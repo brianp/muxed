@@ -3,8 +3,7 @@ use std::path::posix::Path;
 use std::os::homedir;
 #[cfg(test)] use test_helper::{cleanup_dir,random_name};
 
-#[cfg(not_test)] static MUXED_NAME_STR: &'static str = "muxed";
-#[cfg(test)]     static mut MUXED_NAME_STR: &'static str = "muxed";
+static MUXED_NAME_STR: &'static str = "muxed";
 
 /// Create the muxed directory and return the path if creation is successful.
 pub fn create_muxed_dir(path: &Path) -> Path {
@@ -60,4 +59,3 @@ fn muxed_dir_creates_dir() {
 //    assert_eq!(muxed_path.as_str().unwrap(), muxed_dir().as_str().unwrap());
 //    cleanup_dir(muxed_path);
 //}
-
