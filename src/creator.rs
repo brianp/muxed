@@ -106,6 +106,7 @@ fn create_copies_the_template_file() {
 
 #[test]
 fn new_writes_file_to_muxed_dir() {
+    random_muxed_path();
     let name = random_name();
     let muxed_dir = root::muxed_dir();
     let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
