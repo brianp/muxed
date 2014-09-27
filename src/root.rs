@@ -34,8 +34,8 @@ pub fn muxed_dir() -> Path {
     Path::new(format!("/tmp/.{}/", &MUXED_NAME_STR.to_string()))
 }
 
-#[cfg(not_test)] pub fn muxed_path() -> Path {
-    Path::new(format!("{}/.{}/", root::homedir_string(), &MUXED_NAME_STR.to_string()))
+#[cfg(not(test))] pub fn muxed_path() -> Path {
+    Path::new(format!("{}/.{}/", homedir_string(), &MUXED_NAME_STR.to_string()))
 }
 
 #[test]
