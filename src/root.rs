@@ -1,6 +1,7 @@
 use std::io::fs;
 use std::path::posix::Path;
 use std::os::homedir;
+use std::io::fs::PathExtensions;
 #[cfg(test)] use test_helper::{cleanup_dir,random_name};
 
 static MUXED_NAME_STR: &'static str = "muxed";

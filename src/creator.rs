@@ -6,6 +6,7 @@ use std::io::File;
 use std::path::posix::Path;
 use editor;
 use root;
+use std::io::fs::PathExtensions;
 
 #[cfg(test)] use test_helper::{random_name,cleanup_file,cleanup_dir};
 
