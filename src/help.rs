@@ -15,7 +15,7 @@ pub fn print_usage(_program: &str, opts: &[OptGroup]) {
     println("");
     println("Commands:");
     println(format!("{}new [name]          create a new project file", space).as_slice());
-    print(format!("{}open [name]         open a new project file", space).as_slice());
+    print(  format!("{}open [name]         open an existing project file", space).as_slice());
     println(usage("", opts).as_slice());
 }
 
