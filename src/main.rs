@@ -29,11 +29,11 @@ fn main() {
 
     let matches = maybe_matches.unwrap();
 
-    if matches.opt_present("h") || !arg_parse::valid_command(&matches) {
-        help::print_usage(opts);
-        return;
-    } else if matches.opt_present("v") {
+    if matches.opt_present("v") {
         println(format!("{}", "Version: 0.0.0").as_slice());
+        return;
+    } else if matches.opt_present("h") || !arg_parse::valid_command(&matches) {
+        help::print_usage(opts);
         return;
     }
 
@@ -42,8 +42,8 @@ fn main() {
     let command = arg_parse::command(fragments);
     let _value  = arg_parse::value(fragments);
 
-    match command {
+//    match command {
 //        "new"  => creator::new(value),
-        _      => help::print_usage(opts)
-    }
+//        _      => help::print_usage(opts)
+//    }
 }
