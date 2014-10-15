@@ -7,15 +7,13 @@ use std::io::{println};
 
 mod help;
 mod arg_parse;
+mod muxed_root;
 mod creator {
   mod io { }
 }
 
 /// The main execution method.
-/// Uses getopts to fetch arguments and pass them to the initializer for
-/// inspection.
-/// The init method accepts a `Vec<String>` of arguments. If an argument or
-/// command does not match valid input print the help screen.
+/// Verify all the arguments and options passed are valid for the application.
 fn main() {
     let args: Vec<String> = os::args();
 
@@ -30,7 +28,7 @@ fn main() {
     let matches = maybe_matches.unwrap();
 
     if matches.opt_present("v") {
-        println(format!("{}", "Version: 0.0.0").as_slice());
+        println(format!("{}", "Version: 0.0.1").as_slice());
         return;
     } else if matches.opt_present("h") || !arg_parse::valid_command(&matches) {
         help::print_usage(opts);
@@ -38,12 +36,12 @@ fn main() {
     }
 
     let fragments = &matches.free;
+    let command   = arg_parse::command(fragments);
+    let file_path = arg_parse::file_path(&muxed_root::path(), fragments);
 
-    let command = arg_parse::command(fragments);
-    let _value  = arg_parse::value(fragments);
 
-//    match command {
+    match command {
 //        "new"  => creator::new(value),
-//        _      => help::print_usage(opts)
-//    }
+        _      => help::print_usage(opts)
+    }
 }

@@ -1,3 +1,4 @@
+use std::path::posix::Path;
 use getopts::{getopts,OptGroup,Matches};
 #[cfg(test)] use help;
 
@@ -5,16 +6,14 @@ pub fn command(fragments: &Vec<String>) -> &String {
     &fragments[0]
 }
 
-pub fn value(fragments: &Vec<String>) -> &String {
-    &fragments[1]
+pub fn file_path(path: &Path, fragments: &Vec<String>) -> Path {
+    Path::new(format!("{}/{}.toml", path.display(), fragments[1]))
 }
 
 /// Accept the current arguments and match them using getopts.
-/// # Errors
-/// Will fail if arguments are not found.
 pub fn matches(tail: &[String], opts: &[OptGroup]) -> Option<Matches> {
     return match getopts(tail, opts) {
-        Ok(m) => { Some(m) }
+        Ok(m)  => { Some(m) }
         Err(_) => { None }
     }
 }
@@ -47,15 +46,19 @@ fn command_returns_edit() {
 }
 
 #[test]
-fn value_returns_muxed() {
-    let matches = &matches([String::from_str("new"), String::from_str("muxed")], help::opts()).unwrap();
-    assert_eq!(value(&matches.free), &String::from_str("muxed"));
+fn file_path_returns_file() {
+    let matches    = &matches([String::from_str("new"), String::from_str("muxed")], help::opts()).unwrap();
+    let path       = &Path::new("/tmp/.muxed/");
+    let muxed_file = format!("{}", Path::new("/tmp/.muxed/muxed.toml").display());
+    assert_eq!(format!("{}", file_path(path, &matches.free).display()), muxed_file);
 }
 
 #[test]
-fn value_returns_middle() {
-    let matches = &matches([String::from_str("new"), String::from_str("middle"), String::from_str("end")], help::opts()).unwrap();
-    assert_eq!(value(&matches.free), &String::from_str("middle"));
+fn file_path_returns_middle() {
+    let matches    = &matches([String::from_str("new"), String::from_str("middle"), String::from_str("end")], help::opts()).unwrap();
+    let path       = &Path::new("/tmp/.muxed/");
+    let muxed_file = format!("{}", Path::new("/tmp/.muxed/middle.toml").display());
+    assert_eq!(format!("{}", file_path(path, &matches.free).display()), muxed_file);
 }
 
 #[test]
@@ -81,7 +84,7 @@ fn valid_command_open_returns_true() {
 }
 
 #[test]
-fn valid_command_value_returns_false() {
-    let matches = &matches([String::from_str("value"), String::from_str("muxed")], help::opts()).unwrap();
+fn valid_command_file_path_returns_false() {
+    let matches = &matches([String::from_str("file_path"), String::from_str("muxed")], help::opts()).unwrap();
     assert_eq!(valid_command(matches), false);
 }
