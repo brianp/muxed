@@ -1,12 +1,8 @@
 language: rust
 
 rust:
-  - 0.11.0
+  - 0.12.0
   - nightly
 
 notifications:
   email: false
-
-branches:
-  only:
-    - master
