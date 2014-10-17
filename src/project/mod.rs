@@ -1,0 +1,90 @@
+use std::path::posix::Path;
+use std::io::fs::PathExtensions;
+use std::io::process::Command;
+
+mod io;
+
+static TEMPLATE: &'static str = include_str!("template.toml");
+
+pub fn main(path: Path) {
+    if !path.exists() {
+        io::create(&path);
+
+        match is_default_editor_set() {
+            true  => io::open(&path),
+            false => println!("Default editor is not set. Your config has been created and can be found in ~/.muxed/. Please define $EDITOR in your ~/.bashrc or similar file.")
+        }
+    } else {
+        println!("Project already exists.");
+    }
+}
+
+/// Run `which $EDITOR` to see if a default editor is defined on the system.
+fn is_default_editor_set() -> bool {
+  let output = match Command::new("which").arg("$EDITOR").output() {
+      Ok(output) => output.output.to_string(),
+      Err(e)     => fail!("failed to execute process: {}", e),
+  };
+
+  !output.is_empty()
+}
+
+fn modified_template(template: &str, project_name: &str) -> String {
+    template.replace("{file_name}", project_name)
+}
+
+//#[test]
+//fn populates_template_values() {
+//    let value = modified_template(TEMPLATE, "muxed project");
+//    let result = value.as_slice().contains("muxed project");
+//    assert!(result);
+//}
+//
+//#[test]
+//fn removes_template_placeholders() {
+//    let value = modified_template(TEMPLATE, "muxed project");
+//    let result = !value.as_slice().contains("{file_name}");
+//    assert!(result);
+//}
+//
+//#[test]
+//fn creates_project_file() {
+//    let muxed_dir = &root::muxed_dir();
+//    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
+//    create_project_file(path);
+//    assert!(path.exists());
+//
+//    cleanup_dir(muxed_dir);
+//}
+
+//#[test]
+//fn errors_when_creating_project_file() {
+//    //assert!(false);
+//}
+
+//#[test]
+//fn create_copies_the_template_file() {
+//    let muxed_dir = &root::muxed_dir();
+//    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
+//    let filename = project_filename(path);
+//    create_project_file(path);
+//    let data = File::open(path).read_to_end().unwrap();
+//    let template_expectation = modified_template(TEMPLATE, filename.as_slice());
+//    assert_eq!(data.as_slice(), template_expectation.as_bytes());
+//
+//    cleanup_dir(muxed_dir);
+//}
+
+//#[test]
+//fn new_writes_file_to_muxed_dir() {
+//    let name = random_name();
+//    let muxed_dir = root::muxed_dir();
+//    let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
+//
+//    println!("{}", path.display());
+//
+//    new(name.as_slice());
+//    assert!(path.exists());
+//
+//    cleanup_dir(path);
+//}

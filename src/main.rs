@@ -8,9 +8,7 @@ use std::io::{println};
 mod help;
 mod arg_parse;
 mod muxed_root;
-mod creator {
-  mod io { }
-}
+mod project;
 
 /// The main execution method.
 /// Verify all the arguments and options passed are valid for the application.
