@@ -2,8 +2,8 @@ use std::path::posix::Path;
 use getopts::{getopts,OptGroup,Matches};
 #[cfg(test)] use help;
 
-pub fn command(fragments: &Vec<String>) -> &String {
-    &fragments[0]
+pub fn command(fragments: &Vec<String>) -> &str {
+    fragments[0].as_slice()
 }
 
 pub fn file_path(path: &Path, fragments: &Vec<String>) -> Path {
@@ -36,13 +36,13 @@ pub fn valid_command(matches: &Matches) -> bool {
 #[test]
 fn command_returns_new() {
     let matches = &matches([String::from_str("new"), String::from_str("muxed")], help::opts()).unwrap();
-    assert_eq!(command(&matches.free), &String::from_str("new"));
+    assert_eq!(command(&matches.free), "new");
 }
 
 #[test]
 fn command_returns_edit() {
     let matches = &matches([String::from_str("open"), String::from_str("muxed")], help::opts()).unwrap();
-    assert_eq!(command(&matches.free), &String::from_str("open"));
+    assert_eq!(command(&matches.free), "open");
 }
 
 #[test]

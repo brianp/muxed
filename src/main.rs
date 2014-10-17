@@ -39,9 +39,8 @@ fn main() {
     let command   = arg_parse::command(fragments);
     let file_path = arg_parse::file_path(&muxed_root::path(), fragments);
 
-
     match command {
-//        "new"  => creator::new(value),
+        "new"  => project::main(file_path),
         _      => help::print_usage(opts)
     }
 }
