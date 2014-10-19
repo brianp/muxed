@@ -1,14 +1,27 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
+#![feature(macro_rules)]
+
 extern crate getopts;
 extern crate libc;
 
 use std::os;
 use std::io::{println};
 
+#[macro_export]
+macro_rules! try_or_err (
+    ($expr: expr, $err: expr) => ({
+        match $expr {
+            Ok(val) => val,
+            Err(_e) => println!($err)
+        }
+    })
+)
+
 mod help;
 mod arg_parse;
 mod muxed_root;
 mod project;
+mod test_helper;
 
 /// The main execution method.
 /// Verify all the arguments and options passed are valid for the application.

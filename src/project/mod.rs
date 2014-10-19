@@ -8,7 +8,10 @@ static TEMPLATE: &'static str = include_str!("template.toml");
 
 pub fn main(path: Path) {
     if !path.exists() {
-        io::create(&path);
+ //       let filename = path.filename().unwrap();
+//        File::create(path).write(modified_template(TEMPLATE, filename.to_string().as_slice()).as_bytes());
+        try_or_err!(io::create(&path, ""), "Failed to create project file");
+        //Err(_e) => println!("Failed to create project file {}", path.display()),
 
         match is_default_editor_set() {
             true  => io::open(&path),
@@ -47,20 +50,6 @@ fn modified_template(template: &str, project_name: &str) -> String {
 //    assert!(result);
 //}
 //
-//#[test]
-//fn creates_project_file() {
-//    let muxed_dir = &root::muxed_dir();
-//    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
-//    create_project_file(path);
-//    assert!(path.exists());
-//
-//    cleanup_dir(muxed_dir);
-//}
-
-//#[test]
-//fn errors_when_creating_project_file() {
-//    //assert!(false);
-//}
 
 //#[test]
 //fn create_copies_the_template_file() {
