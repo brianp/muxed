@@ -1,6 +1,6 @@
 use std::io::{File, IoError};
 use std::io::fs::PathExtensions;
-use libc::funcs::c95::stdlib::system;
+#[cfg(not(test))] use libc::funcs::c95::stdlib::system;
 #[cfg(test)] use test_helper::{cleanup_file, random_name};
 
 /// Copy and create the new project file from a template.
@@ -17,12 +17,14 @@ pub fn create(path: &Path, content: &str) -> Result<(), IoError>{
 }
 
 /// Overloaded method for use in testing. Doesn't do anything at all.
+
+#[allow(dead_code)]
 #[cfg(test)] pub fn open(_path: &Path) { }
 
 #[test]
 fn creates_file() {
     let path = &Path::new(format!("/tmp/project_file_{}.toml", random_name()));
-    create(path, "");
+    let _result = create(path, "");
     assert!(path.exists());
 
     cleanup_file(path);
@@ -32,7 +34,7 @@ fn creates_file() {
 fn creates_file_with_content() {
     let path    = &Path::new(format!("/tmp/project_file_{}.toml", random_name()));
     let content = "this content";
-    create(path, content);
+    let _result = create(path, content);
 
     let file_contents = File::open(path).read_to_end().unwrap();
     let read_contents = String::from_utf8(file_contents);
