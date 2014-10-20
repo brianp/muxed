@@ -8,10 +8,10 @@ static TEMPLATE: &'static str = include_str!("template.toml");
 
 pub fn main(path: Path) {
     if !path.exists() {
- //       let filename = path.filename().unwrap();
-//        File::create(path).write(modified_template(TEMPLATE, filename.to_string().as_slice()).as_bytes());
-        try_or_err!(io::create(&path, ""), "Failed to create project file");
-        //Err(_e) => println!("Failed to create project file {}", path.display()),
+        let filename = path.filename().unwrap();
+        let template = modified_template(TEMPLATE, filename);
+
+        try_or_err!(io::create(&path, template.as_slice()), "Failed to create project file");
 
         match is_default_editor_set() {
             true  => io::open(&path),
