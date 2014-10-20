@@ -45,7 +45,7 @@ fn creates_file_with_content() {
 }
 
 #[test]
-fn creates_files_without_error () {
+fn creates_file_without_error () {
     let path   = &Path::new(format!("/tmp/project_file_{}.toml", random_name()));
     let result = create(path, "");
 
