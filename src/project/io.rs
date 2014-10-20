@@ -23,7 +23,7 @@ pub fn create(path: &Path, content: &str) -> Result<(), IoError>{
 
 #[test]
 fn creates_file() {
-    let path = &Path::new(format!("/tmp/project_file_{}.toml", random_name()));
+    let path    = &Path::new(format!("/tmp/project_file_{}.toml", random_name()));
     let _result = create(path, "");
     assert!(path.exists());
 
@@ -55,7 +55,7 @@ fn creates_file_without_error () {
 
 #[test]
 fn errors_when_creating_project_file() {
-    let path = &Path::new("");
+    let path   = &Path::new("");
     let result = create(path, "");
     assert!(result.is_err());
 }

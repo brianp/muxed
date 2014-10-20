@@ -9,7 +9,7 @@ pub fn create(path: &Path) -> Result<(), IoError>{
 
 #[test]
 fn creates_muxed_dir() {
-    let path = &Path::new(format!("/tmp/{}", random_name()));
+    let path    = &Path::new(format!("/tmp/{}", random_name()));
     let _result = create(path);
     assert!(path.exists());
 
@@ -31,7 +31,7 @@ fn creates_muxed_dir_without_error () {
 
 #[test]
 fn errors_when_creating_muxed_dir() {
-    let path = &Path::new("");
+    let path   = &Path::new("");
     let result = create(path);
     assert!(result.is_err());
 }

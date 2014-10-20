@@ -1,4 +1,4 @@
-# ~/.muxed/{file_name}.toml
+# ~/.muxed/{file_name}
 
 root = "~/"
 [windows]

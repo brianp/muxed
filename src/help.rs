@@ -21,5 +21,5 @@ pub fn print_usage(opts: &[OptGroup]) {
 
 #[test]
 fn opts_returns_two_options() {
-  assert_eq!(opts().len(), 2);
+    assert_eq!(opts().len(), 2);
 }

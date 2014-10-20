@@ -24,6 +24,6 @@ pub fn path() -> Path {
 #[test]
 pub fn path_returns_muxed_inside_homedir() {
     let path = format!("{}", path().display());
-    let new = format!("{}", Path::new("/tmp/.muxed").display());
+    let new  = format!("{}", Path::new("/tmp/.muxed").display());
     assert_eq!(path, new)
 }
