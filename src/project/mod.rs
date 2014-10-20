@@ -8,7 +8,7 @@ static TEMPLATE: &'static str = include_str!("template.toml");
 
 pub fn main(path: Path) {
     if !path.exists() {
-        let filename = path.filename().unwrap();
+        let filename = path.filename_str().unwrap();
         let template = modified_template(TEMPLATE, filename);
 
         try_or_err!(io::create(&path, template.as_slice()), "Failed to create project file");
@@ -32,23 +32,20 @@ fn is_default_editor_set() -> bool {
   !output.is_empty()
 }
 
-fn modified_template(template: &str, project_name: &[u8]) -> String {
-    let name = String::from_utf8(project_name.to_vec()).unwrap();
-    template.replace("{file_name}", name.as_slice())
+fn modified_template(template: &str, project_name: &str) -> String {
+    template.replace("{file_name}", project_name)
 }
 
 #[test]
 fn populates_template_placeholders() {
-    let name   = "muxed projects".as_bytes();
-    let value  = modified_template(TEMPLATE, name);
+    let value  = modified_template(TEMPLATE, "muxed project");
     let result = value.as_slice().contains("muxed project");
     assert!(result);
 }
 
 #[test]
 fn removes_template_placeholders() {
-    let name   = "muxed projects".as_bytes();
-    let value  = modified_template(TEMPLATE, name);
+    let value  = modified_template(TEMPLATE, "muxed project");
     let result = !value.as_slice().contains("{file_name}");
     assert!(result);
 }
