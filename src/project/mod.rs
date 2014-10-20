@@ -32,24 +32,26 @@ fn is_default_editor_set() -> bool {
   !output.is_empty()
 }
 
-fn modified_template(template: &str, project_name: &str) -> String {
-    template.replace("{file_name}", project_name)
+fn modified_template(template: &str, project_name: &[u8]) -> String {
+    let name = String::from_utf8(project_name.to_vec()).unwrap();
+    template.replace("{file_name}", name.as_slice())
 }
 
-//#[test]
-//fn populates_template_values() {
-//    let value = modified_template(TEMPLATE, "muxed project");
-//    let result = value.as_slice().contains("muxed project");
-//    assert!(result);
-//}
-//
-//#[test]
-//fn removes_template_placeholders() {
-//    let value = modified_template(TEMPLATE, "muxed project");
-//    let result = !value.as_slice().contains("{file_name}");
-//    assert!(result);
-//}
-//
+#[test]
+fn populates_template_values() {
+    let name   = "muxed projects".as_bytes();
+    let value  = modified_template(TEMPLATE, name);
+    let result = value.as_slice().contains("muxed project");
+    assert!(result);
+}
+
+#[test]
+fn removes_template_placeholders() {
+    let name   = "muxed projects".as_bytes();
+    let value  = modified_template(TEMPLATE, name);
+    let result = !value.as_slice().contains("{file_name}");
+    assert!(result);
+}
 
 //#[test]
 //fn create_copies_the_template_file() {
