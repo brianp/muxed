@@ -1,5 +1,5 @@
 use std::io::{File, IoError};
-use std::io::fs::PathExtensions;
+use std::io::fs::{PathExtensions};
 #[cfg(not(test))] use libc::funcs::c95::stdlib::system;
 #[cfg(test)] use test_helper::{cleanup_file, random_name};
 

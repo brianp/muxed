@@ -2,12 +2,19 @@ use std::path::posix::Path;
 use std::io::fs::PathExtensions;
 use std::io::process::Command;
 
+use muxed_root;
+
 mod io;
 
 static TEMPLATE: &'static str = include_str!("template.toml");
 
 pub fn main(path: Path) {
     if !path.exists() {
+        let muxed_dir = Path::new(path.dirname_str().unwrap());
+        if muxed_dir.exists() {
+          try_or_err!(muxed_root::io::create(&muxed_dir), "Failed to create ~/.muxed path.");
+        }
+
         let filename = path.filename_str().unwrap();
         let template = modified_template(TEMPLATE, filename);
 
