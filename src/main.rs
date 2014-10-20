@@ -19,7 +19,7 @@ macro_rules! try_or_err (
 
 mod help;
 mod arg_parse;
-mod muxed_root;
+mod root;
 mod project;
 mod test_helper;
 
@@ -48,7 +48,7 @@ fn main() {
 
     let fragments = &matches.free;
     let command   = arg_parse::command(fragments);
-    let file_path = arg_parse::file_path(&muxed_root::path(), fragments);
+    let file_path = arg_parse::file_path(&root::path(), fragments);
 
     match command {
         "new"  => project::main(file_path),

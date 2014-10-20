@@ -2,7 +2,7 @@ use std::path::posix::Path;
 use std::io::fs::PathExtensions;
 use std::io::process::Command;
 
-use muxed_root;
+use root;
 
 mod io;
 
@@ -12,7 +12,7 @@ pub fn main(path: Path) {
     if !path.exists() {
         let muxed_dir = Path::new(path.dirname_str().unwrap());
         if muxed_dir.exists() {
-          try_or_err!(muxed_root::io::create(&muxed_dir), "Failed to create ~/.muxed path.");
+          try_or_err!(root::io::create(&muxed_dir), "Failed to create ~/.muxed path.");
         }
 
         let filename = path.filename_str().unwrap();
