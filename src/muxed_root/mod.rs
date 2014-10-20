@@ -1,6 +1,8 @@
 use std::path::posix::Path;
 #[cfg(not(test))] use std::os::homedir;
 
+pub mod io;
+
 static MUXED_NAME_STR: &'static str = "muxed";
 
 /// Return the users current homedir as a string.
