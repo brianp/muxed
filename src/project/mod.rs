@@ -52,30 +52,4 @@ fn removes_template_placeholders() {
     let result = !value.as_slice().contains("{file_name}");
     assert!(result);
 }
-
-//#[test]
-//fn create_copies_the_template_file() {
-//    let muxed_dir = &root::muxed_dir();
-//    let path = &Path::new(format!("{}/{}.toml", muxed_dir.display(), random_name()));
-//    let filename = project_filename(path);
-//    create_project_file(path);
-//    let data = File::open(path).read_to_end().unwrap();
-//    let template_expectation = modified_template(TEMPLATE, filename.as_slice());
-//    assert_eq!(data.as_slice(), template_expectation.as_bytes());
-//
-//    cleanup_dir(muxed_dir);
-//}
-
-//#[test]
-//fn new_writes_file_to_muxed_dir() {
-//    let name = random_name();
-//    let muxed_dir = root::muxed_dir();
-//    let path = &Path::new(format!("{}/{}", muxed_dir.display(), name));
-//
-//    println!("{}", path.display());
-//
-//    new(name.as_slice());
-//    assert!(path.exists());
-//
-//    cleanup_dir(path);
 //}
