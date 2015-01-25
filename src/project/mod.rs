@@ -32,8 +32,8 @@ pub fn main(path: Path) {
 /// Run `which $EDITOR` to see if a default editor is defined on the system.
 fn is_default_editor_set() -> bool {
   let output = match Command::new("which").arg("$EDITOR").output() {
-      Ok(output) => output.output.to_string(),
-      Err(e)     => fail!("failed to execute process: {}", e),
+      Ok(output) => String::from_utf8(output.output).unwrap(),
+      Err(e)     => panic!("failed to execute process: {}", e),
   };
 
   !output.is_empty()

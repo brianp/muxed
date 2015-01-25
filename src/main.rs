@@ -1,6 +1,4 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-#![feature(macro_rules)]
-
 extern crate getopts;
 extern crate libc;
 
@@ -15,7 +13,7 @@ macro_rules! try_or_err (
             Err(_e) => println!($err)
         }
     })
-)
+);
 
 mod help;
 mod arg_parse;
@@ -28,8 +26,8 @@ mod test_helper;
 fn main() {
     let args: Vec<String> = os::args();
 
-    let opts = help::opts();
-    let maybe_matches = arg_parse::matches(args.tail(), opts.clone());
+    let opts = &help::opts();
+    let maybe_matches = arg_parse::matches(args.tail(), opts);
 
     if maybe_matches.is_none() {
         help::print_usage(opts);

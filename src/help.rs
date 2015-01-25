@@ -1,7 +1,7 @@
 use getopts::{optflag,usage,OptGroup};
 use std::io::{println,print};
 
-pub fn opts() -> [OptGroup, .. 2]{
+pub fn opts() -> [OptGroup; 2]{
     return [
         optflag("v", "version", "display the version."),
         optflag("h", "help", "print this help menu.")
@@ -9,7 +9,7 @@ pub fn opts() -> [OptGroup, .. 2]{
 }
 
 #[allow(dead_code)]
-pub fn print_usage(opts: &[OptGroup]) {
+pub fn print_usage(opts: &[OptGroup; 2]) {
     let space = "    ";
     println("Usage: muxed <command> [options]");
     println("");

@@ -8,8 +8,8 @@ static MUXED_NAME_STR: &'static str = "muxed";
 /// Return the users current homedir as a string.
 #[cfg(not(test))] fn homedir_string() -> String {
     match homedir() {
-        Some(dir) => format!("{}", dir.display()), 
-        None      => fail!("Impossible to get your home dir!")
+        Some(dir) => format!("{}", dir.display()),
+        None      => panic!("Impossible to get your home dir!")
     }
 }
 
