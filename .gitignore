@@ -5,3 +5,4 @@ test
 main
 muxed
 .vagrant/*
+.ds_store
