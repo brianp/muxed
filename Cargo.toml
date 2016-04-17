@@ -3,3 +3,6 @@
 name = "muxed"
 version = "0.0.1"
 authors = ["Brian Pearce"]
+
+[dependencies]
+getopts = "0.2"
