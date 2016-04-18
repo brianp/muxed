@@ -6,3 +6,4 @@ authors = ["Brian Pearce"]
 
 [dependencies]
 getopts = "0.2"
+libc = "0.2.10"

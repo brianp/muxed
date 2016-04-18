@@ -1,5 +1,6 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
 extern crate getopts;
+extern crate libc;
 
 
 /// The main execution method.
