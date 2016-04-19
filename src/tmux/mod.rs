@@ -18,3 +18,8 @@ pub fn select_layout(window: String, layout: String) {
     let command = format!("{} -t {} {}", SELECT_LAYOUT, window, layout);
     call(command);
 }
+
+pub fn new_window(session_name: String, window_name: String) {
+    let open_command = format!("new-window -s {} -n {}", session_name, window_name);
+    call(open_command);
+}
