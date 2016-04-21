@@ -6,6 +6,7 @@ extern crate yaml_rust;
 use std::env;
 
 mod tmux;
+mod project;
 
 /// The main execution method.
 /// Verify all the arguments and options passed are valid for the application.
@@ -14,5 +15,5 @@ fn main() {
     let program = args[0].clone();
     let input = args[1].clone();
 
-    tmux::open(input);
+    tmux::open(input.clone());
 }

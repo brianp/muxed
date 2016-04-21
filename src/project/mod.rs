@@ -17,6 +17,10 @@ pub fn open(project_name: String) -> Vec<Yaml> {
     }
 }
 
+#[cfg(test)] fn homedir_string() -> String {
+  String::from_str("/tmp")
+}
+
 fn parse_config() {
 }
 
@@ -30,4 +34,11 @@ fn read(config_str: &String) -> String {
 
 fn load_yaml(yaml_string: &String) -> Vec<Yaml> {
     return YamlLoader::load_from_str(yaml_string).unwrap();
+}
+
+#[test]
+pub fn path_returns_muxed_inside_homedir() {
+    let path = format!("{}", path().display());
+    let new  = format!("{}", Path::new("/tmp/.muxed").display());
+    assert_eq!(path, new)
 }
