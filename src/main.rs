@@ -1,6 +1,7 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
 extern crate getopts;
 extern crate libc;
+extern crate yaml_rust;
 
 use std::env;
 
