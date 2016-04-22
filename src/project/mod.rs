@@ -4,6 +4,8 @@ use std::fs::File;
 #[cfg(not(test))] use std::env::home_dir;
 use yaml_rust::{YamlLoader, YamlEmitter, Yaml};
 
+mod parser;
+
 static MUXED_FOLDER: &'static str = "muxed";
 
 pub fn open(project_name: String) -> Vec<Yaml> {
