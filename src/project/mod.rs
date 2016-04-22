@@ -7,7 +7,22 @@ use yaml_rust::{YamlLoader, YamlEmitter, Yaml};
 static MUXED_FOLDER: &'static str = "muxed";
 
 pub fn open(project_name: String) -> Vec<Yaml> {
-    load_yaml(&read(&format!("./{}{}", MUXED_FOLDER, project_name)))
+    YamlLoader::load_from_str(&read(path_string(project_name))).unwrap()
+}
+
+pub fn path_string(project_name: String) -> String {
+    format!("{}/.{}/{}", homedir_string(), &MUXED_FOLDER.to_string(), project_name)
+}
+
+fn read(config_str: String) -> String {
+    let path = Path::new(&config_str);
+    let mut s = String::new();
+    File::open(path).expect("Config Read error").read_to_string(&mut s);
+
+    return s
+}
+
+fn parse_config() {
 }
 
 #[cfg(not(test))] fn homedir_string() -> String {
@@ -18,27 +33,12 @@ pub fn open(project_name: String) -> Vec<Yaml> {
 }
 
 #[cfg(test)] fn homedir_string() -> String {
-  String::from_str("/tmp")
-}
-
-fn parse_config() {
-}
-
-fn read(config_str: &String) -> String {
-    let path = Path::new(config_str);
-    let mut s = String::new();
-    File::open(path).expect("Config Read error").read_to_string(&mut s);
-
-    return s
-}
-
-fn load_yaml(yaml_string: &String) -> Vec<Yaml> {
-    return YamlLoader::load_from_str(yaml_string).unwrap();
+  String::from("/tmp")
 }
 
 #[test]
-pub fn path_returns_muxed_inside_homedir() {
-    let path = format!("{}", path().display());
-    let new  = format!("{}", Path::new("/tmp/.muxed").display());
+pub fn path_string_returns_muxed_inside_homedir() {
+    let path = format!("{}", path_string("".to_string()));
+    let new  = format!("{}", Path::new("/tmp/.muxed/").display());
     assert_eq!(path, new)
 }
