@@ -6,6 +6,7 @@ use project::parser::Command;
 #[cfg(not(test))] use std::env::home_dir;
 
 mod parser;
+pub mod processor;
 
 static MUXED_FOLDER: &'static str = "muxed";
 
@@ -24,9 +25,6 @@ fn read(config_str: String) -> String {
     File::open(path).expect("Config Read error").read_to_string(&mut s);
 
     return s
-}
-
-fn parse_config() {
 }
 
 #[cfg(not(test))] fn homedir_string() -> String {
