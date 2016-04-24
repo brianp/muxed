@@ -8,10 +8,9 @@ mod parser;
 
 static MUXED_FOLDER: &'static str = "muxed";
 
-pub fn open(project_name: String) -> Vec<Yaml> {
+pub fn open(project_name: String) -> Vec<Command> {
     let yaml = YamlLoader::load_from_str(&read(path_string(project_name))).unwrap();
-    parser::main(&yaml);
-    yaml
+    parser::main(&yaml)
 }
 
 pub fn path_string(project_name: String) -> String {
