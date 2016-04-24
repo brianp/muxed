@@ -1,8 +1,9 @@
 use std::path::Path;
 use std::io::prelude::*;
 use std::fs::File;
-#[cfg(not(test))] use std::env::home_dir;
 use yaml_rust::{YamlLoader, YamlEmitter, Yaml};
+use project::parser::Command;
+#[cfg(not(test))] use std::env::home_dir;
 
 mod parser;
 
