@@ -51,3 +51,26 @@ pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
     println!("{:?}", commands);
     commands
 }
+
+#[test]
+pub fn windows_as_array() {
+    let s = "---
+windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let commands = main(&yaml);
+    assert_eq!(commands.len(), 3)
+}
+
+#[test]
+pub fn windows_as_list() {
+    let s = "---
+windows:
+  - cargo: ''
+  - vim: ''
+  - git: ''
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let commands = main(&yaml);
+    assert_eq!(commands.len(), 3)
+}
