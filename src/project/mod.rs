@@ -40,7 +40,7 @@ fn read(config_str: String) -> String {
 
 #[test]
 pub fn path_string_returns_muxed_inside_homedir() {
-    let path = format!("{}", path_string("".to_string()));
-    let new  = format!("{}", Path::new("/tmp/.muxed/").display());
+    let path = format!("{}", path_string("test".to_string()));
+    let new  = format!("{}", Path::new("/tmp/.muxed/test.yml").display());
     assert_eq!(path, new)
 }
