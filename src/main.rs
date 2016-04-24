@@ -8,6 +8,8 @@ use std::env;
 mod tmux;
 mod project;
 
+use project::processor;
+
 /// The main execution method.
 /// Verify all the arguments and options passed are valid for the application.
 fn main() {
@@ -15,5 +17,6 @@ fn main() {
     let program = args[0].clone();
     let input = args[1].clone();
 
-    project::open(input.clone());
+    let commands = project::open(input.clone());
+    processor::main(&commands);
 }
