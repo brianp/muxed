@@ -1,19 +1,17 @@
 use std::collections::BTreeMap;
 use yaml_rust::Yaml;
-use tmux;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 
 #[derive(Debug)]
 pub struct Command {
     //commands: Vec<Command>,
-    key: String,
-    value: String
+    pub key: String,
+    pub value: String
 }
 
 pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
     let mut commands: Vec<Command> = vec!();
-    //println!("{:?}", yaml_string);
 
     fn yaml_match(y: &Yaml) {
         match y {
