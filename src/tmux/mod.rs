@@ -3,8 +3,10 @@ use std::ffi::CString;
 
 static TMUX_NAME: &'static str = "tmux";
 
-fn call(command: String) {
-    let system_call = CString::new(format!("{} {}", TMUX_NAME, command)).unwrap();
+fn call(command: String) -> () {
+    let line = format!("{} {}", TMUX_NAME, command);
+    let system_call = CString::new(line.clone()).unwrap();
+    //println!("{}", line.clone());
     unsafe { system(system_call.as_ptr()); };
 }
 
