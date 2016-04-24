@@ -2,6 +2,8 @@ use std::collections::BTreeMap;
 use yaml_rust::Yaml;
 use tmux;
 
+#[cfg(test)] use yaml_rust::{YamlLoader};
+
 #[derive(Debug)]
 pub struct Command {
     //commands: Vec<Command>,
@@ -33,17 +35,15 @@ pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
     for doc in yaml_string {
         for window in doc["windows"].as_vec().unwrap() {
             match window {
-                &Yaml::Array(ref a) => {
-                    for w in a {
-                      commands.push(Command{key: "window".to_string(), value: w.as_str().unwrap().to_string()})
-                    }
-                },
                 &Yaml::Hash(ref h)  => {
                     for (k, v) in h {
                         commands.push(Command{key: "window".to_string(), value: k.as_str().unwrap().to_string()})
                     }
                 },
-                _ => panic!("wtf")
+                &Yaml::String(ref s) => {
+                    commands.push(Command{key: "window".to_string(), value: s.as_str().to_string()})
+                },
+                _ => panic!("nope")
             };
         };
     };
