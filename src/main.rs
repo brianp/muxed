@@ -15,5 +15,5 @@ fn main() {
     let program = args[0].clone();
     let input = args[1].clone();
 
-    tmux::open(input.clone());
+    project::open(input.clone());
 }

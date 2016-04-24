@@ -43,6 +43,9 @@ pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
                 &Yaml::String(ref s) => {
                     commands.push(Command{key: "window".to_string(), value: s.as_str().to_string()})
                 },
+                &Yaml::Integer(ref s) => {
+                    commands.push(Command{key: "window".to_string(), value: s.to_string()})
+                },
                 _ => panic!("nope")
             };
         };
@@ -56,6 +59,16 @@ pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
 pub fn windows_as_array() {
     let s = "---
 windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let commands = main(&yaml);
+    assert_eq!(commands.len(), 3)
+}
+
+#[test]
+pub fn windows_with_integer_names() {
+    let s = "---
+windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml);
