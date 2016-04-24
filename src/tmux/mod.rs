@@ -8,18 +8,15 @@ fn call(command: String) {
     unsafe { system(system_call.as_ptr()); };
 }
 
-pub fn open(session_name: String) {
-    let open_command = format!("new -s {} -n {}", session_name, "hello");
-    call(open_command);
+pub fn open(session_name: String) -> () {
+    call(format!("new -s {} -n {}", session_name, "hello"));
 }
 
 static SELECT_LAYOUT: &'static str = "select-layout";
-pub fn select_layout(window: String, layout: String) {
-    let command = format!("{} -t {} {}", SELECT_LAYOUT, window, layout);
-    call(command);
+pub fn select_layout(window: String, layout: String) -> () {
+    call(format!("{} -t {} {}", SELECT_LAYOUT, window, layout));
 }
 
-pub fn new_window(session_name: String, window_name: String) {
-    let open_command = format!("new-window -s {} -n {}", session_name, window_name);
-    call(open_command);
+pub fn new_window(session_name: String, window_name: String) -> () {
+    call(format!("new-window -s {} -n {}", session_name, window_name));
 }
