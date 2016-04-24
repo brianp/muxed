@@ -14,7 +14,7 @@ use project::processor;
 /// Verify all the arguments and options passed are valid for the application.
 fn main() {
     let args: Vec<String> = env::args().collect();
-    let program = args[0].clone();
+    //let program = args[0].clone();
     let input = args[1].clone();
 
     let commands = project::open(input.clone());

@@ -1,5 +1,3 @@
-use std::collections::BTreeMap;
-use yaml_rust::Yaml;
 use project::parser::Command;
 use tmux;
 

@@ -1,4 +1,3 @@
-use std::collections::BTreeMap;
 use yaml_rust::Yaml;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
@@ -13,28 +12,11 @@ pub struct Command {
 pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
     let mut commands: Vec<Command> = vec!();
 
-    fn yaml_match(y: &Yaml) {
-        match y {
-            &Yaml::Array(ref v) => {
-                for x in v {
-                    yaml_match(x);
-                }
-            },
-            &Yaml::Hash(ref h) => {
-                for (k, v) in h {
-                    println!("hash: {:?}:", k);
-                    yaml_match(v);
-                }
-            },
-            _ => print!("{:?}", y)
-        };
-    };
-
     for doc in yaml_string {
         for window in doc["windows"].as_vec().unwrap() {
             match window {
                 &Yaml::Hash(ref h)  => {
-                    for (k, v) in h {
+                    for (k, _) in h {
                         commands.push(Command{key: "window".to_string(), value: k.as_str().unwrap().to_string()})
                     }
                 },
