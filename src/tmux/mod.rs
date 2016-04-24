@@ -9,7 +9,11 @@ fn call(command: String) {
 }
 
 pub fn open(session_name: String) -> () {
-    call(format!("new -s {} -n {}", session_name, "hello"));
+    call(format!("attach -t {}", session_name));
+}
+
+pub fn new_session(session_name: String, first_window: String) -> () {
+    call(format!("new -d -s {} -n {}", session_name, first_window));
 }
 
 static SELECT_LAYOUT: &'static str = "select-layout";
@@ -18,5 +22,5 @@ pub fn select_layout(window: String, layout: String) -> () {
 }
 
 pub fn new_window(session_name: String, window_name: String) -> () {
-    call(format!("new-window -s {} -n {}", session_name, window_name));
+    call(format!("new-window -t {} -n {}", session_name, window_name));
 }
