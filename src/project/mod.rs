@@ -14,7 +14,7 @@ pub fn open(project_name: String) -> Vec<Command> {
 }
 
 pub fn path_string(project_name: String) -> String {
-    format!("{}/.{}/{}", homedir_string(), &MUXED_FOLDER.to_string(), project_name)
+    format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER.to_string(), project_name)
 }
 
 fn read(config_str: String) -> String {
