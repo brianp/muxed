@@ -1,13 +1,7 @@
 use yaml_rust::Yaml;
+use command::Command;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
-
-#[derive(Debug)]
-pub struct Command {
-    //commands: Vec<Command>,
-    pub key: String,
-    pub value: String
-}
 
 pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
     let mut commands: Vec<Command> = vec!();

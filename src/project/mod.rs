@@ -1,18 +1,17 @@
 use std::path::Path;
 use std::io::prelude::*;
 use std::fs::File;
-use yaml_rust::YamlLoader;
-use project::parser::Command;
+use yaml_rust::{YamlLoader, Yaml};
+use command::Command;
 #[cfg(not(test))] use std::env::home_dir;
 
-mod parser;
+pub mod parser;
 pub mod processor;
 
 static MUXED_FOLDER: &'static str = "muxed";
 
-pub fn open(project_name: String) -> Vec<Command> {
-    let yaml = YamlLoader::load_from_str(&read(path_string(project_name))).unwrap();
-    parser::main(&yaml)
+pub fn open(project_name: String) -> Vec<Yaml> {
+    YamlLoader::load_from_str(&read(path_string(project_name))).unwrap()
 }
 
 pub fn path_string(project_name: String) -> String {

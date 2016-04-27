@@ -6,8 +6,10 @@ extern crate yaml_rust;
 use std::env;
 
 mod tmux;
+mod command;
 mod project;
 
+use project::parser;
 use project::processor;
 
 /// The main execution method.
@@ -17,6 +19,7 @@ fn main() {
     //let program = args[0].clone();
     let input = args[1].clone();
 
-    let commands = project::open(input.clone());
-    processor::main(&commands);
+    let yaml     = project::open(input.clone());
+    let commands = parser::main(&yaml);
+    processor::main(&commands)
 }
