@@ -1,11 +1,19 @@
-//#[derive(Debug)]
-//#[derive(Clone)]
-//pub enum Command {
-//    Window { value: String },
-//    Root { value: String, window: String }
-//}
+#[derive(Debug)]
+#[derive(Clone)]
+pub struct Window {
+  pub value: String
+}
 
-pub struct Command {
+#[derive(Debug)]
+#[derive(Clone)]
+pub struct Root {
   pub value: String,
-  pub key: String
+  pub window: String
+}
+
+#[derive(Debug)]
+#[derive(Clone)]
+pub enum Command {
+    Window(Window),
+    Root(Root)
 }

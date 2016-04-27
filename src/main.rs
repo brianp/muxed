@@ -21,5 +21,5 @@ fn main() {
 
     let yaml     = project::open(input.clone());
     let commands = parser::main(&yaml);
-    processor::main(&commands)
+    processor::main(commands.clone())
 }
