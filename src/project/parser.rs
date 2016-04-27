@@ -8,30 +8,28 @@ pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
 
     for doc in yaml_string {
         for window in doc["windows"].as_vec().unwrap() {
+            let root = match doc["root"].as_str() {
+                Some(x) => Some(x.to_string()),
+                None    => None
+            };
+
             match window {
                 &Yaml::Hash(ref h)  => {
                     for (k, _) in h {
-                        commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string()}))
+                        commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone()}))
                     }
                 },
                 &Yaml::String(ref s) => {
-                    commands.push(Command::Window(Window{value: s.clone()}))
+                    commands.push(Command::Window(Window{value: s.clone(), root: root.clone()}))
                 },
                 &Yaml::Integer(ref s) => {
-                    commands.push(Command::Window(Window{value: s.to_string()}))
+                    commands.push(Command::Window(Window{value: s.to_string(), root: root.clone()}))
                 },
                 _ => panic!("nope")
             };
         };
-
-        //if doc["root"].as_str().is_some() {
-        //    for c in commands.clone() {
-        //        commands.push(Command::Root{value: doc["root"].as_str().unwrap().to_string(), window: c.value});
-        //    };
-        //};
     };
 
-    println!("{:?}", commands);
     commands
 }
 
@@ -66,4 +64,23 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml);
     assert_eq!(commands.len(), 3)
+}
+
+#[test]
+pub fn root_command() {
+    let s = "---
+root: '~/.muxed'
+windows:
+  - cargo: ''
+  - vim: ''
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let commands = main(&yaml);
+
+    let first_window: Option<Window> = match commands[0].clone() {
+        Command::Window(w) => Some(w),
+        _                  => None
+    };
+
+    assert_eq!(first_window.unwrap().root.unwrap(), "~/.muxed".to_string())
 }

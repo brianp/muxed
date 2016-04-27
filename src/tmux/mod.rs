@@ -23,6 +23,10 @@ pub fn select_layout(window: String, layout: String) -> () {
     call(format!("{} -t {} {}", SELECT_LAYOUT, window, layout));
 }
 
-pub fn new_window(session_name: String, window_name: String) -> () {
-    call(format!("new-window -t {} -n {}", session_name, window_name));
+pub fn new_window(session_name: String, window_name: String, root: Option<String>) -> () {
+    if root.is_some() {
+        call(format!("new-window -t {} -n {} -c {}", session_name, window_name, root.unwrap()));
+    } else {
+        call(format!("new-window -t {} -n {}", session_name, window_name));
+    }
 }
