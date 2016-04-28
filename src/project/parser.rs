@@ -46,6 +46,12 @@ fn window_matcher(window: &Yaml, root: &Option<String>) -> Vec<Command> {
     commands
 }
 
+fn pane_matcher(panes: &Yaml, root: Option<String>, window: String) -> Command {
+    let layout = panes["layout"].as_str().unwrap().to_string();
+    let exec: Vec<String> = panes["panes"].as_vec().unwrap().iter().map(|x| x.as_str().unwrap().to_string()).collect();
+    Command::Panes(Panes{window: window, layout: layout, root: root, exec: exec})
+}
+
 #[test]
 pub fn windows_as_array() {
     let s = "---
