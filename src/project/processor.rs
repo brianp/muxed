@@ -15,7 +15,7 @@ pub fn main(sess: String, commands: Vec<Command>) -> () {
     for c in exec_commands.clone() {
         match c.clone() {
             Command::Window(w) => tmux::new_window(sess.clone(), w.value.clone(), w.root, w.exec.clone()),
-            Command::Panes(w)  => tmux::split_window(sess.clone(), w.window.clone(), w.root, w.exec.clone()),
+            Command::Panes(w)  => tmux::split_window(sess.clone(), w.window.clone(), w.root, w.exec.clone(), w.layout.clone()),
             _ => panic!("nope")
         }
     };

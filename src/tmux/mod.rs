@@ -23,8 +23,7 @@ fn select_layout(window: String, layout: String) -> () {
     call(format!("{} -t {} {}", SELECT_LAYOUT, window, layout));
 }
 
-// TODO: Not actually accepting pane layout. ex: main-vertical
-pub fn split_window(session_name: String, window_name: String, root: Option<String>, exec: Vec<String>) -> () {
+pub fn split_window(session_name: String, window_name: String, root: Option<String>, exec: Vec<String>, layout: String) -> () {
     let (first_pane, other_panes) = exec.split_at(1);
 
     call(format!("send-keys -t {}:{} '{}' KPEnter", session_name, window_name, first_pane[0]));
@@ -40,6 +39,9 @@ pub fn split_window(session_name: String, window_name: String, root: Option<Stri
 
         call(format!("send-keys -t {}:{}.{} '{}' KPEnter", session_name, window_name, i+1, c));
     };
+
+    // TODO: Sets layout after every pane is split.
+    call(format!("{} -t {}:{} {}", SELECT_LAYOUT, session_name, window_name, layout));
 }
 
 pub fn new_window(session_name: String, window_name: String, root: Option<String>, exec: String) -> () {
