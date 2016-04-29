@@ -19,8 +19,22 @@ pub fn new_session(session_name: String, first_window: String) -> () {
 }
 
 static SELECT_LAYOUT: &'static str = "select-layout";
-pub fn select_layout(window: String, layout: String) -> () {
+fn select_layout(window: String, layout: String) -> () {
     call(format!("{} -t {} {}", SELECT_LAYOUT, window, layout));
+}
+
+pub fn split_window(session_name: String, window_name: String, root: Option<String>, exec: Vec<String>) -> () {
+    let (first_pane, other_panes) = exec.split_at(1);
+
+    call(format!("send-keys -t {} '{}' KPEnter", window_name, first_pane[0]));
+
+    for c in other_panes.clone() {
+        if root.is_some() {
+            call(format!("split-window -t {} -c '{}'", window_name, c));
+        } else {
+            call(format!("split-window -t {} -c '{}'", window_name, c));
+        }
+    }
 }
 
 pub fn new_window(session_name: String, window_name: String, root: Option<String>) -> () {
