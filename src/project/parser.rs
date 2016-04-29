@@ -117,21 +117,41 @@ windows:
     assert_eq!(commands.len(), 2)
 }
 
-//#[test]
-//pub fn panes_command_has_execs() {
-//    let s = "---
-//windows:
-//  - editor:
-//      layout: 'main-vertical'
-//      panes: ['vim', 'guard']
-//";
-//    let yaml = YamlLoader::load_from_str(s).unwrap();
-//    let commands = main(&yaml);
-//
-//    let pane_command: Option<Panes> = match commands[0].clone() {
-//        Command::Panes(w) => Some(w),
-//        _                  => None
-//    };
-//
-//    assert_eq!(pane_command.unwrap().exec, vec!(["vim", "guard"]))
-//}
+#[test]
+pub fn panes_command_exists() {
+    let s = "---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['vim', 'guard']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let commands = main(&yaml);
+
+    let pane_command: Option<Panes> = match commands[1].clone() {
+        Command::Panes(w) => Some(w),
+        _                 => None
+    };
+
+    assert!(pane_command.is_some())
+}
+
+#[test]
+pub fn panes_command_execs_array() {
+    let s = "---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['vim', 'guard']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let commands = main(&yaml);
+
+    let pane_command: Option<Panes> = match commands[1].clone() {
+        Command::Panes(w) => Some(w),
+        _                 => None
+    };
+
+    assert_eq!(pane_command.clone().unwrap().exec[0], "vim");
+    assert_eq!(pane_command.clone().unwrap().exec[1], "guard")
+}
