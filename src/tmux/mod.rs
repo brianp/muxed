@@ -30,9 +30,9 @@ pub fn split_window(session_name: String, window_name: String, root: Option<Stri
 
     for c in other_panes.clone() {
         if root.is_some() {
-            call(format!("split-window -t {} -c '{}'", window_name, c));
+            call(format!("split-window -t {} -c {} '{}'", window_name, root.clone().unwrap(), c));
         } else {
-            call(format!("split-window -t {} -c '{}'", window_name, c));
+            call(format!("split-window -t {} '{}'", window_name, c));
         }
     }
 }
