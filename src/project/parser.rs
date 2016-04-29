@@ -27,18 +27,19 @@ fn window_matcher(window: &Yaml, root: &Option<String>) -> Vec<Command> {
     match window {
         &Yaml::Hash(ref h)  => {
             for (k, v) in h {
-                commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone()}));
-
                 if v.as_hash().is_some() {
+                    commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: "".to_string()}));
                     commands.push(pane_matcher(v, root.clone(), k.as_str().unwrap().to_string()));
-                };
+                } else {
+                    commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: v.as_str().unwrap().to_string().clone()}));
+                }
             }
         },
         &Yaml::String(ref s) => {
-            commands.push(Command::Window(Window{value: s.clone(), root: root.clone()}))
+            commands.push(Command::Window(Window{value: s.clone(), root: root.clone(), exec: "".to_string()}))
         },
         &Yaml::Integer(ref s) => {
-            commands.push(Command::Window(Window{value: s.to_string(), root: root.clone()}))
+            commands.push(Command::Window(Window{value: s.to_string(), root: root.clone(), exec: "".to_string()}))
         },
         _ => panic!("nope")
     };

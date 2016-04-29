@@ -23,24 +23,31 @@ fn select_layout(window: String, layout: String) -> () {
     call(format!("{} -t {} {}", SELECT_LAYOUT, window, layout));
 }
 
+// TODO: Not actually accepting pane layout. ex: main-vertical
 pub fn split_window(session_name: String, window_name: String, root: Option<String>, exec: Vec<String>) -> () {
     let (first_pane, other_panes) = exec.split_at(1);
 
-    call(format!("send-keys -t {} '{}' KPEnter", window_name, first_pane[0]));
+    call(format!("send-keys -t {}:{} '{}' KPEnter", session_name, window_name, first_pane[0]));
 
-    for c in other_panes.clone() {
+    format!("new-window -t {} -n {}", session_name, window_name);
+
+    for (i,c) in other_panes.clone().into_iter().enumerate() {
         if root.is_some() {
-            call(format!("split-window -t {} -c {} '{}'", window_name, root.clone().unwrap(), c));
+            call(format!("split-window -t {} -c {}", window_name, root.clone().unwrap()));
         } else {
-            call(format!("split-window -t {} '{}'", window_name, c));
+            call(format!("split-window -t {}:{}", session_name, window_name));
         }
-    }
+
+        call(format!("send-keys -t {}:{}.{} '{}' KPEnter", session_name, window_name, i+1, c));
+    };
 }
 
-pub fn new_window(session_name: String, window_name: String, root: Option<String>) -> () {
+pub fn new_window(session_name: String, window_name: String, root: Option<String>, exec: String) -> () {
     if root.is_some() {
         call(format!("new-window -t {} -n {} -c {}", session_name, window_name, root.unwrap()));
     } else {
         call(format!("new-window -t {} -n {}", session_name, window_name));
     }
+
+    call(format!("send-keys -t {}:{}.{} '{}' KPEnter", session_name, window_name, 0, exec));
 }

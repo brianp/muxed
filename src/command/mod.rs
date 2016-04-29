@@ -2,7 +2,8 @@
 #[derive(Clone)]
 pub struct Window {
   pub value: String,
-  pub root: Option<String>
+  pub root: Option<String>,
+  pub exec: String
 }
 
 #[derive(Debug)]

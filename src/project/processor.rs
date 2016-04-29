@@ -1,9 +1,7 @@
 use command::{Command, Window};
 use tmux;
 
-pub fn main(commands: Vec<Command>) -> () {
-    let sess = "test".to_string();
-
+pub fn main(sess: String, commands: Vec<Command>) -> () {
     let first_window: Vec<Window> = commands.iter().flat_map(|c| {
         match c.clone() {
             Command::Window(w) => Some(w),
@@ -16,7 +14,7 @@ pub fn main(commands: Vec<Command>) -> () {
 
     for c in exec_commands.clone() {
         match c.clone() {
-            Command::Window(w) => tmux::new_window(sess.clone(), w.value.clone(), w.root),
+            Command::Window(w) => tmux::new_window(sess.clone(), w.value.clone(), w.root, w.exec.clone()),
             Command::Panes(w)  => tmux::split_window(sess.clone(), w.window.clone(), w.root, w.exec.clone()),
             _ => panic!("nope")
         }
