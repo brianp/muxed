@@ -2,6 +2,7 @@ use libc::system;
 use std::ffi::CString;
 
 static TMUX_NAME: &'static str = "tmux";
+static SELECT_LAYOUT: &'static str = "select-layout";
 
 fn call(command: String) -> () {
     let line = format!("{} {}", TMUX_NAME, command);
@@ -16,11 +17,6 @@ pub fn open(session_name: String) -> () {
 
 pub fn new_session(session_name: String, first_window: String) -> () {
     call(format!("new -d -s {} -n {}", session_name, first_window));
-}
-
-static SELECT_LAYOUT: &'static str = "select-layout";
-fn select_layout(window: String, layout: String) -> () {
-    call(format!("{} -t {} {}", SELECT_LAYOUT, window, layout));
 }
 
 pub fn split_window(session_name: String, window_name: String, root: Option<String>, exec: Vec<String>, layout: String) -> () {

@@ -1,6 +1,5 @@
 use yaml_rust::Yaml;
 use command::{Command, Window, Panes};
-use std::collections::HashMap;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 

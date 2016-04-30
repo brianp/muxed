@@ -2,7 +2,6 @@ use std::path::Path;
 use std::io::prelude::*;
 use std::fs::File;
 use yaml_rust::{YamlLoader, Yaml};
-use command::Command;
 #[cfg(not(test))] use std::env::home_dir;
 
 pub mod parser;
@@ -21,7 +20,7 @@ pub fn path_string(project_name: String) -> String {
 fn read(config_str: String) -> String {
     let path = Path::new(&config_str);
     let mut s = String::new();
-    File::open(path).expect("Config Read error").read_to_string(&mut s);
+    let _ = File::open(path).expect("Config Read error").read_to_string(&mut s);
 
     return s
 }
