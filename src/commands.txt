@@ -1,0 +1,29 @@
+tmux new -d -s muxed -n cargo
+tmux send-keys -t muxed:cargo 'cargo build' KPEnter
+tmux split-window -t cargo -c ~/.muxed/
+tmux send-keys -t muxed:cargo.1 'echo HI' KPEnter
+tmux select-layout -t muxed:cargo main-horizontal
+arranging in: main-horizontal
+tmux new-window -t muxed -n vim -c ~/.muxed/
+tmux send-keys -t muxed:vim.0 'vim .' KPEnter
+tmux new-window -t muxed -n git -c ~/.muxed/
+tmux send-keys -t muxed:git.0 'git status' KPEnter
+tmux attach -t muxed
+
+new-session SESSION_NAME default_name
+new-window  SESSION_NAME WINDOW_NAME DIRECTORY
+split-window TARGET DIRECTORY
+select-layout TARGET layout
+send-keys TARGET command
+attach SESSION_NAME
+
+Session{name: muxed, window_name: cargo}
+SendKeys{target: muxed:cargo, exec: 'cargo build'}
+Split{target: muxed:cargo, root: dir}
+SendKeys{target: muxed:cargo.1, exec: 'echo HI'}
+Layout{target: muxed:cargo, layout: 'main-horizontal'}
+Window{session_name: muxed, name: vim, root: dir}
+SendKeys{target: muxed:vim.0, exec: 'vim .'}
+Window{session_name: muxed, name: git, root: dir}
+SendKeys{target: muxed:git.0, exec: 'git status'}
+Attach{name: muxed}
