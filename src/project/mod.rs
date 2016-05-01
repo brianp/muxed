@@ -10,9 +10,10 @@ pub mod processor;
 static MUXED_FOLDER: &'static str = "muxed";
 
 pub fn main(project_name: String) -> Vec<Yaml> {
+    YamlLoader::load_from_str(&read(project_path(project_name))).unwrap()
 }
 
-pub fn path_string(project_name: String) -> String {
+pub fn project_path(project_name: String) -> String {
     format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER.to_string(), project_name)
 }
 
@@ -36,8 +37,8 @@ fn read(config_str: String) -> String {
 }
 
 #[test]
-pub fn path_string_returns_muxed_inside_homedir() {
-    let path = format!("{}", path_string("test".to_string()));
+pub fn project_path_returns_muxed_in_homedir() {
+    let path = format!("{}", project_path("test".to_string()));
     let new  = format!("{}", Path::new("/tmp/.muxed/test.yml").display());
     assert_eq!(path, new)
 }
