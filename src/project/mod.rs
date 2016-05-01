@@ -9,8 +9,7 @@ pub mod processor;
 
 static MUXED_FOLDER: &'static str = "muxed";
 
-pub fn open(project_name: String) -> Vec<Yaml> {
-    YamlLoader::load_from_str(&read(path_string(project_name))).unwrap()
+pub fn main(project_name: String) -> Vec<Yaml> {
 }
 
 pub fn path_string(project_name: String) -> String {
