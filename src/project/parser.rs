@@ -1,55 +1,78 @@
 use yaml_rust::Yaml;
-use command::{Command, Window, Panes};
+use command::{Command, Session, SendKeys, Split, Layout, Window, Window2, Attach, Panes};
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 
-pub fn main(yaml_string: &Vec<Yaml>) -> Vec<Command> {
+pub fn main(yaml_string: &Vec<Yaml>, project_name: String) -> Vec<Command> {
     let mut commands: Vec<Command> = vec!();
 
     for doc in yaml_string {
-        for window in doc["windows"].as_vec().unwrap() {
-            let root = match doc["root"].as_str() {
-                Some(x) => Some(x.to_string()),
-                None    => None
-            };
+        let root = match doc["root"].as_str() {
+            Some(x) => Some(x.to_string()),
+            None    => None
+        };
 
-            commands.append(&mut window_matcher(window, &root));
+        let (first_window, windows) = doc["windows"].as_vec().expect("No Windows have been defined.").split_at(1);
+
+        match &first_window[0] {
+             &Yaml::Hash(ref h)  => {
+                 for (k, v) in h {
+                     if v.as_hash().is_some() {
+                         commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                         commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
+                     } else {
+                         commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                     }
+                 }
+             },
+             &Yaml::String(ref s) => {
+                 commands.push(Command::Session(Session{name: project_name.clone(), window_name: s.clone(), root: root.clone()}))
+             },
+             &Yaml::Integer(ref s) => {
+                 commands.push(Command::Session(Session{name: project_name.clone(), window_name: s.to_string(), root: root.clone()}))
+             },
+             _ => panic!("Muxed config file formatting isn't recognized.")
+        };
+
+        for (i,window) in windows.iter().enumerate() {
+            match window {
+                &Yaml::Hash(ref h)  => {
+                    for (k, v) in h {
+                        if v.as_hash().is_some() {
+                            commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: "".to_string()}));
+                            commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
+                        } else {
+                            commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: v.as_str().unwrap().to_string().clone()}));
+                        }
+                    }
+                },
+                &Yaml::String(ref s) => {
+                    commands.push(Command::Window(Window{value: s.clone(), root: root.clone(), exec: "".to_string()}))
+                },
+                &Yaml::Integer(ref s) => {
+                    commands.push(Command::Window(Window{value: s.to_string(), root: root.clone(), exec: "".to_string()}))
+                },
+                _ => panic!("Muxed config file formatting isn't recognized.")
+            };
         };
     };
 
     commands
 }
 
-fn window_matcher(window: &Yaml, root: &Option<String>) -> Vec<Command> {
-    let mut commands: Vec<Command> = vec!();
+fn pane_matcher(session: String, panes: &Yaml, root: Option<String>, window: String) -> Vec<Command> {
+    let mut commands = vec!();
 
-    match window {
-        &Yaml::Hash(ref h)  => {
-            for (k, v) in h {
-                if v.as_hash().is_some() {
-                    commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: "".to_string()}));
-                    commands.push(pane_matcher(v, root.clone(), k.as_str().unwrap().to_string()));
-                } else {
-                    commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: v.as_str().unwrap().to_string().clone()}));
-                }
-            }
-        },
-        &Yaml::String(ref s) => {
-            commands.push(Command::Window(Window{value: s.clone(), root: root.clone(), exec: "".to_string()}))
-        },
-        &Yaml::Integer(ref s) => {
-            commands.push(Command::Window(Window{value: s.to_string(), root: root.clone(), exec: "".to_string()}))
-        },
-        _ => panic!("nope")
+    if panes["layout"].as_str().is_some() {
+        let layout = panes["layout"].as_str().unwrap().to_string();
+        commands.push(Command::Layout(Layout{target: format!("{}:{}", window, session).to_string(), layout: panes["layout"].as_str().expect("Bad layout").to_string()}));
+    };
+
+    for (i, pane) in panes["panes"].as_vec().expect("Something is wrong with panes.").iter().enumerate() {
+        commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window, i).to_string(), exec: pane.as_str().expect("Bad exec command").to_string()}));
     };
 
     commands
-}
-
-fn pane_matcher(panes: &Yaml, root: Option<String>, window: String) -> Command {
-    let layout = panes["layout"].as_str().unwrap().to_string();
-    let exec: Vec<String> = panes["panes"].as_vec().unwrap().iter().map(|x| x.as_str().unwrap().to_string()).collect();
-    Command::Panes(Panes{window: window, layout: layout, root: root, exec: exec})
 }
 
 #[test]
@@ -58,7 +81,7 @@ pub fn windows_as_array() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
     assert_eq!(commands.len(), 3)
 }
 
@@ -68,7 +91,7 @@ pub fn windows_with_integer_names() {
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
     assert_eq!(commands.len(), 3)
 }
 
@@ -81,7 +104,7 @@ windows:
   - git: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
     assert_eq!(commands.len(), 3)
 }
 
@@ -94,7 +117,7 @@ windows:
   - vim: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
 
     let first_window: Option<Window> = match commands[0].clone() {
         Command::Window(w) => Some(w),
@@ -113,7 +136,7 @@ windows:
       panes: ['vim', 'guard']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
     assert_eq!(commands.len(), 2)
 }
 
@@ -126,7 +149,7 @@ windows:
       panes: ['vim', 'guard']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
 
     let pane_command: Option<Panes> = match commands[1].clone() {
         Command::Panes(w) => Some(w),
@@ -145,7 +168,7 @@ windows:
       panes: ['vim', 'guard']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml);
+    let commands = main(&yaml, "muxed".to_string());
 
     let pane_command: Option<Panes> = match commands[1].clone() {
         Command::Panes(w) => Some(w),
