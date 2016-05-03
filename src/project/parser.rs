@@ -82,13 +82,54 @@ fn pane_matcher(session: String, panes: &Yaml, root: Option<String>, window: Str
 }
 
 #[test]
-pub fn windows_as_array() {
+pub fn windows_defined_as_array_has_4_commands() {
     let s = "---
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, "muxed".to_string());
-    assert_eq!(commands.len(), 3)
+    assert_eq!(main(&yaml, "muxed".to_string()).len(), 4)
+}
+
+#[test]
+pub fn windows_defined_as_array_has_1_session() {
+    let s = "---
+windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Session(_) => true,
+      _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 1)
+}
+
+#[test]
+pub fn windows_defined_as_array_has_2_windows() {
+    let s = "---
+windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Window2(_) => true,
+      _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 2)
+}
+
+#[test]
+pub fn windows_defined_as_array_has_1_attach() {
+    let s = "---
+windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Attach(_) => true,
+      _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 1)
 }
 
 #[test]
@@ -97,8 +138,7 @@ pub fn windows_with_integer_names() {
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, "muxed".to_string());
-    assert_eq!(commands.len(), 3)
+    assert_eq!(main(&yaml, "muxed".to_string()).len(), 4)
 }
 
 #[test]
@@ -111,7 +151,7 @@ windows:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml, "muxed".to_string());
-    assert_eq!(commands.len(), 3)
+    assert_eq!(commands.len(), 7)
 }
 
 #[test]
@@ -125,16 +165,16 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml, "muxed".to_string());
 
-    let first_window: Option<Window> = match commands[0].clone() {
-        Command::Window(w) => Some(w),
-        _                  => None
+    let first_window: Option<Session> = match commands[0].clone() {
+        Command::Session(w) => Some(w),
+        _                   => None
     };
 
     assert_eq!(first_window.unwrap().root.unwrap(), "~/.muxed".to_string())
 }
 
 #[test]
-pub fn panes_array() {
+pub fn panes_array_has_7_commands() {
     let s = "---
 windows:
   - editor:
@@ -143,44 +183,97 @@ windows:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml, "muxed".to_string());
-    assert_eq!(commands.len(), 2)
+    println!("{:?}", commands);
+    assert_eq!(commands.len(), 6)
 }
 
 #[test]
-pub fn panes_command_exists() {
+pub fn panes_array_has_1_split() {
     let s = "---
 windows:
   - editor:
       layout: 'main-vertical'
       panes: ['vim', 'guard']
 ";
+
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, "muxed".to_string());
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Split(_) => true,
+      _ => false
+    }).collect();
 
-    let pane_command: Option<Panes> = match commands[1].clone() {
-        Command::Panes(w) => Some(w),
-        _                 => None
-    };
-
-    assert!(pane_command.is_some())
+    assert_eq!(remains.len(), 1)
 }
 
 #[test]
-pub fn panes_command_execs_array() {
+pub fn panes_array_has_1_layout() {
     let s = "---
 windows:
   - editor:
       layout: 'main-vertical'
       panes: ['vim', 'guard']
 ";
+
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, "muxed".to_string());
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Layout(_) => true,
+      _ => false
+    }).collect();
 
-    let pane_command: Option<Panes> = match commands[1].clone() {
-        Command::Panes(w) => Some(w),
-        _                 => None
-    };
-
-    assert_eq!(pane_command.clone().unwrap().exec[0], "vim");
-    assert_eq!(pane_command.clone().unwrap().exec[1], "guard")
+    assert_eq!(remains.len(), 1)
 }
+
+#[test]
+pub fn panes_array_has_no_window() {
+    let s = "---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['vim', 'guard']
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Window2(_) => true,
+      _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn panes_array_has_1_session() {
+    let s = "---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['vim', 'guard']
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+      &Command::Session(_) => true,
+      _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 1)
+}
+
+//#[test]
+//pub fn panes_command_execs_array() {
+//    let s = "---
+//windows:
+//  - editor:
+//      layout: 'main-vertical'
+//      panes: ['vim', 'guard']
+//";
+//    let yaml = YamlLoader::load_from_str(s).unwrap();
+//    let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
+//      &Command::SendKeys(_) => true,
+//      _ => false
+//    }).collect();
+//
+//    assert_eq!(remains.len(), 2);
+//    assert_eq!(remains[0].exec, "vim");
+//    assert_eq!(remains[1].exec, "guard")
+//}
