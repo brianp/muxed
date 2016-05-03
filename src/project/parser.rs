@@ -42,15 +42,16 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: String) -> Vec<Command> {
                             commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: "".to_string()}));
                             commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
                         } else {
-                            commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: v.as_str().unwrap().to_string().clone()}));
+                            commands.push(Command::Window2(Window2{session_name: project_name.clone(), name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                            commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
                         }
                     }
                 },
                 &Yaml::String(ref s) => {
-                    commands.push(Command::Window(Window{value: s.clone(), root: root.clone(), exec: "".to_string()}))
+                    commands.push(Command::Window2(Window2{session_name: project_name.clone(), name: s.clone(), root: root.clone()}))
                 },
                 &Yaml::Integer(ref s) => {
-                    commands.push(Command::Window(Window{value: s.to_string(), root: root.clone(), exec: "".to_string()}))
+                    commands.push(Command::Window2(Window2{session_name: project_name.clone(), name: s.to_string(), root: root.clone()}))
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
