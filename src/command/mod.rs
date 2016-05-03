@@ -33,7 +33,8 @@ pub struct Split {
 #[derive(Clone)]
 pub struct Layout {
     pub target: String,
-    pub layout: String
+    pub layout: String,
+    pub panes: usize
 }
 
 #[derive(Debug)]
