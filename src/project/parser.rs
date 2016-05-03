@@ -22,6 +22,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: String) -> Vec<Command> {
                          commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
                      } else {
                          commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                         commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
                      }
                  }
              },
