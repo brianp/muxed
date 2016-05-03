@@ -57,7 +57,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: String) -> Vec<Command> {
             };
         };
     };
-
+    commands.push(Command::Attach(Attach{name: project_name.clone()}));
     commands
 }
 
