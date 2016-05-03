@@ -65,13 +65,13 @@ fn pane_matcher(session: String, panes: &Yaml, root: Option<String>, window: Str
     let mut commands = vec!();
     let panes2 = panes["panes"].as_vec().expect("Something is wrong with panes.");
 
-    if panes["layout"].as_str().is_some() {
-        let layout = panes["layout"].as_str().unwrap().to_string();
-        commands.push(Command::Layout(Layout{panes: panes2.len(), target: format!("{}:{}", session, window).to_string(), layout: panes["layout"].as_str().expect("Bad layout").to_string()}));
-    };
-
     for (i, pane) in panes2.iter().enumerate() {
         commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window, i).to_string(), exec: pane.as_str().expect("Bad exec command").to_string()}));
+    };
+
+    if panes["layout"].as_str().is_some() {
+        let layout = panes["layout"].as_str().unwrap().to_string();
+        commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window).to_string(), layout: panes["layout"].as_str().expect("Bad layout").to_string()}));
     };
 
     commands

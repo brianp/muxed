@@ -34,7 +34,6 @@ pub struct Split {
 pub struct Layout {
     pub target: String,
     pub layout: String,
-    pub panes: usize
 }
 
 #[derive(Debug)]
