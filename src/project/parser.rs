@@ -67,6 +67,9 @@ fn pane_matcher(session: String, panes: &Yaml, root: Option<String>, window: Str
     let panes2 = panes["panes"].as_vec().expect("Something is wrong with panes.");
 
     for (i, pane) in panes2.iter().enumerate() {
+        if i < (panes2.len()-1) {
+            commands.push(Command::Split(Split{target: format!("{}:{}.{}", session, window, i.to_string()).to_string(), root: root.clone()}));
+        };
         commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window, i).to_string(), exec: pane.as_str().expect("Bad exec command").to_string()}));
     };
 
