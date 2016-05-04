@@ -21,6 +21,5 @@ fn main() {
 
     let yaml     = project::main(input.clone());
     let commands = parser::main(&yaml, input.clone());
-    println!("{:?}", commands);
-    processor::main(input.clone(), commands.clone())
+    processor::main(commands.clone())
 }
