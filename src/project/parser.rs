@@ -1,5 +1,5 @@
 use yaml_rust::Yaml;
-use command::{Command, Session, SendKeys, Split, Layout, Window, Window2, Attach, Panes};
+use command::{Command, Session, SendKeys, Split, Layout, Window, Window2, Attach};
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 

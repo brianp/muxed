@@ -51,15 +51,6 @@ pub struct Attach {
 
 #[derive(Debug)]
 #[derive(Clone)]
-pub struct Panes {
-    pub layout: String,
-    pub window: String,
-    pub exec: Vec<String>,
-    pub root: Option<String>
-}
-
-#[derive(Debug)]
-#[derive(Clone)]
 pub enum Command {
     Session(Session),
     Window(Window),
@@ -68,5 +59,4 @@ pub enum Command {
     Layout(Layout),
     SendKeys(SendKeys),
     Attach(Attach),
-    Panes(Panes)
 }
