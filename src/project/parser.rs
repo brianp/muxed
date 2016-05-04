@@ -35,7 +35,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: String) -> Vec<Command> {
              _ => panic!("Muxed config file formatting isn't recognized.")
         };
 
-        for (i,window) in windows.iter().enumerate() {
+        for window in windows.iter() {
             match window {
                 &Yaml::Hash(ref h)  => {
                     for (k, v) in h {
@@ -74,8 +74,8 @@ fn pane_matcher(session: String, panes: &Yaml, root: Option<String>, window: Str
     };
 
     if panes["layout"].as_str().is_some() {
-        let layout = panes["layout"].as_str().unwrap().to_string();
-        commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window).to_string(), layout: panes["layout"].as_str().expect("Bad layout").to_string()}));
+        let layout = panes["layout"].as_str().expect("Bad layout").to_string();
+        commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window).to_string(), layout: layout}));
     };
 
     commands
