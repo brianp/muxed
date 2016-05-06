@@ -9,14 +9,6 @@ pub struct Session {
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Window {
-    pub value: String,
-    pub root: Option<String>,
-    pub exec: String
-}
-
-#[derive(Debug)]
-#[derive(Clone)]
-pub struct Window2 {
     pub session_name: String,
     pub name: String,
     pub root: Option<String>
@@ -54,9 +46,8 @@ pub struct Attach {
 pub enum Command {
     Session(Session),
     Window(Window),
-    Window2(Window2),
     Split(Split),
     Layout(Layout),
     SendKeys(SendKeys),
-    Attach(Attach),
+    Attach(Attach)
 }

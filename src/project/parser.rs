@@ -1,5 +1,5 @@
 use yaml_rust::Yaml;
-use command::{Command, Session, SendKeys, Split, Layout, Window, Window2, Attach};
+use command::{Command, Session, SendKeys, Split, Layout, Window, Attach};
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 
@@ -40,19 +40,19 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: String) -> Vec<Command> {
                 &Yaml::Hash(ref h)  => {
                     for (k, v) in h {
                         if v.as_hash().is_some() {
-                            commands.push(Command::Window(Window{value: k.as_str().unwrap().to_string(), root: root.clone(), exec: "".to_string()}));
+                            commands.push(Command::Window(Window{session_name: project_name.clone(), name: k.as_str().unwrap().to_string(), root: root.clone()}));
                             commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
                         } else {
-                            commands.push(Command::Window2(Window2{session_name: project_name.clone(), name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                            commands.push(Command::Window(Window{session_name: project_name.clone(), name: k.as_str().unwrap().to_string(), root: root.clone()}));
                             commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
                         }
                     }
                 },
                 &Yaml::String(ref s) => {
-                    commands.push(Command::Window2(Window2{session_name: project_name.clone(), name: s.clone(), root: root.clone()}))
+                    commands.push(Command::Window(Window{session_name: project_name.clone(), name: s.clone(), root: root.clone()}))
                 },
                 &Yaml::Integer(ref s) => {
-                    commands.push(Command::Window2(Window2{session_name: project_name.clone(), name: s.to_string(), root: root.clone()}))
+                    commands.push(Command::Window(Window{session_name: project_name.clone(), name: s.to_string(), root: root.clone()}))
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
@@ -111,7 +111,7 @@ windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Window2(_) => true,
+      &Command::Window(_) => true,
       _ => false
     }).collect();
 
@@ -234,7 +234,7 @@ windows:
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, "muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Window2(_) => true,
+      &Command::Window(_) => true,
       _ => false
     }).collect();
 
