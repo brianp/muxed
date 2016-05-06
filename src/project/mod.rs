@@ -33,7 +33,7 @@ fn read(config_str: String) -> String {
 }
 
 #[cfg(test)] fn homedir_string() -> String {
-  String::from("/tmp")
+    String::from("/tmp")
 }
 
 #[test]
