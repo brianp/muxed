@@ -3,7 +3,6 @@
 pub struct Session {
     pub name: String,
     pub window_name: String,
-    pub root: Option<String>
 }
 
 #[derive(Debug)]

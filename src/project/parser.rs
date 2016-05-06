@@ -18,19 +18,22 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
              &Yaml::Hash(ref h)  => {
                  for (k, v) in h {
                      if v.as_hash().is_some() {
-                         commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                         commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string()}));
                          commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
                      } else {
-                         commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                         commands.push(Command::Session(Session{name: project_name.clone(), window_name: k.as_str().unwrap().to_string()}));
+                         if root.is_some() {
+                            commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: format!("cd {}", root.clone().unwrap().to_string())}));
+                         };
                          commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
                      }
                  }
              },
              &Yaml::String(ref s) => {
-                 commands.push(Command::Session(Session{name: project_name.clone(), window_name: s.clone(), root: root.clone()}))
+                 commands.push(Command::Session(Session{name: project_name.clone(), window_name: s.clone()}))
              },
              &Yaml::Integer(ref s) => {
-                 commands.push(Command::Session(Session{name: project_name.clone(), window_name: s.to_string(), root: root.clone()}))
+                 commands.push(Command::Session(Session{name: project_name.clone(), window_name: s.to_string()}))
              },
              _ => panic!("Muxed config file formatting isn't recognized.")
         };
@@ -97,8 +100,8 @@ windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Session(_) => true,
-      _ => false
+        &Command::Session(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 1)
@@ -111,8 +114,8 @@ windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Window(_) => true,
-      _ => false
+        &Command::Window(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 2)
@@ -125,8 +128,8 @@ windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Attach(_) => true,
-      _ => false
+        &Command::Attach(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 1)
@@ -155,7 +158,7 @@ windows:
 }
 
 #[test]
-pub fn root_command() {
+pub fn session_window_has_root() {
     let s = "---
 root: '~/.muxed'
 windows:
@@ -163,14 +166,17 @@ windows:
   - vim: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string());
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
 
-    let first_window: Option<Session> = match commands[0].clone() {
-        Command::Session(w) => Some(w),
-        _                   => None
+    let send_keys = match remains[0].clone() {
+        Command::SendKeys(c) => c,
+        _ => panic!("No send key")
     };
 
-    assert_eq!(first_window.unwrap().root.unwrap(), "~/.muxed".to_string())
+    assert_eq!(send_keys.exec, "cd ~/.muxed".to_string())
 }
 
 #[test]
@@ -183,7 +189,6 @@ windows:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml, &"muxed".to_string());
-    println!("{:?}", commands);
     assert_eq!(commands.len(), 6)
 }
 
@@ -198,8 +203,8 @@ windows:
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Split(_) => true,
-      _ => false
+        &Command::Split(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 1)
@@ -216,8 +221,8 @@ windows:
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Layout(_) => true,
-      _ => false
+        &Command::Layout(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 1)
@@ -234,8 +239,8 @@ windows:
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Window(_) => true,
-      _ => false
+        &Command::Window(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 0)
@@ -252,8 +257,8 @@ windows:
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-      &Command::Session(_) => true,
-      _ => false
+        &Command::Session(_) => true,
+        _ => false
     }).collect();
 
     assert_eq!(remains.len(), 1)
