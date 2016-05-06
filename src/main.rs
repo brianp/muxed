@@ -20,6 +20,6 @@ fn main() {
     let input = args[1].clone();
 
     let yaml     = project::main(&input);
-    let commands = parser::main(&yaml, input.clone());
+    let commands = parser::main(&yaml, &input);
     processor::main(&commands)
 }
