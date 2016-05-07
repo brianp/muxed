@@ -1,10 +1,12 @@
 use yaml_rust::Yaml;
 use command::{Command, Session, SendKeys, Split, Layout, Window, Attach};
+use rand::random;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 
 pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
     let mut commands: Vec<Command> = vec!();
+    let tmp_window_name = format!("muxed_first_window_{}", random::<u16>().to_string());
 
     for doc in yaml_string {
         let root = match doc["root"].as_str() {

@@ -2,6 +2,7 @@
 extern crate getopts;
 extern crate libc;
 extern crate yaml_rust;
+extern crate rand;
 
 use std::env;
 

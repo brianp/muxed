@@ -8,3 +8,4 @@ authors = ["Brian Pearce"]
 getopts   = "0.2"
 libc      = "0.2.10"
 yaml-rust = "0.3.2"
+rand      = "0.3"
