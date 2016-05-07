@@ -2,7 +2,7 @@
 #[derive(Clone)]
 pub struct Session {
     pub name: String,
-    pub window_name: String,
+    pub tmp_window_name: String
 }
 
 #[derive(Debug)]
@@ -42,11 +42,18 @@ pub struct Attach {
 
 #[derive(Debug)]
 #[derive(Clone)]
+pub struct KillWindow {
+    pub name: String
+}
+
+#[derive(Debug)]
+#[derive(Clone)]
 pub enum Command {
     Session(Session),
     Window(Window),
     Split(Split),
     Layout(Layout),
     SendKeys(SendKeys),
-    Attach(Attach)
+    Attach(Attach),
+    KillWindow(KillWindow)
 }

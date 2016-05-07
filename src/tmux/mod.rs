@@ -14,9 +14,8 @@ pub fn attach(session_name: &String) -> () {
     call(format!("attach -t {}", session_name));
 }
 
-// TODO: The first window in a new session doesn't respect a root option.
-pub fn new_session(session_name: &String, window_name: &String) -> () {
-    call(format!("new -d -s {} -n {}", session_name, window_name));
+pub fn new_session(session_name: &String, tmp_name: &String) -> () {
+    call(format!("new -d -s {} -n {}", session_name, tmp_name));
 }
 
 pub fn split_window(target: &String, root: &Option<String>) -> () {
@@ -41,4 +40,8 @@ pub fn layout(target: &String, layout: &String) -> () {
 
 pub fn send_keys(target: &String, exec: &String) -> () {
     call(format!("send-keys -t {} '{}' KPEnter", target, exec));
+}
+
+pub fn kill_window(target: &String) -> () {
+    call(format!("kill-window -t {}", target));
 }
