@@ -19,19 +19,17 @@ pub fn new_session(session_name: &String, tmp_name: &String) -> () {
 }
 
 pub fn split_window(target: &String, root: &Option<String>) -> () {
-    if root.is_some() {
-        call(format!("split-window -t {} -c {}", target, root.clone().unwrap()));
-    } else {
-        call(format!("split-window -t {}", target));
-    }
+    call(match root {
+        &Some(ref r) => format!("split-window -t {} -c {}", target, r),
+        &None        => format!("split-window -t {}", target)
+    });
 }
 
 pub fn new_window(session_name: &String, window_name: &String, root: &Option<String>) -> () {
-    if root.is_some() {
-        call(format!("new-window -t {} -n {} -c {}", session_name, window_name, root.clone().unwrap()));
-    } else {
-        call(format!("new-window -t {} -n {}", session_name, window_name));
-    }
+    call(match root {
+        &Some(ref r) => format!("new-window -t {} -n {} -c {}", session_name, window_name, r),
+        &None        => format!("new-window -t {} -n {}", session_name, window_name)
+    });
 }
 
 pub fn layout(target: &String, layout: &String) -> () {
