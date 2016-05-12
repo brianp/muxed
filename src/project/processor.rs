@@ -1,6 +1,26 @@
+//! Processes the stack of Commands and matches them to the appropriate tmux
+/// call.
+
 use command::Command;
 use tmux;
 
+/// Processing of the commands. A simple match occurs to handle the tmux calls
+/// needed based off the command provided. The commands are processed first in,
+/// first out. So simply looping the Vec is enough to execute all needed
+/// instructions.
+///
+/// # Example
+///
+/// ```
+/// let commands: Vec<Command> = vec!(
+///   Command::Session(Session{...}),
+///   Command::Attach(Attach{...})
+/// );
+///
+/// main(&commands);
+/// ```
+///
+/// commands: The stack of commands to process.
 pub fn main(commands: &Vec<Command>) -> () {
     for c in commands {
         match c {
