@@ -45,6 +45,7 @@ fn call(command: String) -> () {
 /// let session_name = "muxed".to_string();
 /// tmux::attach(muxed);
 /// ```
+/// session_name: The active tmux session name.
 pub fn attach(session_name: &String) -> () {
     call(format!("attach -t {}", session_name));
 }
@@ -73,6 +74,10 @@ pub fn attach(session_name: &String) -> () {
 /// let tmp_window_name = random::<u16>().to_string();
 /// tmux::new_session(session_name, tmp_window_name);
 /// ```
+///
+/// session_name: The active tmux session name.
+/// tmp_name: The name for the temp initial window that is created with a new
+/// session.
 pub fn new_session(session_name: &String, tmp_name: &String) -> () {
     call(format!("new -d -s {} -n {}", session_name, tmp_name));
 }
