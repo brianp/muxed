@@ -22,31 +22,31 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
                 &Yaml::Hash(ref h)  => {
                     for (k, v) in h {
                         if v.as_hash().is_some() {
-                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name.clone(), i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
-                            commands.append(&mut pane_matcher(project_name.clone(), v, root.clone(), k.as_str().unwrap().to_string()));
+                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                            commands.append(&mut pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string()));
                         } else {
-                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name.clone(), i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
                             commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
                         }
                     }
                 },
                 &Yaml::String(ref s) => {
-                    commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name.clone(), i+1), name: s.clone(), root: root.clone()}))
+                    commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: s.clone(), root: root.clone()}))
                 },
                 &Yaml::Integer(ref s) => {
-                    commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name.clone(), i+1), name: s.to_string(), root: root.clone()}))
+                    commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: s.to_string(), root: root.clone()}))
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
         };
     };
 
-    commands.push(Command::KillWindow(KillWindow{name: format!("{}:{}", project_name.clone(), tmp_window_name.clone())}));
+    commands.push(Command::KillWindow(KillWindow{name: format!("{}:{}", project_name, tmp_window_name)}));
     commands.push(Command::Attach(Attach{name: project_name.clone()}));
     commands
 }
 
-fn pane_matcher(session: String, panes: &Yaml, root: Option<String>, window: String) -> Vec<Command> {
+fn pane_matcher(session: &String, panes: &Yaml, root: &Option<String>, window: String) -> Vec<Command> {
     let mut commands = vec!();
     let panes2 = panes["panes"].as_vec().expect("Something is wrong with panes.");
 
