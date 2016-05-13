@@ -25,20 +25,21 @@ The config file name should match your project name, and will be used to call on
 $ touch ~/.muxed/my_project.yml
 ```
 
-### 3. Copy a simple config in to your project file.
+### 3. Copy a simple config in to your project config file.
 
+Example config:
 ```yaml
 root: "~/"
 windows:
   - editor:
       layout: "main-vertical"
-      panes: ["vim", "guard"]
-  - server: "bundle exec rails s"
-  - logs: "tail -f log/development.log"
+      panes: ["vi", "ls -alh"]
+  - processes: "ls /proc"
+  - logs: "tail -f /var/log/dmesg"
 ```
 
 ```bash
-$ ./muxed project
+printf 'root: "~/"\nwindows:\n  - editor:\n      layout: "main-vertical"\n      panes: ["vi", "ls -alh"]\n  - processes: "ls /proc"\n  - logs: "tail -f /var/log/dmesg"' > ~/.muxed/my_project.yml
 ```
 
 ### 4. Compile & run Muxed for your project.
