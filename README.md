@@ -22,7 +22,7 @@ $ mkdir ~/.muxed/
 The config file name should match your project name, and will be used to call on the project in step 4.
 
 ```bash
-$ touch ~/.muxed/project.yml
+$ touch ~/.muxed/my_project.yml
 ```
 
 ### 3. Copy a simple config in to your project file.
@@ -37,15 +37,14 @@ windows:
   - logs: "tail -f log/development.log"
 ```
 
-### 4. Compile & run Muxed for your project.
-Here is where you call your project, with the same name as the config file created in step 2.
-
 ```bash
 $ ./muxed project
 ```
 
-#### With Cargo:
+### 4. Compile & run Muxed for your project.
+Here is where you call your project, with the same name as the config file created in step 2.
 
 ```bash
-$ cargo run project
+$ cargo build
+$ cargo run my_project
 ```
