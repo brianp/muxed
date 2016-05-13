@@ -38,6 +38,12 @@ windows:
   - logs: "tail -f /var/log/dmesg"
 ```
 
+This will create a new tmux session with three windows named *editor*,
+*processes* and *logs*. By default your view will be on the last window opened,
+which in this case is *logs*. The first window will have two panes split
+vertically, the left will have the editor *vi* running and the right will have a
+shell listing of your current working directory.
+
 ```bash
 printf 'root: "~/"\nwindows:\n  - editor:\n      layout: "main-vertical"\n      panes: ["vi", "ls -alh"]\n  - processes: "ls /proc"\n  - logs: "tail -f /var/log/dmesg"' > ~/.muxed/my_project.yml
 ```
