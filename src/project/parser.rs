@@ -41,7 +41,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
         };
     };
 
-    commands.push(Command::KillWindow(KillWindow{name: tmp_window_name.clone()}));
+    commands.push(Command::KillWindow(KillWindow{name: format!("{}:{}", project_name.clone(), tmp_window_name.clone())}));
     commands.push(Command::Attach(Attach{name: project_name.clone()}));
     commands
 }
