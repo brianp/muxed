@@ -50,7 +50,7 @@ pub fn main(project_name: &String) -> Vec<Yaml> {
 /// project_name: The name of the project, corresponding to the project config
 /// file.
 fn project_path(project_name: &String) -> String {
-    format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER.to_string(), project_name)
+    format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER, project_name)
 }
 
 /// Read takes in the string path for a config file and returns the contents of

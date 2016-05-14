@@ -15,7 +15,7 @@ use rand::random;
 /// project_name: The name of the project.
 pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
     let mut commands: Vec<Command> = vec!();
-    let tmp_window_name = format!("muxed_first_window_{}", random::<u16>().to_string());
+    let tmp_window_name = format!("muxed_first_window_{}", random::<u16>());
 
     // The initial session command. Contains the tmp_window_name to be closed
     // before attaching.
@@ -68,7 +68,7 @@ fn pane_matcher(session: &String, panes: &Yaml, root: &Option<String>, window: S
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes2.len()-1) {
-            commands.push(Command::Split(Split{target: format!("{}:{}.{}", session, window, i.to_string()).to_string(), root: root.clone()}));
+            commands.push(Command::Split(Split{target: format!("{}:{}.{}", session, window, i).to_string(), root: root.clone()}));
         };
         // Execute given commands in each new pane after all splits are
         // complete.
