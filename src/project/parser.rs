@@ -60,25 +60,25 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher(session: &String, panes: &Yaml, root: &Option<String>, window: String) -> Vec<Command> {
+fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_name: String) -> Vec<Command> {
     let mut commands = vec!();
-    let panes2 = panes["panes"].as_vec().expect("Something is wrong with panes.");
+    let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
-    for (i, pane) in panes2.iter().enumerate() {
+    for (i, pane) in panes.iter().enumerate() {
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
-        if i < (panes2.len()-1) {
-            commands.push(Command::Split(Split{target: format!("{}:{}.{}", session, window, i).to_string(), root: root.clone()}));
+        if i < (panes.len()-1) {
+            commands.push(Command::Split(Split{target: format!("{}:{}.{}", session, window_name, i).to_string(), root: root.clone()}));
         };
         // Execute given commands in each new pane after all splits are
         // complete.
-        commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window, i).to_string(), exec: pane.as_str().expect("Bad exec command").to_string()}));
+        commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window_name, i).to_string(), exec: pane.as_str().expect("Bad exec command").to_string()}));
     };
 
     // After all panes are split select the layout for the window
-    if panes["layout"].as_str().is_some() {
-        let layout = panes["layout"].as_str().expect("Bad layout").to_string();
-        commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window).to_string(), layout: layout}));
+    if window["layout"].as_str().is_some() {
+        let layout = window["layout"].as_str().expect("Bad layout").to_string();
+        commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window_name).to_string(), layout: layout}));
     };
 
     commands
