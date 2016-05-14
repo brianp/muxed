@@ -7,6 +7,8 @@ use std::io::prelude::*;
 use std::fs::File;
 use yaml_rust::{YamlLoader, Yaml};
 #[cfg(not(test))] use std::env::home_dir;
+#[cfg(test)] use rand::random;
+#[cfg(test)] use std::fs;
 
 pub mod parser;
 pub mod processor;
@@ -55,4 +57,22 @@ pub fn read(project_name: &String) -> Result<Vec<Yaml>, String> {
 /// Return the temp dir as the users home dir during testing.
 #[cfg(test)] fn homedir() -> Result<PathBuf, String> {
     Ok(PathBuf::from("/tmp"))
+}
+
+#[test]
+fn missing_file_returns_err() {
+    let result = read(&String::from("not_a_file"));
+    assert!(result.is_err())
+}
+
+#[test]
+fn poorly_formatted_file_returns_err() {
+    let name = format!("/tmp/{}.yml", random::<u16>());
+    let path = Path::new(&name);
+    let mut buffer = File::create(path).unwrap();
+    let _ = buffer.write(b"some bytes");
+
+    let result = read(&format!("{}", path.display()));
+    assert!(result.is_err());
+    let _ = fs::remove_file(path);
 }
