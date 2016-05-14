@@ -26,44 +26,17 @@ static MUXED_FOLDER: &'static str = "muxed";
 /// `~/.muxed/compiler.yml`.
 ///
 /// ```
-/// let yaml: Vec<Yaml> = main("compiler".to_string());
+/// let yaml: Vec<Yaml> = read("compiler".to_string());
 /// ```
 ///
 /// project_name: The name of the project, corresponding to the project config
 /// file.
-pub fn main(project_name: &String) -> Vec<Yaml> {
-    YamlLoader::load_from_str(&read(project_path(project_name))).unwrap()
-}
-
-/// Project path locates the full path of the project file as a String. It's in
-/// a string format because I had issues passing values of `Path`. `Path` would be
-/// a more appropriate type to return, alas we are here.
-///
-/// # Examples
-///
-/// ```
-/// let path: String = project_path("compiler".to_string());
-/// println!("{}", path);
-/// => "/home/vagrant/.muxed/compiler.yml"
-/// ```
-///
-/// project_name: The name of the project, corresponding to the project config
-/// file.
-fn project_path(project_name: &String) -> String {
-    format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER, project_name)
-}
-
-/// Read takes in the string path for a config file and returns the contents of
-/// the file. Again we'de rather have a `Path` passed in to the function but we
-/// I had issues with passing `Path` references or values.
-///
-/// config_str: The string path to the config file.
-fn read(config_str: String) -> String {
-    let path = Path::new(&config_str);
-    let mut s = String::new();
-    let _ = File::open(path).expect("Config Read error").read_to_string(&mut s);
-
-    return s
+pub fn read(project_name: &String) -> Vec<Yaml> {
+    let config = format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER, project_name);
+    let path = Path::new(&config);
+    let mut contents = String::new();
+    let _ = File::open(path).expect("Config Read error").read_to_string(&mut contents);
+    YamlLoader::load_from_str(&contents).expect("Yaml was not parsed")
 }
 
 /// Return the users homedir as a string.
@@ -77,11 +50,4 @@ fn read(config_str: String) -> String {
 /// Return the temp dir as the users home dir during testing.
 #[cfg(test)] fn homedir_string() -> String {
     String::from("/tmp")
-}
-
-#[test]
-pub fn project_path_returns_muxed_in_homedir() {
-    let path = format!("{}", project_path(&"test".to_string()));
-    let new  = format!("{}", Path::new("/tmp/.muxed/test.yml").display());
-    assert_eq!(path, new)
 }

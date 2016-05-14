@@ -40,7 +40,7 @@ pub fn main() {
     //let program = args[0].clone();
     let input = args[1].clone();
 
-    let yaml     = project::main(&input);
+    let yaml     = project::read(&input);
     let commands = parser::main(&yaml, &input);
     processor::main(&commands)
 }
