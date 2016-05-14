@@ -13,6 +13,20 @@ mod project;
 use project::parser;
 use project::processor;
 
+#[macro_export]
+macro_rules! try_or_err (
+    ($expr: expr) => ({
+        match $expr {
+            Ok(val) => val,
+            Err(e) => {
+              println!("Muxed ran in to a problem:");
+              println!("{}", e);
+              return
+            }
+        }
+    })
+);
+
 /// The main execution method.
 /// Currently accepts a single option. The option represents a configuration
 /// file in the same naming format. Given a project file name `projectName.yml`
