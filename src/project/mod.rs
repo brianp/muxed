@@ -2,7 +2,7 @@
 /// users home directory. Finding the desired config files, and reading the
 /// configs in.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::io::prelude::*;
 use std::fs::File;
 use yaml_rust::{YamlLoader, Yaml};
@@ -32,7 +32,8 @@ static MUXED_FOLDER: &'static str = "muxed";
 /// project_name: The name of the project, corresponding to the project config
 /// file.
 pub fn read(project_name: &String) -> Vec<Yaml> {
-    let config = format!("{}/.{}/{}.yml", homedir_string(), &MUXED_FOLDER, project_name);
+    let home = try!(homedir().map_err(|e| e));
+    let config = format!("{}/.{}/{}.yml", home.display(), &MUXED_FOLDER, project_name);
     let path = Path::new(&config);
     let mut contents = String::new();
     let _ = File::open(path).expect("Config Read error").read_to_string(&mut contents);
@@ -40,14 +41,14 @@ pub fn read(project_name: &String) -> Vec<Yaml> {
 }
 
 /// Return the users homedir as a string.
-#[cfg(not(test))] fn homedir_string() -> String {
+#[cfg(not(test))] fn homedir() -> Result<PathBuf, String>{
     match home_dir() {
-        Some(dir) => format!("{}", dir.display()),
-        None      => panic!("Impossible to get your home dir!")
+        Some(dir) => Ok(dir),
+        None      => Err(String::from("We couldn't find your home directory."))
     }
 }
 
 /// Return the temp dir as the users home dir during testing.
-#[cfg(test)] fn homedir_string() -> String {
-    String::from("/tmp")
+#[cfg(test)] fn homedir() -> Result<PathBuf, String> {
+    Ok(PathBuf::from("/tmp"))
 }
