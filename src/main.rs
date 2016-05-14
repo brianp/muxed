@@ -52,9 +52,9 @@ macro_rules! try_or_err (
 pub fn main() {
     let args: Vec<String> = env::args().collect();
     //let program = args[0].clone();
-    let input = args[1].clone();
+    let input = &args[1];
 
-    let yaml     = project::read(&input);
-    let commands = parser::main(&yaml, &input);
+    let yaml = try_or_err!(project::read(input));
+    let commands = parser::main(&yaml, input);
     processor::main(&commands)
 }

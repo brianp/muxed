@@ -26,18 +26,22 @@ static MUXED_FOLDER: &'static str = "muxed";
 /// `~/.muxed/compiler.yml`.
 ///
 /// ```
-/// let yaml: Vec<Yaml> = read("compiler".to_string());
+/// let yaml: Result<Vec<Yaml>, String> = read("compiler".to_string());
 /// ```
 ///
 /// project_name: The name of the project, corresponding to the project config
 /// file.
-pub fn read(project_name: &String) -> Vec<Yaml> {
+pub fn read(project_name: &String) -> Result<Vec<Yaml>, String> {
     let home = try!(homedir().map_err(|e| e));
     let config = format!("{}/.{}/{}.yml", home.display(), &MUXED_FOLDER, project_name);
     let path = Path::new(&config);
+
+    let mut file = try!(File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}`. Received error: {}", project_name, e.to_string())));
     let mut contents = String::new();
-    let _ = File::open(path).expect("Config Read error").read_to_string(&mut contents);
-    YamlLoader::load_from_str(&contents).expect("Yaml was not parsed")
+    try!(file.read_to_string(&mut contents).map_err(|e| e.to_string()));
+
+    let parsed_yaml = try!(YamlLoader::load_from_str(&contents).map_err(|e| e.to_string()));
+    Ok(parsed_yaml)
 }
 
 /// Return the users homedir as a string.
