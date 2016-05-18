@@ -55,6 +55,6 @@ pub fn main() {
     let input = &args[1];
 
     let yaml = try_or_err!(project::read(input));
-    let commands = parser::main(&yaml, input);
+    let commands = try_or_err!(parser::main(&yaml, input));
     processor::main(&commands)
 }

@@ -13,7 +13,7 @@ use rand::random;
 ///
 /// yaml_string: The parsed yaml from the config file.
 /// project_name: The name of the project.
-pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
+pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
     let tmp_window_name = format!("muxed_first_window_{}", random::<u16>());
 
@@ -35,7 +35,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
                     for (k, v) in h {
                         if v.as_hash().is_some() {
                             commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
-                            commands.append(&mut pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string()));
+                            commands.append(&mut try!(pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string())));
                         } else {
                             commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
                             commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
@@ -55,12 +55,12 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Vec<Command> {
 
     commands.push(Command::KillWindow(KillWindow{name: format!("{}:{}", project_name, tmp_window_name)}));
     commands.push(Command::Attach(Attach{name: project_name.clone()}));
-    commands
+    Ok(commands)
 }
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_name: String) -> Vec<Command> {
+fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_name: String) -> Result<Vec<Command>, String> {
     let mut commands = vec!();
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
@@ -81,7 +81,7 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
         commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window_name).to_string(), layout: layout}));
     };
 
-    commands
+    Ok(commands)
 }
 
 #[test]
@@ -90,7 +90,7 @@ pub fn windows_defined_as_array_has_6_commands() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    assert_eq!(main(&yaml, &"muxed".to_string()).len(), 6)
+    assert_eq!(main(&yaml, &"muxed".to_string()).unwrap().len(), 6)
 }
 
 #[test]
@@ -99,7 +99,7 @@ pub fn windows_defined_as_array_has_1_session() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Session(_) => true,
         _ => false
     }).collect();
@@ -113,7 +113,7 @@ pub fn windows_defined_as_array_has_3_windows() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -127,7 +127,7 @@ pub fn windows_defined_as_array_has_1_attach() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Attach(_) => true,
         _ => false
     }).collect();
@@ -141,7 +141,7 @@ pub fn windows_with_integer_names() {
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    assert_eq!(main(&yaml, &"muxed".to_string()).len(), 6)
+    assert_eq!(main(&yaml, &"muxed".to_string()).unwrap().len(), 6)
 }
 
 #[test]
@@ -153,7 +153,7 @@ windows:
   - git: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string());
+    let commands = main(&yaml, &"muxed".to_string()).unwrap();
     assert_eq!(commands.len(), 9)
 }
 
@@ -166,7 +166,7 @@ windows:
       panes: ['vim', 'guard']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string());
+    let commands = main(&yaml, &"muxed".to_string()).unwrap();
     assert_eq!(commands.len(), 8)
 }
 
@@ -180,7 +180,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Split(_) => true,
         _ => false
     }).collect();
@@ -198,7 +198,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Layout(_) => true,
         _ => false
     }).collect();
@@ -216,7 +216,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -234,29 +234,10 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
         &Command::Session(_) => true,
         _ => false
     }).collect();
 
     assert_eq!(remains.len(), 1)
 }
-
-//#[test]
-//pub fn panes_command_execs_array() {
-//    let s = "---
-//windows:
-//  - editor:
-//      layout: 'main-vertical'
-//      panes: ['vim', 'guard']
-//";
-//    let yaml = YamlLoader::load_from_str(s).unwrap();
-//    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).into_iter().filter(|x| match x {
-//      &Command::SendKeys(_) => true,
-//      _ => false
-//    }).collect();
-//
-//    assert_eq!(remains.len(), 2);
-//    assert_eq!(remains[0].exec, "vim");
-//    assert_eq!(remains[1].exec, "guard")
-//}
