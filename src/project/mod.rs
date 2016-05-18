@@ -69,10 +69,27 @@ fn missing_file_returns_err() {
 fn poorly_formatted_file_returns_err() {
     let name = format!("/tmp/{}.yml", random::<u16>());
     let path = Path::new(&name);
+    let _ = fs::create_dir(Path::new("/tmp/.muxed/"));
     let mut buffer = File::create(path).unwrap();
     let _ = buffer.write(b"some bytes");
 
     let result = read(&format!("{}", path.display()));
-    assert!(result.is_err());
     let _ = fs::remove_file(path);
+    assert!(result.is_err());
+}
+
+#[test]
+fn good_file_returns_ok() {
+    let name = random::<u16>();
+    let name1 = format!("/tmp/.muxed/{}.yml", name);
+    let path = Path::new(&name1);
+    let _ = fs::create_dir(Path::new("/tmp/.muxed/"));
+    let mut buffer = File::create(path).unwrap();
+    let _ = buffer.write(b"---
+windows: ['cargo', 'vim', 'git']
+");
+
+    let result = read(&format!("{}", name));
+    let _ = fs::remove_file(path);
+    assert!(result.is_ok());
 }
