@@ -1,5 +1,4 @@
 [package]
-
 name = "muxed"
 version = "0.2.0"
 authors = ["Brian Pearce"]
