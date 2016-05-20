@@ -12,6 +12,8 @@ mod open {
     use std::path::{Path, PathBuf};
     use std::io::prelude::*;
     use helpers::*;
+    use std::thread::sleep;
+    use std::time::Duration;
 
     fn setup(contents: &'static [u8]) -> (String, PathBuf) {
         let project_name = format!("muxed_int_test_{}", random::<u16>());
@@ -36,6 +38,11 @@ mod open {
     fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name);
+
+        // If this sleep fixes the problem, put it in a loop and remove the
+        // sleep, in favour of waiting.
+        let duration = Duration::new(1, 0);
+        sleep(duration);
         let session = session_object(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session
