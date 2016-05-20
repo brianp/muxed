@@ -6,43 +6,36 @@ extern crate rand;
 mod helpers;
 
 mod open {
-    use rand::random;
+    use rand::{random};
     use std::fs::File;
     use std::fs;
     use std::path::{Path, PathBuf};
     use std::io::prelude::*;
     use helpers::*;
-    use std::thread::sleep;
-    use std::time::Duration;
 
     fn setup(contents: &'static [u8]) -> (String, PathBuf) {
         let project_name = format!("muxed_int_test_{}", random::<u16>());
-        let home_dir = homedir().unwrap();
-        let muxed_dir = format!("{}/.muxed/", home_dir.display());
-        let project_file = format!("{}/{}.yml", muxed_dir, project_name);
+        let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
+        let project_path = PathBuf::from(&project_file);
 
-        let muxed_path = Path::new(&muxed_dir);
-        if !muxed_path.exists() { println!("{:?}", fs::create_dir(&muxed_dir)) };
+        let muxed_path = project_path.parent().unwrap();
+        if !muxed_path.exists() { println!("{:?}", fs::create_dir(muxed_path)) };
 
-        let mut buffer = File::create(&project_file).unwrap();
+        let mut buffer = File::create(&project_path).unwrap();
         let _ = buffer.write(contents);
 
-        (project_name, PathBuf::from(&project_file))
+        (project_name, project_path.clone())
     }
 
     fn cleanup(project_name: &String, config_path: &PathBuf) -> () {
         let _ = fs::remove_file(config_path);
+        let _ = fs::remove_dir(config_path.parent().unwrap());
         kill_session(&project_name);
     }
 
     fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
-        open_muxed(&project_name);
-
-        // If this sleep fixes the problem, put it in a loop and remove the
-        // sleep, in favour of waiting.
-        let duration = Duration::new(1, 0);
-        sleep(duration);
+        open_muxed(&project_name, config_path.parent().unwrap());
         let session = session_object(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session

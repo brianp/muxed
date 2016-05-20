@@ -33,9 +33,12 @@ static MUXED_FOLDER: &'static str = "muxed";
 ///
 /// project_name: The name of the project, corresponding to the project config
 /// file.
-pub fn read(project_name: &String) -> Result<Vec<Yaml>, String> {
+pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yaml>, String> {
     let home = try!(homedir().map_err(|e| e));
-    let config = format!("{}/.{}/{}.yml", home.display(), &MUXED_FOLDER, project_name);
+    let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
+    let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
+
+    let config = format!("{}/{}.yml", muxed_dir, project_name);
     let path = Path::new(&config);
 
     let mut file = try!(File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}`. Received error: {}", project_name, e.to_string())));
@@ -61,7 +64,7 @@ pub fn read(project_name: &String) -> Result<Vec<Yaml>, String> {
 
 #[test]
 fn missing_file_returns_err() {
-    let result = read(&String::from("not_a_file"));
+    let result = read(&String::from("not_a_file"), &None);
     assert!(result.is_err())
 }
 
@@ -74,7 +77,7 @@ fn poorly_formatted_file_returns_err() {
     let mut buffer = File::create(path).unwrap();
     let _ = buffer.write(b"mix: [1,2,3]: muxed");
 
-    let result = read(&format!("{}", name));
+    let result = read(&format!("{}", name), &None);
     let _ = fs::remove_file(path);
     assert!(result.is_err());
 }
@@ -90,7 +93,7 @@ fn good_file_returns_ok() {
 windows: ['cargo', 'vim', 'git']
 ");
 
-    let result = read(&format!("{}", name));
+    let result = read(&format!("{}", name), &None);
     let _ = fs::remove_file(path);
     assert!(result.is_ok());
 }

@@ -61,6 +61,12 @@ pub fn main() {
                                .short("d")
                                .multiple(false)
                                .help("If you want to create a muxed session without connecting to it"))
+                          .arg(Arg::with_name("PROJECT_DIR")
+                               .short("-p")
+                               .multiple(false)
+                               .value_name("PROJECT_DIR")
+                               .takes_value(true)
+                               .help("The directory your project config files live in. Defaults to ~/.muxed/"))
                           //.subcommand(SubCommand::with_name("new")
                           //            .about("Create a new project file"))
                           //.subcommand(SubCommand::with_name("edit")
@@ -69,8 +75,9 @@ pub fn main() {
 
     let input = matches.value_of("PROJECT_NAME").unwrap().to_string();
     let daemonize = matches.is_present("daemonize");
+    let muxed_dir = matches.value_of("PROJECT_DIR");
 
-    let yaml = try_or_err!(project::read(&input));
+    let yaml = try_or_err!(project::read(&input, &muxed_dir));
     let commands = try_or_err!(parser::main(&yaml, &input, daemonize));
     processor::main(&commands)
 }

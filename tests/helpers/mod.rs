@@ -1,15 +1,7 @@
 //! The integration suite helpers.
 
 use std::process::Command;
-use std::path::PathBuf;
-use std::env::home_dir;
-
-pub fn homedir() -> Result<PathBuf, String>{
-    match home_dir() {
-        Some(dir) => Ok(dir),
-        None      => Err(String::from("We couldn't find your home directory."))
-    }
-}
+use std::path::{Path, PathBuf};
 
 /// List windows will give details about the active sessions in testing.
 /// target: A string represented by the {named_session}:{named_window}
@@ -24,12 +16,19 @@ pub fn list_windows(target: &String) -> String {
     String::from_utf8_lossy(&output.stdout).into_owned()
 }
 
-pub fn open_muxed(project: &String) -> () {
-    Command::new("./target/debug/muxed")
+pub fn open_muxed(project: &String, project_root: &Path) -> () {
+    println!("root: {}", project_root.display());
+    let output = Command::new("./target/debug/muxed")
         .arg("-d")
-        .arg(format!("{}", project))
+        .arg("-p")
+        .arg(format!("{}", project_root.display()))
+        .arg(project)
         .output()
         .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+
+    println!("status: {}", output.status);
+    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
+    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
 pub fn kill_session(target: &String) -> () {
