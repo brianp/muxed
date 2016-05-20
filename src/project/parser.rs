@@ -13,7 +13,7 @@ use rand::random;
 ///
 /// yaml_string: The parsed yaml from the config file.
 /// project_name: The name of the project.
-pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Result<Vec<Command>, String> {
+pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
     let tmp_window_name = format!("muxed_first_window_{}", random::<u16>());
 
@@ -54,7 +54,8 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String) -> Result<Vec<Comman
     };
 
     commands.push(Command::KillWindow(KillWindow{name: format!("{}:{}", project_name, tmp_window_name)}));
-    commands.push(Command::Attach(Attach{name: project_name.clone()}));
+
+    if !daemonize { commands.push(Command::Attach(Attach{name: project_name.clone()})) };
     Ok(commands)
 }
 

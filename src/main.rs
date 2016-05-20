@@ -10,6 +10,7 @@ mod project;
 
 use project::parser;
 use project::processor;
+use clap::{Arg, App};
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -48,8 +49,28 @@ macro_rules! try_or_err (
 /// $ ./muxed projectName
 /// ```
 pub fn main() {
+    let matches = App::new("Muxed")
+                          .version("0.2.0")
+                          .author("Brian Pearce")
+                          .about("Another TMUX window manager")
+                          .arg(Arg::with_name("PROJECT_NAME")
+                               .help("The name of your poject to open")
+                               .required(true)
+                               .index(1))
+                          .arg(Arg::with_name("daemonize")
+                               .short("d")
+                               .multiple(false)
+                               .help("If you want to create a muxed session without connecting to it"))
+                          //.subcommand(SubCommand::with_name("new")
+                          //            .about("Create a new project file"))
+                          //.subcommand(SubCommand::with_name("edit")
+                          //            .about("Edit a project file"))
+                          .get_matches();
 
-    let yaml = try_or_err!(project::read(input));
-    let commands = try_or_err!(parser::main(&yaml, input));
+    let input = matches.value_of("PROJECT_NAME").unwrap().to_string();
+    let daemonize = matches.is_present("daemonize");
+
+    let yaml = try_or_err!(project::read(&input));
+    let commands = try_or_err!(parser::main(&yaml, &input, daemonize));
     processor::main(&commands)
 }
