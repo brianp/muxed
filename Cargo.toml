@@ -4,7 +4,7 @@ version = "0.2.0"
 authors = ["Brian Pearce"]
 
 [dependencies]
-getopts   = "0.2"
+clap      = "2.5.1"
 libc      = "0.2.10"
 yaml-rust = "0.3.2"
 rand      = "0.3"

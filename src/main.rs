@@ -1,10 +1,8 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-extern crate getopts;
+extern crate clap;
 extern crate libc;
 extern crate yaml_rust;
 extern crate rand;
-
-use std::env;
 
 mod tmux;
 mod command;
@@ -50,9 +48,6 @@ macro_rules! try_or_err (
 /// $ ./muxed projectName
 /// ```
 pub fn main() {
-    let args: Vec<String> = env::args().collect();
-    //let program = args[0].clone();
-    let input = &args[1];
 
     let yaml = try_or_err!(project::read(input));
     let commands = try_or_err!(parser::main(&yaml, input));
