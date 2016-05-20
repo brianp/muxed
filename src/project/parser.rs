@@ -91,7 +91,7 @@ pub fn windows_defined_as_array_has_6_commands() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    assert_eq!(main(&yaml, &"muxed".to_string()).unwrap().len(), 6)
+    assert_eq!(main(&yaml, &"muxed".to_string(), false).unwrap().len(), 6)
 }
 
 #[test]
@@ -100,7 +100,7 @@ pub fn windows_defined_as_array_has_1_session() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Session(_) => true,
         _ => false
     }).collect();
@@ -114,7 +114,7 @@ pub fn windows_defined_as_array_has_3_windows() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -128,7 +128,7 @@ pub fn windows_defined_as_array_has_1_attach() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Attach(_) => true,
         _ => false
     }).collect();
@@ -142,7 +142,7 @@ pub fn windows_with_integer_names() {
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    assert_eq!(main(&yaml, &"muxed".to_string()).unwrap().len(), 6)
+    assert_eq!(main(&yaml, &"muxed".to_string(), false).unwrap().len(), 6)
 }
 
 #[test]
@@ -154,7 +154,7 @@ windows:
   - git: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string()).unwrap();
+    let commands = main(&yaml, &"muxed".to_string(), false).unwrap();
     assert_eq!(commands.len(), 9)
 }
 
@@ -167,7 +167,7 @@ windows:
       panes: ['vim', 'guard']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string()).unwrap();
+    let commands = main(&yaml, &"muxed".to_string(), false).unwrap();
     assert_eq!(commands.len(), 8)
 }
 
@@ -181,7 +181,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Split(_) => true,
         _ => false
     }).collect();
@@ -199,7 +199,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Layout(_) => true,
         _ => false
     }).collect();
@@ -217,7 +217,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -235,7 +235,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string()).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Session(_) => true,
         _ => false
     }).collect();
