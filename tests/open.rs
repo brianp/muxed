@@ -44,7 +44,7 @@ mod open {
     #[test]
     fn opens_3_windows_from_array() {
         let contents = b"---
-windows: ['cargo', 'vim', 'git']
+windows: ['vi', 'ls', 'git']
 ";
         let session = test_with_contents(contents);
         assert_eq!(session.num_of_windows, 3)
@@ -56,7 +56,7 @@ windows: ['cargo', 'vim', 'git']
 windows:
   - editor:
       layout: 'main-vertical'
-      panes: ['vim', 'guard']
+      panes: ['vi', 'ls']
   - stuff: ''
 ";
         let session = test_with_contents(contents);
@@ -66,7 +66,7 @@ windows:
     #[test]
     fn opens_3_windows_with_integer_names() {
         let contents = b"---
-windows: [1, 'vim', 3]
+windows: [1, 'ls', 3]
 ";
         let session = test_with_contents(contents);
         assert_eq!(session.num_of_windows, 3)
