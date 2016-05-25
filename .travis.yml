@@ -8,19 +8,33 @@ rust:
 matrix:
   allow_failures:
     - rust: nightly
+    - env: TMUX_VERSION=master
+    - env: TMUX_VERSION=1.9a
 
 env:
-  - ARCH=x86_64
-  - ARCH=i686
+  - ARCH=x86_64 TMUX_VERSION=2.2
+  - ARCH=i686 TMUX_VERSION=2.2
+  - TMUX_VERSION=master
+  - TMUX_VERSION=2.2
+  - TMUX_VERSION=2.1
+  - TMUX_VERSION=2.0
+  - TMUX_VERSION=1.9a
+  - TMUX_VERSION=1.8
 
 os:
   - linux
   #- osx
 
-addons:
-  apt:
-    packages:
-      - tmux
+before_script:
+  - sudo apt-get remove tmux
+  - git clone https://github.com/tmux/tmux.git tmux
+  - cd tmux
+  - git checkout $TMUX_VERSION
+  - sh autogen.sh
+  - ./configure --prefix=$HOME/tmux && make && make install
+  - export PATH=$PATH:$HOME/tmux/bin
+  - cd ..
+  - tmux -V
 
 notifications:
   email: false
