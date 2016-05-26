@@ -2,6 +2,7 @@
 
 extern crate libc;
 extern crate rand;
+extern crate regex;
 
 mod helpers;
 
@@ -9,7 +10,7 @@ mod open {
     use rand::{random};
     use std::fs::File;
     use std::fs;
-    use std::path::{Path, PathBuf};
+    use std::path::PathBuf;
     use std::io::prelude::*;
     use helpers::*;
 
@@ -36,7 +37,7 @@ mod open {
     fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name, config_path.parent().unwrap());
-        let session = session_object(&list_windows(&project_name.to_string()));
+        let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session
     }
@@ -70,5 +71,36 @@ windows: [1, 'ls', 3]
 ";
         let session = test_with_contents(contents);
         assert_eq!(session.num_of_windows, 3)
+    }
+
+    #[test]
+    fn single_window_has_2_panes() {
+        let contents = b"---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['vi', 'ls']
+";
+        let session = test_with_contents(contents);
+        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
+        assert_eq!(num, 2)
+    }
+
+    #[test]
+    fn multiple_windows_with_panes() {
+        let contents = b"---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['vi', 'ls']
+  - tests:
+      layout: 'main-vertical'
+      panes: ['vi', 'ls', 'ls']
+";
+        let session = test_with_contents(contents);
+        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
+        let num1 = session.windows.get("tests").unwrap().get("Panes").unwrap().to_owned();
+        assert_eq!(num, 2);
+        assert_eq!(num1, 3)
     }
 }
