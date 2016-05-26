@@ -51,7 +51,7 @@ pub struct TmuxSession {
 
 impl TmuxSession {
     pub fn from_string(results: &String) -> TmuxSession {
-        let window_name = Regex::new(r": (\w*)[$\*-]? \(").unwrap();
+        let window_name = Regex::new(r":\s(\w*)[$\*-]?\s+\(").unwrap();
 
         let lines: Vec<&str> = results.split("\n").collect();
         let (_, window_lines) = lines.split_last().unwrap();
@@ -87,30 +87,71 @@ impl TmuxSession {
 
 #[test]
 fn count_panes_returns_two() {
-  let num = TmuxSession::count_panes("1: ssh (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-  assert_eq!(num, 2)
+    let num = TmuxSession::count_panes("1: ssh (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+    assert_eq!(num, 2)
 }
 
 #[test]
 fn count_panes_returns_one() {
-  let num = TmuxSession::count_panes("1: ssh (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-  assert_eq!(num, 1)
+    let num = TmuxSession::count_panes("1: ssh (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+    assert_eq!(num, 1)
 }
 
 #[test]
-fn count_with_active_previous_flag() {
-  let num = TmuxSession::count_panes("1: ssh- (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-  assert_eq!(num, 2)
+fn parses_with_trailing_whitespace_after_window_name() {
+    let config = "1: ssh  (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let session = TmuxSession::from_string(&config.to_string());
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    assert_eq!(session.num_of_windows, 1);
+    assert_eq!(panes, 2)
 }
 
 #[test]
-fn count_with_active_dollar_sign_flag() {
-  let num = TmuxSession::count_panes("1: ssh$ (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-  assert_eq!(num, 2)
+fn parses_with_previous_flag() {
+    let config = "1: ssh- (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let session = TmuxSession::from_string(&config.to_string());
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    assert_eq!(session.num_of_windows, 1);
+    assert_eq!(panes, 2)
 }
 
 #[test]
-fn count_with_active_window_flag() {
-  let num = TmuxSession::count_panes("1: ssh* (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-  assert_eq!(num, 2)
+fn parses_with_dollar_sign_flag() {
+    let config = "1: ssh$ (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let session = TmuxSession::from_string(&config.to_string());
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    assert_eq!(session.num_of_windows, 1);
+    assert_eq!(panes, 2)
+}
+
+#[test]
+fn parses_with_window_flag() {
+    let config = "1: ssh* (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let session = TmuxSession::from_string(&config.to_string());
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    assert_eq!(session.num_of_windows, 1);
+    assert_eq!(panes, 2)
+}
+
+#[test]
+fn count_three_windows() {
+    let config = "1: ssh  (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0
+                  2: vim- (1 panes) [173x42] [layout b5be,173x42,0,0,1] @1
+                  3: bash* (2 panes) [173x42] [layout b5bf,173x42,0,0,2] @2 (active)\n";
+    let num = TmuxSession::from_string(&config.to_string()).num_of_windows;
+    assert_eq!(num, 3)
+}
+
+#[test]
+fn count_four_total_panes() {
+    let config = "1: ssh  (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0
+                  2: vim- (1 panes) [173x42] [layout b5be,173x42,0,0,1] @1
+                  3: bash* (2 panes) [173x42] [layout b5bf,173x42,0,0,2] @2 (active)\n";
+    let session = TmuxSession::from_string(&config.to_string());
+    let num = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    let num1 = session.windows.get("vim").unwrap().get("Panes").unwrap().to_owned();
+    let num2 = session.windows.get("bash").unwrap().get("Panes").unwrap().to_owned();
+    assert_eq!(num.to_owned(), 1);
+    assert_eq!(num1.to_owned(), 1);
+    assert_eq!(num2.to_owned(), 2)
 }
