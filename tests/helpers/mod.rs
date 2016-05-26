@@ -84,3 +84,33 @@ impl TmuxSession {
         usize::from_str(num).unwrap()
     }
 }
+
+#[test]
+fn count_panes_returns_two() {
+  let num = TmuxSession::count_panes("1: ssh (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+  assert_eq!(num, 2)
+}
+
+#[test]
+fn count_panes_returns_one() {
+  let num = TmuxSession::count_panes("1: ssh (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+  assert_eq!(num, 1)
+}
+
+#[test]
+fn counts_with_active_previous_flag() {
+  let num = TmuxSession::count_panes("1: ssh- (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+  assert_eq!(num, 2)
+}
+
+#[test]
+fn count_with_active_dollar_sign_flag() {
+  let num = TmuxSession::count_panes("1: ssh$ (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+  assert_eq!(num, 2)
+}
+
+#[test]
+fn count_with_active_window_flag() {
+  let num = TmuxSession::count_panes("1: ssh* (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+  assert_eq!(num, 2)
+}
