@@ -1,3 +1,5 @@
+.PHONY : clean doc test build
+
 clean:
 	cargo clean
 
@@ -14,3 +16,4 @@ help:
 	@echo doc: create public doc
 	@echo clean: remove target folder
 	@echo test: run the spec_suite
+	@echo build: build the project
