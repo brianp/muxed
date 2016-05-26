@@ -41,7 +41,7 @@ pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yam
     let config = format!("{}/{}.yml", muxed_dir, project_name);
     let path = Path::new(&config);
 
-    let mut file = try!(File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}`. Received error: {}", project_name, e.to_string())));
+    let mut file = try!(File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, default_dir, e.to_string())));
     let mut contents = String::new();
     try!(file.read_to_string(&mut contents).map_err(|e| e.to_string()));
 
