@@ -16,8 +16,6 @@ matrix:
     - rust: nightly
       env: TMUX_VERSION=2.1
     - rust: nightly
-      env: TMUX_VERSION=2.2
-    - rust: nightly
       env: TMUX_VERSION=2.0
     - rust: nightly
       env: TMUX_VERSION=1.9a
