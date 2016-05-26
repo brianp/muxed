@@ -1,7 +1,10 @@
 //! The integration suite helpers.
 
+use regex::Regex;
 use std::process::Command;
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use std::collections::HashMap;
+use std::str::FromStr;
 
 /// List windows will give details about the active sessions in testing.
 /// target: A string represented by the {named_session}:{named_window}
@@ -40,12 +43,44 @@ pub fn kill_session(target: &String) -> () {
         .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 }
 
+#[derive(Debug)]
 pub struct TmuxSession {
     pub num_of_windows: usize,
+    pub windows: HashMap<String, HashMap<String, usize>>
 }
 
-pub fn session_object(results: &String) -> TmuxSession {
-    let lines: Vec<&str> = results.split("\n").collect();
-    let (_, window_lines) = lines.split_last().unwrap();
-    TmuxSession{num_of_windows: window_lines.len()}
+impl TmuxSession {
+    pub fn from_string(results: &String) -> TmuxSession {
+        let window_name = Regex::new(r": (\w*)[$\*-]? \(").unwrap();
+
+        let lines: Vec<&str> = results.split("\n").collect();
+        let (_, window_lines) = lines.split_last().unwrap();
+
+        let mut windows: HashMap<String, HashMap<String, usize>> = HashMap::new();
+        let mut h = HashMap::new();
+
+        for line in window_lines {
+            for cap in window_name.captures_iter(line) {
+                let name = cap.at(1).unwrap();
+                h.insert("Panes".to_string(), TmuxSession::count_panes(line));
+                windows.insert(name.to_string(), h.clone());
+            }
+        }
+
+        TmuxSession {
+          num_of_windows: window_lines.len(),
+          windows: windows
+        }
+    }
+
+    pub fn count_panes(line: &str) -> usize {
+        let panes = Regex::new(r"\((\d*) panes\)").unwrap();
+        let mut num: &str = "";
+
+        for cap in panes.captures_iter(line) {
+            num = cap.at(1).unwrap_or("0");
+        }
+
+        usize::from_str(num).unwrap()
+    }
 }
