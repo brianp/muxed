@@ -44,8 +44,9 @@ which in this case is *logs*. The first window will have two panes split
 vertically, the left will have the editor *vi* running and the right will have a
 shell listing of your current working directory.
 
+A one liner for creating the above config:
 ```bash
-printf 'root: "~/"\nwindows:\n  - editor:\n      layout: "main-vertical"\n      panes: ["vi", "ls -alh"]\n  - processes: "ls /proc"\n  - logs: "tail -f /var/log/dmesg"' > ~/.muxed/my_project.yml
+$ printf 'root: "~/"\nwindows:\n  - editor:\n      layout: "main-vertical"\n      panes: ["vi", "ls -alh"]\n  - processes: "ls /proc"\n  - logs: "tail -f /var/log/dmesg"' > ~/.muxed/my_project.yml
 ```
 
 ### 4. Compile & run Muxed for your project.
@@ -55,3 +56,27 @@ Here is where you call your project, with the same name as the config file creat
 $ cargo build
 $ cargo run my_project
 ```
+
+## Usage Options
+
+```shell
+USAGE:
+    muxed [FLAGS] [OPTIONS] <PROJECT_NAME>
+
+FLAGS:
+    -d               If you want to create a muxed session without connecting to it
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+
+OPTIONS:
+    -p <PROJECT_DIR>        The directory your project config files live in. Defaults to ~/.muxed/
+
+ARGS:
+    <PROJECT_NAME>    The name of your poject to open
+```
+
+## Inspiration
+This project has been inspired by the work done on the [tmuxinator](https://github.com/tmuxinator/tmuxinator) project. Check it out for a `ruby` based tmux project management solution.
+
+## Copyright
+Copyright (c) 2014-2016 Brian Pearce. See LICENSE for further details.
