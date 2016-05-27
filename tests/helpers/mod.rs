@@ -151,7 +151,7 @@ fn count_four_total_panes() {
     let num = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
     let num1 = session.windows.get("vim").unwrap().get("Panes").unwrap().to_owned();
     let num2 = session.windows.get("bash").unwrap().get("Panes").unwrap().to_owned();
-    assert_eq!(num.to_owned(), 1);
-    assert_eq!(num1.to_owned(), 1);
-    assert_eq!(num2.to_owned(), 2)
+    assert_eq!(num, 1);
+    assert_eq!(num1, 1);
+    assert_eq!(num2, 2)
 }
