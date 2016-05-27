@@ -50,7 +50,7 @@ macro_rules! try_or_err (
 /// ```
 pub fn main() {
     let matches = App::new("Muxed")
-                          .version("0.2.1")
+                          .version("0.2.2")
                           .author("Brian Pearce")
                           .about("Another TMUX window manager")
                           .arg(Arg::with_name("PROJECT_NAME")
