@@ -50,9 +50,9 @@ macro_rules! try_or_err (
 /// ```
 pub fn main() {
     let matches = App::new("Muxed")
-                          .version("0.2.2")
+                          .version(env!("CARGO_PKG_VERSION"))
                           .author("Brian Pearce")
-                          .about("Another TMUX window manager")
+                          .about("Another TMUX project manager")
                           .arg(Arg::with_name("PROJECT_NAME")
                                .help("The name of your poject to open")
                                .required(true)
