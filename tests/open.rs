@@ -103,4 +103,29 @@ windows:
         assert_eq!(num, 2);
         assert_eq!(num1, 3)
     }
+
+    #[test]
+    fn window_with_empty_command_is_valid() {
+        let contents = b"---
+windows:
+  - editor:
+";
+        let session = test_with_contents(contents);
+        assert_eq!(session.num_of_windows, 1)
+    }
+
+    #[test]
+    fn panes_with_empty_commands_are_valid() {
+        let contents = b"---
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes:
+        -
+        -
+";
+        let session = test_with_contents(contents);
+        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
+        assert_eq!(num, 2)
+    }
 }

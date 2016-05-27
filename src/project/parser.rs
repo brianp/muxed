@@ -38,7 +38,10 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                             commands.append(&mut try!(pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string())));
                         } else {
                             commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
-                            commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().expect("Bad exec command").to_string()}));
+
+                            if v.as_str().is_some() {
+                                commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().unwrap().to_string()}));
+                            }
                         }
                     }
                 },
@@ -73,7 +76,10 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
         };
         // Execute given commands in each new pane after all splits are
         // complete.
-        commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window_name, i).to_string(), exec: pane.as_str().expect("Bad exec command").to_string()}));
+
+        if pane.as_str().is_some() {
+            commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window_name, i).to_string(), exec: pane.as_str().unwrap().to_string()}));
+        }
     };
 
     // After all panes are split select the layout for the window
@@ -156,6 +162,65 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let commands = main(&yaml, &"muxed".to_string(), false).unwrap();
     assert_eq!(commands.len(), 9)
+}
+
+#[test]
+pub fn windows_with_empty_command() {
+    let s = "---
+windows:
+  - editor:
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let result = main(&yaml, &"muxed".to_string(), false);
+    assert!(result.is_ok())
+}
+
+#[test]
+pub fn window_with_empty_command_has_no_send_keys() {
+    let s = "---
+windows:
+  - editor:
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn panes_with_empty_command() {
+    let s = "---
+windows:
+  - cargo:
+      layout: 'main-vertical'
+      panes:
+        -
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let result = main(&yaml, &"muxed".to_string(), false);
+    assert!(result.is_ok())
+}
+
+#[test]
+pub fn panes_with_empty_command_has_no_send_keys() {
+    let s = "---
+windows:
+  - editor:
+      panes:
+        -
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 0)
 }
 
 #[test]
