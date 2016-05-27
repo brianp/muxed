@@ -37,7 +37,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                             commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
                             commands.append(&mut try!(pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string())));
                         } else {
-                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string())), root: root.clone()}));
 
                             if v.as_str().is_some() {
                                 commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().unwrap().to_string()}));
@@ -189,6 +189,17 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn window_with_no_name() {
+    let s = "---
+windows:
+  - : ls
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let result = main(&yaml, &"muxed".to_string(), false);
+    assert!(result.is_err())
 }
 
 #[test]
