@@ -12,6 +12,7 @@
         - git
         - autotools-dev
         - automake
+        - clang-3.5
 
     #- name: uninstall apt-get packages
     #  apt: name={{ item }} state=absent force=yes
