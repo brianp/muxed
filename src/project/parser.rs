@@ -19,7 +19,10 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
 
     // The initial session command. Contains the tmp_window_name to be closed
     // before attaching.
-    commands.push(Command::Session(Session{name: project_name.clone(), tmp_window_name: tmp_window_name.clone()}));
+    commands.push(Command::Session(Session{
+        name: project_name.clone(),
+        tmp_window_name: tmp_window_name.clone()
+    }));
 
     // There should only be one doc but it's a vec so loop it.
     for doc in yaml_string {
@@ -34,22 +37,42 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                 &Yaml::Hash(ref h)  => {
                     for (k, v) in h {
                         if v.as_hash().is_some() {
-                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: k.as_str().unwrap().to_string(), root: root.clone()}));
+                            commands.push(Command::Window(Window{
+                                    session_name: format!("{}:{}", project_name, i+1),
+                                    name: k.as_str().unwrap().to_string(),
+                                    root: root.clone()
+                            }));
+
                             commands.append(&mut try!(pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string())));
                         } else {
-                            commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string())), root: root.clone()}));
+                            commands.push(Command::Window(Window{
+                                session_name: format!("{}:{}", project_name, i+1),
+                                name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string())),
+                                root: root.clone()
+                            }));
 
                             if v.as_str().is_some() {
-                                commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(), exec: v.as_str().unwrap().to_string()}));
+                                commands.push(Command::SendKeys(SendKeys{
+                                    target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                    exec: v.as_str().unwrap().to_string()
+                                }));
                             }
                         }
                     }
                 },
                 &Yaml::String(ref s) => {
-                    commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: s.clone(), root: root.clone()}))
+                    commands.push(Command::Window(Window{
+                        session_name: format!("{}:{}", project_name, i+1),
+                        name: s.clone(),
+                        root: root.clone()
+                    }))
                 },
                 &Yaml::Integer(ref s) => {
-                    commands.push(Command::Window(Window{session_name: format!("{}:{}", project_name, i+1), name: s.to_string(), root: root.clone()}))
+                    commands.push(Command::Window(Window{
+                        session_name: format!("{}:{}", project_name, i+1),
+                        name: s.to_string(),
+                        root: root.clone()
+                    }))
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
@@ -72,20 +95,29 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len()-1) {
-            commands.push(Command::Split(Split{target: format!("{}:{}.{}", session, window_name, i).to_string(), root: root.clone()}));
+            commands.push(Command::Split(Split{
+                target: format!("{}:{}.{}", session, window_name, i).to_string(),
+                root: root.clone()
+            }));
         };
         // Execute given commands in each new pane after all splits are
         // complete.
 
         if pane.as_str().is_some() {
-            commands.push(Command::SendKeys(SendKeys{target: format!("{}:{}.{}", session, window_name, i).to_string(), exec: pane.as_str().unwrap().to_string()}));
+            commands.push(Command::SendKeys(SendKeys{
+                target: format!("{}:{}.{}", session, window_name, i).to_string(),
+                exec: pane.as_str().unwrap().to_string()
+            }));
         }
     };
 
     // After all panes are split select the layout for the window
     if window["layout"].as_str().is_some() {
         let layout = window["layout"].as_str().expect("Bad layout").to_string();
-        commands.push(Command::Layout(Layout{target: format!("{}:{}", session, window_name).to_string(), layout: layout}));
+        commands.push(Command::Layout(Layout{
+            target: format!("{}:{}", session, window_name).to_string(),
+            layout: layout
+        }));
     };
 
     Ok(commands)
