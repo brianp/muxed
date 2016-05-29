@@ -11,6 +11,7 @@ mod project;
 use project::parser;
 use project::processor;
 use clap::{Arg, App};
+use command::Command;
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -73,11 +74,21 @@ pub fn main() {
                           //            .about("Edit a project file"))
                           .get_matches();
 
-    let input = matches.value_of("PROJECT_NAME").unwrap().to_string();
+    let project_name = matches.value_of("PROJECT_NAME").unwrap().to_string();
     let daemonize = matches.is_present("daemonize");
     let muxed_dir = matches.value_of("PROJECT_DIR");
 
-    let yaml = try_or_err!(project::read(&input, &muxed_dir));
-    let commands = try_or_err!(parser::main(&yaml, &input, daemonize));
+    let commands: Vec<Command>;
+    // This refactoring could make a good conference talk example
+    match project::session_exists(&project_name) {
+        Some(c) => {
+            commands = vec!(c);
+        },
+        None => {
+            let yaml = try_or_err!(project::read(&project_name, &muxed_dir));
+            commands = try_or_err!(parser::main(&yaml, &project_name, daemonize));
+        }
+    };
+
     processor::main(&commands)
 }
