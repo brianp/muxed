@@ -6,6 +6,8 @@ use std::path::{Path, PathBuf};
 use std::io::prelude::*;
 use std::fs::File;
 use yaml_rust::{YamlLoader, Yaml};
+use command::{Command, Attach};
+use tmux::{list_windows};
 #[cfg(not(test))] use std::env::home_dir;
 #[cfg(test)] use rand::random;
 #[cfg(test)] use std::fs;
@@ -60,6 +62,16 @@ pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yam
 /// Return the temp dir as the users home dir during testing.
 #[cfg(test)] fn homedir() -> Result<PathBuf, String> {
     Ok(PathBuf::from("/tmp"))
+}
+
+/// Find out if a tmux session is already active with this name. If it is active
+/// return Some<Command::Attach> with a command to attach to the session. If a
+/// session is not active return None and let the app carry on.
+pub fn session_exists(project_name: &String) -> Option<Command> {
+    match list_windows(project_name).success() {
+      true  => Some(Command::Attach(Attach{name: project_name.clone()})),
+      false => None
+    }
 }
 
 #[test]

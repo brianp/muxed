@@ -7,6 +7,7 @@
 
 use libc::system;
 use std::ffi::CString;
+use std::process::{Command, ExitStatus};
 
 /// The program to call commands on.
 static TMUX_NAME: &'static str = "tmux";
@@ -173,4 +174,15 @@ pub fn send_keys(target: &String, exec: &String) -> () {
 /// exec: The system command to be executed in a particular pane.
 pub fn kill_window(target: &String) -> () {
     call(format!("kill-window -t {}", target));
+}
+
+pub fn list_windows(target: &String) -> ExitStatus {
+    let output = Command::new("tmux")
+                     .arg("list-windows")
+                     .arg("-t")
+                     .arg(target)
+                     .output()
+                     .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+
+    output.status
 }
