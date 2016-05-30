@@ -67,15 +67,6 @@ pub struct Attach {
     pub name: String
 }
 
-/// Sends the kill-window command. Used to kill off the randomized first pane
-/// opened with the new session.
-/// name: the name of the window to kill.
-#[derive(Debug)]
-#[derive(Clone)]
-pub struct KillWindow {
-    pub name: String
-}
-
 /// The Command enum. Commands represent the series of commands sent to the
 /// running tmux process to build a users env. This is an enum to support
 /// containing all the commands that require running in a single Vec. This
@@ -88,6 +79,5 @@ pub enum Command {
     Split(Split),
     Layout(Layout),
     SendKeys(SendKeys),
-    Attach(Attach),
-    KillWindow(KillWindow)
+    Attach(Attach)
 }

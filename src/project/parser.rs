@@ -2,8 +2,7 @@
 /// processed later.
 
 use yaml_rust::Yaml;
-use command::{Command, Session, SendKeys, Split, Layout, Window, Attach, KillWindow};
-use rand::random;
+use command::{Command, Session, SendKeys, Split, Layout, Window, Attach};
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 

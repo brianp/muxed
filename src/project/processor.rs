@@ -29,8 +29,7 @@ pub fn main(commands: &Vec<Command>) -> () {
             &Command::Split(ref c)      => tmux::split_window(&c.target, &c.root),
             &Command::Layout(ref c)     => tmux::layout(&c.target, &c.layout),
             &Command::SendKeys(ref c)   => tmux::send_keys(&c.target, &c.exec),
-            &Command::Attach(ref c)     => tmux::attach(&c.name),
-            &Command::KillWindow(ref c) => tmux::kill_window(&c.name)
+            &Command::Attach(ref c)     => tmux::attach(&c.name)
         }
     };
 }

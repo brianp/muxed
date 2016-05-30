@@ -158,24 +158,15 @@ pub fn send_keys(target: &String, exec: &String) -> () {
     call(format!("send-keys -t {} '{}' KPEnter", target, exec));
 }
 
-/// Kill Window is only used to elimiate the default window opened with a
-/// randomized name when a new session is started.
+/// List Windows is used firgure out if a named session is already running.
 ///
 /// # Examples
 ///
 /// ```
-/// tmux::kill_window("muxed:cargo".to_string());
-/// ```
-///
-/// target: A string represented by the {named_session}:{named_window}
-/// exec: The system command to be executed in a particular pane.
-pub fn kill_window(target: &String) -> () {
-    call(format!("kill-window -t {}", target));
-}
-
-/// List Windows is used firgure out if a named session is already running.
 /// tmux::list_windows("muxed:cargo".to_string());
 /// => ExitStatus
+/// ```
+///
 /// target: A string represented by the {named_session}
 pub fn list_windows(target: &String) -> ExitStatus {
     let output = Command::new("tmux")
