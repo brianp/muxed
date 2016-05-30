@@ -15,7 +15,6 @@ use rand::random;
 /// project_name: The name of the project.
 pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
-    let tmp_window_name = format!("muxed_first_window_{}", random::<u16>());
 
     // There should only be one doc but it's a vec so loop it.
     for doc in yaml_string {

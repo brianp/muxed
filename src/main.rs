@@ -2,7 +2,7 @@
 extern crate clap;
 extern crate libc;
 extern crate yaml_rust;
-extern crate rand;
+#[cfg(test)] extern crate rand;
 
 mod tmux;
 mod command;
