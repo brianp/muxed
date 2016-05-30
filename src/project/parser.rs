@@ -172,7 +172,7 @@ windows: ['cargo', 'vim', 'git']
 }
 
 #[test]
-pub fn expect_3_windows_from_array() {
+pub fn expect_2_windows_from_array() {
     let s = "---
 windows: ['cargo', 'vim', 'git']
 ";
@@ -182,7 +182,7 @@ windows: ['cargo', 'vim', 'git']
         _ => false
     }).collect();
 
-    assert_eq!(remains.len(), 3)
+    assert_eq!(remains.len(), 2)
 }
 
 #[test]
@@ -200,7 +200,7 @@ windows: ['cargo', 'vim', 'git']
 }
 
 #[test]
-pub fn expect_3_windows_with_mixed_type_names() {
+pub fn expect_2_windows_with_mixed_type_names() {
     let s = "---
 windows: [1, 'vim', 3]
 ";
@@ -209,11 +209,11 @@ windows: [1, 'vim', 3]
         &Command::Window(_) => true,
         _ => false
     }).collect();
-    assert_eq!(remains.len(), 3)
+    assert_eq!(remains.len(), 2)
 }
 
 #[test]
-pub fn expect_3_windows_from_list() {
+pub fn expect_2_windows_from_list() {
     let s = "---
 windows:
   - cargo: ''
@@ -225,7 +225,7 @@ windows:
         &Command::Window(_) => true,
         _ => false
     }).collect();
-    assert_eq!(remains.len(), 3)
+    assert_eq!(remains.len(), 2)
 }
 
 #[test]
@@ -328,24 +328,6 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Layout(_) => true,
-        _ => false
-    }).collect();
-
-    assert_eq!(remains.len(), 1)
-}
-
-#[test]
-pub fn expect_1_window_with_panes_array() {
-    let s = "---
-windows:
-  - editor:
-      layout: 'main-vertical'
-      panes: ['vim', 'guard']
-";
-
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
-        &Command::Window(_) => true,
         _ => false
     }).collect();
 
