@@ -8,7 +8,7 @@
 #[derive(Clone)]
 pub struct Session {
     pub name: String,
-    pub tmp_window_name: String
+    pub window_name: String
 }
 
 /// The Window command is used to identify every new window opened in the tmux
@@ -21,8 +21,7 @@ pub struct Session {
 #[derive(Clone)]
 pub struct Window {
     pub session_name: String,
-    pub name: String,
-    pub root: Option<String>
+    pub name: String
 }
 
 /// The Split is used to call split-window on a particular window in the

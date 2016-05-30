@@ -79,8 +79,8 @@ pub fn attach(session_name: &String) -> () {
 /// session_name: The active tmux session name.
 /// tmp_name: The name for the temp initial window that is created with a new
 /// session.
-pub fn new_session(session_name: &String, tmp_name: &String) -> () {
-    call(format!("new -d -s {} -n {}", session_name, tmp_name));
+pub fn new_session(session_name: &String, window_name: &String) -> () {
+    call(format!("new -d -s {} -n {}", session_name, window_name));
 }
 
 /// Split window acts as the command to target named windows in a session to
@@ -117,11 +117,8 @@ pub fn split_window(target: &String, root: &Option<String>) -> () {
 /// window_name: The desired window name for the new window.
 /// root: An `Option<String>` passed to the -c argument to change the current
 /// directory.
-pub fn new_window(session_name: &String, window_name: &String, root: &Option<String>) -> () {
-    call(match root {
-        &Some(ref r) => format!("new-window -t {} -n {} -c {}", session_name, window_name, r),
-        &None        => format!("new-window -t {} -n {}", session_name, window_name)
-    });
+pub fn new_window(session_name: &String, window_name: &String) -> () {
+    call(format!("new-window -t {} -n {}", session_name, window_name));
 }
 
 /// The layout function will adjust the layout of a tmux window that already has
@@ -176,6 +173,10 @@ pub fn kill_window(target: &String) -> () {
     call(format!("kill-window -t {}", target));
 }
 
+/// List Windows is used firgure out if a named session is already running.
+/// tmux::list_windows("muxed:cargo".to_string());
+/// => ExitStatus
+/// target: A string represented by the {named_session}
 pub fn list_windows(target: &String) -> ExitStatus {
     let output = Command::new("tmux")
                      .arg("list-windows")

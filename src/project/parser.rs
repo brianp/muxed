@@ -17,13 +17,6 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
     let mut commands: Vec<Command> = vec!();
     let tmp_window_name = format!("muxed_first_window_{}", random::<u16>());
 
-    // The initial session command. Contains the tmp_window_name to be closed
-    // before attaching.
-    commands.push(Command::Session(Session{
-        name: project_name.clone(),
-        tmp_window_name: tmp_window_name.clone()
-    }));
-
     // There should only be one doc but it's a vec so loop it.
     for doc in yaml_string {
         let root = match doc["root"].as_str() {
@@ -32,24 +25,39 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
         };
 
         let windows = doc["windows"].as_vec().expect("No Windows have been defined.");
-        for (i, window) in windows.iter().enumerate() {
+
+        for window in windows.iter() {
             match window {
                 &Yaml::Hash(ref h)  => {
                     for (k, v) in h {
                         if v.as_hash().is_some() {
                             commands.push(Command::Window(Window{
-                                    session_name: format!("{}:{}", project_name, i+1),
-                                    name: k.as_str().unwrap().to_string(),
-                                    root: root.clone()
+                                    session_name: project_name.clone(),
+                                    name: k.as_str().unwrap().to_string()
                             }));
 
-                            commands.append(&mut try!(pane_matcher(&project_name, v, &root, k.as_str().unwrap().to_string())));
+                            if root.is_some() {
+                              let r = root.clone().unwrap();
+                              commands.push(Command::SendKeys(SendKeys{
+                                  target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                  exec: format!("cd {}", r)
+                              }));
+                            };
+
+                            commands.append(&mut try!(pane_matcher(&project_name, v, &root.clone(), k.as_str().unwrap().to_string())));
                         } else {
                             commands.push(Command::Window(Window{
-                                session_name: format!("{}:{}", project_name, i+1),
-                                name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string())),
-                                root: root.clone()
+                                session_name: project_name.clone(),
+                                name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string()))
                             }));
+
+                            if root.is_some() {
+                              let r = root.clone().unwrap();
+                              commands.push(Command::SendKeys(SendKeys{
+                                  target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                  exec: format!("cd {}", r)
+                              }));
+                            };
 
                             if v.as_str().is_some() {
                                 commands.push(Command::SendKeys(SendKeys{
@@ -62,27 +70,53 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                 },
                 &Yaml::String(ref s) => {
                     commands.push(Command::Window(Window{
-                        session_name: format!("{}:{}", project_name, i+1),
-                        name: s.clone(),
-                        root: root.clone()
-                    }))
+                        session_name: project_name.clone(),
+                        name: s.clone()
+                    }));
+
+                    if root.is_some() {
+                      let r = root.clone().unwrap();
+                      commands.push(Command::SendKeys(SendKeys{
+                          target: format!("{}:{}", project_name, s).to_string(),
+                          exec: format!("cd {}", r).to_string()
+                      }));
+                    };
                 },
                 &Yaml::Integer(ref s) => {
                     commands.push(Command::Window(Window{
-                        session_name: format!("{}:{}", project_name, i+1),
-                        name: s.to_string(),
-                        root: root.clone()
-                    }))
+                        session_name: project_name.clone(),
+                        name: s.to_string()
+                    }));
+
+                    if root.is_some() {
+                      let r = root.clone().unwrap();
+                      commands.push(Command::SendKeys(SendKeys{
+                          target: format!("{}:{}", project_name, s).to_string(),
+                          exec: format!("cd {}", r).to_string()
+                      }));
+                    };
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
         };
     };
 
-    commands.push(Command::KillWindow(KillWindow{name: format!("{}:{}", project_name, tmp_window_name)}));
-
     if !daemonize { commands.push(Command::Attach(Attach{name: project_name.clone()})) };
-    Ok(commands)
+
+    let (first, commands) = commands.split_first().unwrap();
+    let mut remains = commands.to_vec();
+
+    match first {
+        &Command::Window(ref w) => {
+            remains.insert(0, Command::Session(Session{
+                name: project_name.clone(),
+                window_name: w.name.clone()
+            }));
+        },
+        _ => {}
+    };
+
+    Ok(remains)
 }
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
