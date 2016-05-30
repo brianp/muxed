@@ -4,7 +4,7 @@ Muxed
 
 ## Another TMUX project manager
 
-Currently this project is _not stable_ and in active development (May 11, 2016). This means it compiles on Rustlang stable and can be used to manage projects in the "happy path."
+Currently this project is _not stable_ and in active development (May, 2016). This means it compiles on Rustlang stable and can be used to manage projects in the "happy path."
 
 What's the happy path mean? You must meet all requirements and use simple configs.
 
@@ -49,11 +49,30 @@ A one liner for creating the above config:
 $ printf 'root: "~/"\nwindows:\n  - editor:\n      layout: "main-vertical"\n      panes: ["vi", "ls -alh"]\n  - processes: "ls /proc"\n  - logs: "tail -f /var/log/dmesg"' > ~/.muxed/my_project.yml
 ```
 
-### 4. Compile & run Muxed for your project.
-Here is where you call your project, with the same name as the config file created in step 2.
+## Installation
+
+### Download:
+
+See the [releases](https://github.com/brianp/muxed/releases) page for muxed packages. Download and untar the package as desired.
+Make sure the `muxed` binary is somewhere in your `$PATH`. I generally move the binary in to `/usr/local/bin`.
 
 ```bash
+$ tar -xvzf muxed-VERSION-SYSTEM.tar.gz
+x muxed
+$ mv muxed /usr/local/bin
+$ muxed --help
+$ muxed my_project
+```
+
+### From source:
+
+Have rust stable (or nightly at the risk of it not working) installed.
+Clone this repo. Then run cargo to build the source, and again use cargo to run the app.
+
+```bash
+$ git clone git@github.com:brianp/muxed.git
 $ cargo build
+$ cargo run -- --help
 $ cargo run my_project
 ```
 
