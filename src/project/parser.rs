@@ -124,16 +124,7 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
 }
 
 #[test]
-pub fn windows_defined_as_array_has_6_commands() {
-    let s = "---
-windows: ['cargo', 'vim', 'git']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    assert_eq!(main(&yaml, &"muxed".to_string(), false).unwrap().len(), 6)
-}
-
-#[test]
-pub fn windows_defined_as_array_has_1_session() {
+pub fn expect_1_session() {
     let s = "---
 windows: ['cargo', 'vim', 'git']
 ";
@@ -147,7 +138,7 @@ windows: ['cargo', 'vim', 'git']
 }
 
 #[test]
-pub fn windows_defined_as_array_has_3_windows() {
+pub fn expect_3_windows_from_array() {
     let s = "---
 windows: ['cargo', 'vim', 'git']
 ";
@@ -161,7 +152,7 @@ windows: ['cargo', 'vim', 'git']
 }
 
 #[test]
-pub fn windows_defined_as_array_has_1_attach() {
+pub fn expect_1_attach() {
     let s = "---
 windows: ['cargo', 'vim', 'git']
 ";
@@ -175,16 +166,20 @@ windows: ['cargo', 'vim', 'git']
 }
 
 #[test]
-pub fn windows_with_integer_names() {
+pub fn expect_3_windows_with_mixed_type_names() {
     let s = "---
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    assert_eq!(main(&yaml, &"muxed".to_string(), false).unwrap().len(), 6)
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::Window(_) => true,
+        _ => false
+    }).collect();
+    assert_eq!(remains.len(), 3)
 }
 
 #[test]
-pub fn windows_as_list() {
+pub fn expect_3_windows_from_list() {
     let s = "---
 windows:
   - cargo: ''
@@ -192,12 +187,15 @@ windows:
   - git: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string(), false).unwrap();
-    assert_eq!(commands.len(), 9)
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::Window(_) => true,
+        _ => false
+    }).collect();
+    assert_eq!(remains.len(), 3)
 }
 
 #[test]
-pub fn windows_with_empty_command() {
+pub fn expect_ok_with_empty_syscommands() {
     let s = "---
 windows:
   - editor:
@@ -208,7 +206,7 @@ windows:
 }
 
 #[test]
-pub fn window_with_empty_command_has_no_send_keys() {
+pub fn expect_no_send_keys_commands() {
     let s = "---
 windows:
   - editor:
@@ -224,7 +222,7 @@ windows:
 }
 
 #[test]
-pub fn window_with_no_name() {
+pub fn expect_err_with_nameless_window() {
     let s = "---
 windows:
   - : ls
@@ -235,7 +233,7 @@ windows:
 }
 
 #[test]
-pub fn panes_with_empty_command() {
+pub fn expect_ok_with_empty_panes_syscommands() {
     let s = "---
 windows:
   - cargo:
@@ -249,7 +247,7 @@ windows:
 }
 
 #[test]
-pub fn panes_with_empty_command_has_no_send_keys() {
+pub fn expect_no_send_keys_with_empty_panes_syscommands() {
     let s = "---
 windows:
   - editor:
@@ -267,20 +265,7 @@ windows:
 }
 
 #[test]
-pub fn panes_array_has_8_commands() {
-    let s = "---
-windows:
-  - editor:
-      layout: 'main-vertical'
-      panes: ['vim', 'guard']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let commands = main(&yaml, &"muxed".to_string(), false).unwrap();
-    assert_eq!(commands.len(), 8)
-}
-
-#[test]
-pub fn panes_array_has_1_split() {
+pub fn expect_1_split_window() {
     let s = "---
 windows:
   - editor:
@@ -298,7 +283,7 @@ windows:
 }
 
 #[test]
-pub fn panes_array_has_1_layout() {
+pub fn expect_1_layout() {
     let s = "---
 windows:
   - editor:
@@ -316,7 +301,7 @@ windows:
 }
 
 #[test]
-pub fn panes_array_has_1_window() {
+pub fn expect_1_window_with_panes_array() {
     let s = "---
 windows:
   - editor:
@@ -334,7 +319,7 @@ windows:
 }
 
 #[test]
-pub fn panes_array_has_1_session() {
+pub fn expect_1_session_with_panes_array() {
     let s = "---
 windows:
   - editor:
