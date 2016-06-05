@@ -22,6 +22,11 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
             None    => None
         };
 
+        let pre = match doc["pre"].as_str() {
+            Some(x) => Some(x.to_string()),
+            None    => None
+        };
+
         let windows = doc["windows"].as_vec().expect("No Windows have been defined.");
 
         for window in windows.iter() {
@@ -42,7 +47,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                               }));
                             };
 
-                            commands.append(&mut try!(pane_matcher(&project_name, v, &root.clone(), k.as_str().unwrap().to_string())));
+                            commands.append(&mut try!(pane_matcher(&project_name, v, &root.clone(), k.as_str().unwrap().to_string(), &pre.clone())));
                         } else {
                             commands.push(Command::Window(Window{
                                 session_name: project_name.clone(),
@@ -57,6 +62,16 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                               }));
                             };
 
+                            // SendKeys for the Pre option
+                            if pre.is_some() {
+                                let p = pre.clone().unwrap();
+                                commands.push(Command::SendKeys(SendKeys{
+                                    target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                    exec: p
+                                }));
+                            };
+
+                            // SendKeys for the exec command
                             if v.as_str().is_some() {
                                 let ex = v.as_str().unwrap();
                                 if !ex.is_empty() {
@@ -82,6 +97,15 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                           exec: format!("cd {}", r).to_string()
                       }));
                     };
+
+                    // SendKeys for the Pre option
+                    if pre.is_some() {
+                        let p = pre.clone().unwrap();
+                        commands.push(Command::SendKeys(SendKeys{
+                            target: format!("{}:{}", project_name, s).to_string(),
+                            exec: p
+                        }));
+                    };
                 },
                 &Yaml::Integer(ref s) => {
                     commands.push(Command::Window(Window{
@@ -95,6 +119,15 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                           target: format!("{}:{}", project_name, s).to_string(),
                           exec: format!("cd {}", r).to_string()
                       }));
+                    };
+
+                    // SendKeys for the Pre option
+                    if pre.is_some() {
+                        let p = pre.clone().unwrap();
+                        commands.push(Command::SendKeys(SendKeys{
+                            target: format!("{}:{}", project_name, s).to_string(),
+                            exec: p
+                        }));
                     };
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
@@ -122,7 +155,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_name: String) -> Result<Vec<Command>, String> {
+fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_name: String, pre: &Option<String>) -> Result<Vec<Command>, String> {
     let mut commands = vec!();
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
@@ -135,9 +168,18 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
                 root: root.clone()
             }));
         };
+
+        // SendKeys for the Pre option
+        if pre.is_some() {
+            let p = pre.clone().unwrap();
+            commands.push(Command::SendKeys(SendKeys{
+                target: format!("{}:{}.{}", session, window_name, i).to_string(),
+                exec: p
+            }));
+        };
+
         // Execute given commands in each new pane after all splits are
         // complete.
-
         if pane.as_str().is_some() {
             let p = pane.as_str().unwrap();
             if !p.is_empty() {
@@ -372,6 +414,26 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn expect_three_send_keys_commands_from_pre() {
+    let s = "---
+pre: 'ls'
+windows:
+  - editor:
+      panes:
+        -
+        -
+  - logs:
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 3)
 }
 
 #[test]
