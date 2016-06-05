@@ -145,7 +145,8 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
 
     // After all panes are split select the layout for the window
     if window["layout"].as_str().is_some() {
-        let layout = window["layout"].as_str().expect("Bad layout").to_string();
+        let err = format!("A problem with the specified layout for the window: {}", &window_name);
+        let layout = window["layout"].as_str().expect(err.as_str()).to_string();
         commands.push(Command::Layout(Layout{
             target: format!("{}:{}", session, window_name).to_string(),
             layout: layout
@@ -348,4 +349,21 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 1)
+}
+
+#[test]
+pub fn expect_no_layout() {
+    let s = "---
+windows:
+  - editor:
+      panes: ['vim', 'guard']
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::Layout(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 0)
 }
