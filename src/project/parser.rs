@@ -58,10 +58,13 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                             };
 
                             if v.as_str().is_some() {
-                                commands.push(Command::SendKeys(SendKeys{
-                                    target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
-                                    exec: v.as_str().unwrap().to_string()
-                                }));
+                                let ex = v.as_str().unwrap();
+                                if !ex.is_empty() {
+                                    commands.push(Command::SendKeys(SendKeys{
+                                        target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                        exec: v.as_str().unwrap().to_string()
+                                    }));
+                                };
                             }
                         }
                     }
@@ -136,10 +139,13 @@ fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_n
         // complete.
 
         if pane.as_str().is_some() {
-            commands.push(Command::SendKeys(SendKeys{
-                target: format!("{}:{}.{}", session, window_name, i).to_string(),
-                exec: pane.as_str().unwrap().to_string()
-            }));
+            let p = pane.as_str().unwrap();
+            if !p.is_empty() {
+                commands.push(Command::SendKeys(SendKeys{
+                    target: format!("{}:{}.{}", session, window_name, i).to_string(),
+                    exec: p.to_string()
+                }));
+            };
         }
     };
 
@@ -362,6 +368,39 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
         &Command::Layout(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn expect_no_send_keys_with_blank_panes() {
+    let s = "---
+windows:
+  - editor:
+      panes: ['','','']
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn expect_no_send_keys_with_blank_window() {
+    let s = "---
+windows:
+  - editor: ''
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
         _ => false
     }).collect();
 
