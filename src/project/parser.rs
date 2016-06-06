@@ -27,9 +27,14 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
             None    => None
         };
 
-        let comm_opts = |target: String| -> Vec<Command> {
+        // A clojure used to capture the current local root and pre Options.
+        // This way we can call the clojure to create common SendKeys command
+        // like changing the directory or executing a system command from the
+        // `pre` option.
+        let common_commands = |target: String| -> Vec<Command> {
             let mut commands2 = vec!();
 
+            // SendKeys to change to the `root` directory
             if root.is_some() {
                 let r = root.clone().unwrap();
                 commands2.push(Command::SendKeys(SendKeys{
@@ -78,7 +83,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                             }));
 
                             let t = format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string();
-                            commands.append(&mut comm_opts(t.to_string()));
+                            commands.append(&mut common_commands(t.to_string()));
 
                             // SendKeys for the exec command
                             if v.as_str().is_some() {
@@ -100,7 +105,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                     }));
 
                     let t = format!("{}:{}", &project_name, &s);
-                    commands.append(&mut comm_opts(t.to_string()));
+                    commands.append(&mut common_commands(t.to_string()));
                 },
                 &Yaml::Integer(ref s) => {
                     commands.push(Command::Window(Window{
@@ -109,7 +114,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                     }));
 
                     let t = format!("{}:{}", &project_name, &s);
-                    commands.append(&mut comm_opts(t.to_string()));
+                    commands.append(&mut common_commands(t.to_string()));
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
@@ -169,7 +174,7 @@ fn pane_matcher(session: &String, window: &Yaml, window_name: String, pre: &Opti
                     exec: p.to_string()
                 }));
             };
-        }
+        };
     };
 
     // After all panes are split select the layout for the window
