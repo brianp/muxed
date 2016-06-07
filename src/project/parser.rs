@@ -22,6 +22,39 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
             None    => None
         };
 
+        let pre = match doc["pre"].as_str() {
+            Some(x) => Some(x.to_string()),
+            None    => None
+        };
+
+        // A clojure used to capture the current local root and pre Options.
+        // This way we can call the clojure to create common SendKeys command
+        // like changing the directory or executing a system command from the
+        // `pre` option.
+        let common_commands = |target: String| -> Vec<Command> {
+            let mut commands2 = vec!();
+
+            // SendKeys to change to the `root` directory
+            if root.is_some() {
+                let r = root.clone().unwrap();
+                commands2.push(Command::SendKeys(SendKeys{
+                    target: target.clone(),
+                    exec: format!("cd {}", r)
+                }));
+            };
+
+            // SendKeys for the Pre option
+            if pre.is_some() {
+                let p = pre.clone().unwrap();
+                commands2.push(Command::SendKeys(SendKeys{
+                    target: target.clone(),
+                    exec: p
+                }));
+            };
+
+            commands2
+        };
+
         let windows = doc["windows"].as_vec().expect("No Windows have been defined.");
 
         for window in windows.iter() {
@@ -30,38 +63,27 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                     for (k, v) in h {
                         if v.as_hash().is_some() {
                             commands.push(Command::Window(Window{
-                                    session_name: project_name.clone(),
-                                    name: k.as_str().unwrap().to_string()
+                                session_name: project_name.clone(),
+                                name: k.as_str().unwrap().to_string()
                             }));
 
-                            if root.is_some() {
-                              let r = root.clone().unwrap();
-                              commands.push(Command::SendKeys(SendKeys{
-                                  target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
-                                  exec: format!("cd {}", r)
-                              }));
-                            };
-
-                            commands.append(&mut try!(pane_matcher(&project_name, v, &root.clone(), k.as_str().unwrap().to_string())));
+                            let target = format!("{}:{}", project_name, k.as_str().unwrap());
+                            commands.append(&mut try!(pane_matcher(v, &target, &common_commands)));
                         } else {
                             commands.push(Command::Window(Window{
                                 session_name: project_name.clone(),
                                 name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string()))
                             }));
 
-                            if root.is_some() {
-                              let r = root.clone().unwrap();
-                              commands.push(Command::SendKeys(SendKeys{
-                                  target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
-                                  exec: format!("cd {}", r)
-                              }));
-                            };
+                            let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
+                            commands.append(&mut common_commands(t.to_string()));
 
+                            // SendKeys for the exec command
                             if v.as_str().is_some() {
                                 let ex = v.as_str().unwrap();
                                 if !ex.is_empty() {
                                     commands.push(Command::SendKeys(SendKeys{
-                                        target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                        target: format!("{}:{}", project_name, k.as_str().unwrap()).to_string(),
                                         exec: v.as_str().unwrap().to_string()
                                     }));
                                 };
@@ -75,13 +97,8 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                         name: s.clone()
                     }));
 
-                    if root.is_some() {
-                      let r = root.clone().unwrap();
-                      commands.push(Command::SendKeys(SendKeys{
-                          target: format!("{}:{}", project_name, s).to_string(),
-                          exec: format!("cd {}", r).to_string()
-                      }));
-                    };
+                    let t = format!("{}:{}", &project_name, &s);
+                    commands.append(&mut common_commands(t.to_string()));
                 },
                 &Yaml::Integer(ref s) => {
                     commands.push(Command::Window(Window{
@@ -89,13 +106,8 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                         name: s.to_string()
                     }));
 
-                    if root.is_some() {
-                      let r = root.clone().unwrap();
-                      commands.push(Command::SendKeys(SendKeys{
-                          target: format!("{}:{}", project_name, s).to_string(),
-                          exec: format!("cd {}", r).to_string()
-                      }));
-                    };
+                    let t = format!("{}:{}", &project_name, &s);
+                    commands.append(&mut common_commands(t.to_string()));
                 },
                 _ => panic!("Muxed config file formatting isn't recognized.")
             };
@@ -122,39 +134,45 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher(session: &String, window: &Yaml, root: &Option<String>, window_name: String) -> Result<Vec<Command>, String> {
+fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T) -> Result<Vec<Command>, String>
+    where T : Fn(String) -> Vec<Command> {
+
     let mut commands = vec!();
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
     for (i, pane) in panes.iter().enumerate() {
+        let t = format!("{}.{}", target, i);
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len()-1) {
             commands.push(Command::Split(Split{
-                target: format!("{}:{}.{}", session, window_name, i).to_string(),
-                root: root.clone()
+                target: t.to_string()
             }));
         };
+
+        // Call the common_commands clojure to execute `cd` and `pre` options in
+        // pane splits.
+        commands.append(&mut common_commands(t.to_string()));
+
         // Execute given commands in each new pane after all splits are
         // complete.
-
         if pane.as_str().is_some() {
             let p = pane.as_str().unwrap();
             if !p.is_empty() {
                 commands.push(Command::SendKeys(SendKeys{
-                    target: format!("{}:{}.{}", session, window_name, i).to_string(),
+                    target: t.to_string(),
                     exec: p.to_string()
                 }));
             };
-        }
+        };
     };
 
     // After all panes are split select the layout for the window
     if window["layout"].as_str().is_some() {
-        let err = format!("A problem with the specified layout for the window: {}", &window_name);
+        let err = format!("A problem with the specified layout for the window: {}", target);
         let layout = window["layout"].as_str().expect(err.as_str()).to_string();
         commands.push(Command::Layout(Layout{
-            target: format!("{}:{}", session, window_name).to_string(),
+            target: target.to_string(),
             layout: layout
         }));
     };
@@ -372,6 +390,26 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn expect_three_send_keys_commands_from_pre() {
+    let s = "---
+pre: 'ls'
+windows:
+  - editor:
+      panes:
+        -
+        -
+  - logs:
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 3)
 }
 
 #[test]
