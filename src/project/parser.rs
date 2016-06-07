@@ -75,7 +75,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                                 name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string()))
                             }));
 
-                            let t = format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string();
+                            let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
                             commands.append(&mut common_commands(t.to_string()));
 
                             // SendKeys for the exec command
@@ -83,7 +83,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                                 let ex = v.as_str().unwrap();
                                 if !ex.is_empty() {
                                     commands.push(Command::SendKeys(SendKeys{
-                                        target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
+                                        target: format!("{}:{}", project_name, k.as_str().unwrap()).to_string(),
                                         exec: v.as_str().unwrap().to_string()
                                     }));
                                 };
