@@ -97,11 +97,8 @@ pub fn new_session(session_name: &String, window_name: &String) -> () {
 /// target: A string represented by the {named_session}:{named_window}.{pane}
 /// root: An `Option<String>` passed to the -c argument to change the current
 /// directory.
-pub fn split_window(target: &String, root: &Option<String>) -> () {
-    call(match root {
-        &Some(ref r) => format!("split-window -t {} -c {}", target, r),
-        &None        => format!("split-window -t {}", target)
-    });
+pub fn split_window(target: &String) -> () {
+    call(format!("split-window -t {}", target));
 }
 
 /// New window opens a new window in the named session with the provided window

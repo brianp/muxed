@@ -32,8 +32,7 @@ pub struct Window {
 #[derive(Debug)]
 #[derive(Clone)]
 pub struct Split {
-    pub target: String,
-    pub root: Option<String>
+    pub target: String
 }
 
 /// The Layout command calls select-layout with a specific pre-defined tmux

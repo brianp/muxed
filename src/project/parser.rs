@@ -150,8 +150,7 @@ fn pane_matcher(session: &String, window: &Yaml, window_name: String, pre: &Opti
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len()-1) {
             commands.push(Command::Split(Split{
-                target: format!("{}:{}.{}", session, window_name, i).to_string(),
-                root: root.clone()
+                target: format!("{}:{}.{}", session, window_name, i).to_string()
             }));
         };
 

@@ -26,7 +26,7 @@ pub fn main(commands: &Vec<Command>) -> () {
         match c {
             &Command::Session(ref c)  => tmux::new_session(&c.name, &c.window_name),
             &Command::Window(ref c)   => tmux::new_window(&c.session_name, &c.name),
-            &Command::Split(ref c)    => tmux::split_window(&c.target, &c.root),
+            &Command::Split(ref c)    => tmux::split_window(&c.target),
             &Command::Layout(ref c)   => tmux::layout(&c.target, &c.layout),
             &Command::SendKeys(ref c) => tmux::send_keys(&c.target, &c.exec),
             &Command::Attach(ref c)   => tmux::attach(&c.name)
