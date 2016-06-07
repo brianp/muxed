@@ -67,15 +67,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                                 name: k.as_str().unwrap().to_string()
                             }));
 
-                            if root.is_some() {
-                              let r = root.clone().unwrap();
-                              commands.push(Command::SendKeys(SendKeys{
-                                  target: format!("{}:{}", project_name, k.as_str().unwrap().to_string()).to_string(),
-                                  exec: format!("cd {}", r)
-                              }));
-                            };
-
-                            commands.append(&mut try!(pane_matcher(&project_name, v, k.as_str().unwrap().to_string(), &pre, &root)));
+                            commands.append(&mut try!(pane_matcher(&project_name, v, k.as_str().unwrap().to_string(), &common_commands)));
                         } else {
                             commands.push(Command::Window(Window{
                                 session_name: project_name.clone(),
@@ -141,7 +133,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher(session: &String, window: &Yaml, window_name: String, pre: &Option<String>, root: &Option<String>) -> Result<Vec<Command>, String> {
+fn pane_matcher(session: &String, window: &Yaml, window_name: String, common_commands: (&Fn(String) -> Vec<Command>)) -> Result<Vec<Command>, String> {
     let mut commands = vec!();
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
@@ -154,14 +146,10 @@ fn pane_matcher(session: &String, window: &Yaml, window_name: String, pre: &Opti
             }));
         };
 
-        // SendKeys for the Pre option
-        if pre.is_some() {
-            let p = pre.clone().unwrap();
-            commands.push(Command::SendKeys(SendKeys{
-                target: format!("{}:{}.{}", session, window_name, i).to_string(),
-                exec: p
-            }));
-        };
+        // Call the common_commands clojure to execute `cd` and `pre` options in
+        // pane splits.
+        let t = format!("{}:{}.{}", session, window_name, i);
+        commands.append(&mut common_commands(t.to_string()));
 
         // Execute given commands in each new pane after all splits are
         // complete.
