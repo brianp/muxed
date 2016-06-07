@@ -133,7 +133,9 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher(session: &String, window: &Yaml, window_name: String, common_commands: (&Fn(String) -> Vec<Command>)) -> Result<Vec<Command>, String> {
+fn pane_matcher<T>(session: &String, window: &Yaml, window_name: String, common_commands: T) -> Result<Vec<Command>, String>
+    where T : Fn(String) -> Vec<Command> {
+
     let mut commands = vec!();
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
