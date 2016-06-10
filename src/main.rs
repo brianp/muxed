@@ -10,8 +10,9 @@ mod project;
 
 use project::parser;
 use project::processor;
-use clap::{Arg, App};
+use clap::{Arg, App, SubCommand, AppSettings};
 use command::Command;
+use std::process;
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -54,10 +55,12 @@ pub fn main() {
                           .version(env!("CARGO_PKG_VERSION"))
                           .author("Brian Pearce")
                           .about("Another TMUX project manager")
+                          .setting(AppSettings::SubcommandsNegateReqs)
                           .arg(Arg::with_name("PROJECT_NAME")
                                .help("The name of your poject to open")
+                               .index(1)
                                .required(true)
-                               .index(1))
+                               .takes_value(true))
                           .arg(Arg::with_name("daemonize")
                                .short("d")
                                .multiple(false)
@@ -68,11 +71,38 @@ pub fn main() {
                                .value_name("PROJECT_DIR")
                                .takes_value(true)
                                .help("The directory your project config files live in. Defaults to ~/.muxed/"))
-                          //.subcommand(SubCommand::with_name("new")
-                          //            .about("Create a new project file"))
-                          //.subcommand(SubCommand::with_name("edit")
-                          //            .about("Edit a project file"))
+                          .subcommand(SubCommand::with_name("new")
+                                      .about("Create a new project file")
+                                      .arg(Arg::with_name("NEW_PROJECT_NAME")
+                                          .help("The new project/file name")
+                                          .required(true))
+                                      .arg(Arg::with_name("PROJECT_DIR")
+                                          .short("-p")
+                                          .multiple(false)
+                                          .takes_value(true)
+                                          .help("The directory your project config files live in. Defaults to ~/.muxed/")))
                           .get_matches();
+
+    if let Some(matches) = matches.subcommand_matches("new") {
+        if matches.is_present("NEW_PROJECT_NAME") {
+            let project_name = matches.value_of("NEW_PROJECT_NAME").unwrap().to_string();
+
+            let mut output = process::Command::new("muxednew").arg(project_name);
+
+            if matches.is_present("PROJECT_DIR") {
+                output.arg("-p")
+                      .arg(matches.value_of("PROJECT_DIR").unwrap());
+            }
+
+            output = try_or_err!(output.output().map_err(|_| "Muxednew might not be installed." ));
+
+            if !output.status.success() {
+                println!("{}", String::from_utf8_lossy(&output.stdout));
+            };
+        };
+
+        return
+    };
 
     let project_name = matches.value_of("PROJECT_NAME").unwrap().to_string();
     let daemonize = matches.is_present("daemonize");
