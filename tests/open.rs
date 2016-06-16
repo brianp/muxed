@@ -13,6 +13,8 @@ mod open {
     use std::path::PathBuf;
     use std::io::prelude::*;
     use helpers::*;
+    use std::thread::sleep;
+    use std::time::Duration;
 
     fn setup(contents: &'static [u8]) -> (String, PathBuf) {
         let project_name = format!("muxed_int_test_{}", random::<u16>());
@@ -37,6 +39,13 @@ mod open {
     fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name, config_path.parent().unwrap());
+        // Needed as send-keys commands may not be finished executing when we go
+        // to introspect. In the future make all test templates touch a named
+        // .finished file in the last pane/window. Loop until the file exists.
+        // Once it is found we know it's time for inspection. This is better
+        // than sleeping as we may sleep longer than needed. Especially for
+        // tests that don't require the wait time at all.
+        sleep(Duration::from_millis(800));
         let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session
@@ -127,5 +136,20 @@ windows:
         let session = test_with_contents(contents);
         let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
         assert_eq!(num, 2)
+    }
+
+    #[test]
+    fn expect_to_open_in_directory_containing_spaces() {
+        let dir = PathBuf::from("/tmp/Directory With Spaces/");
+        if !dir.exists() { println!("{:?}", fs::create_dir(&dir)) };
+        let contents = b"---
+root: /tmp/Directory With Spaces/
+windows:
+  - editor: ''
+";
+        let session = test_with_contents(contents);
+        let active_dir = session.active_dir;
+        let _ = fs::remove_dir(dir);
+        assert_eq!(active_dir, "/tmp/Directory With Spaces");
     }
 }

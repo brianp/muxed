@@ -13,6 +13,8 @@ pub fn list_windows(target: &String) -> String {
                      .arg("list-windows")
                      .arg("-t")
                      .arg(target)
+                     .arg("-F")
+                     .arg("'#{window_index}: #{window_name}  (#{window_panes} panes) (Dir: #{pane_current_path})'")
                      .output()
                      .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
@@ -46,7 +48,8 @@ pub fn kill_session(target: &String) -> () {
 #[derive(Debug)]
 pub struct TmuxSession {
     pub num_of_windows: usize,
-    pub windows: HashMap<String, HashMap<String, usize>>
+    pub windows: HashMap<String, HashMap<String, usize>>,
+    pub active_dir: String
 }
 
 impl TmuxSession {
@@ -69,8 +72,20 @@ impl TmuxSession {
 
         TmuxSession {
           num_of_windows: window_lines.len(),
-          windows: windows
+          windows: windows,
+          active_dir: TmuxSession::active_dir(&window_lines[0])
         }
+    }
+
+    pub fn active_dir(line: &str) -> String {
+        let panes = Regex::new(r"\(Dir: (.*)\)").unwrap();
+        let mut dir: &str = "";
+
+        for cap in panes.captures_iter(line) {
+            dir = cap.at(1).unwrap_or("Nope");
+        }
+
+        dir.to_string()
     }
 
     pub fn count_panes(line: &str) -> usize {
