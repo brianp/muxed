@@ -39,7 +39,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                 let r = root.clone().unwrap();
                 commands2.push(Command::SendKeys(SendKeys{
                     target: target.clone(),
-                    exec: format!("cd {}", r)
+                    exec: format!("cd \"{}\"", r)
                 }));
             };
 
@@ -443,4 +443,26 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 0)
+}
+
+#[test]
+pub fn expect_full_directory_name() {
+    let s = "---
+root: ~/JustPlainSimple Technologies Inc./financials/ledgers
+windows:
+  - dir: ''
+";
+
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    let root = match remains[0] {
+        Command::SendKeys(ref k) => k,
+        _ => panic!("nope")
+    };
+
+    assert_eq!(root.exec, "cd \"~/JustPlainSimple Technologies Inc./financials/ledgers\"")
 }
