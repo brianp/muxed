@@ -45,7 +45,7 @@ mod open {
         // Once it is found we know it's time for inspection. This is better
         // than sleeping as we may sleep longer than needed. Especially for
         // tests that don't require the wait time at all.
-        sleep(Duration::from_millis(800));
+        sleep(Duration::new(1,0));
         let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session
