@@ -66,7 +66,7 @@ pub fn main() {
                            .multiple(false)
                            .help("If you want to create a muxed session without connecting to it"))
                       .arg(Arg::with_name("PROJECT_DIR")
-                           .short("-p")
+                           .short("p")
                            .multiple(false)
                            .value_name("PROJECT_DIR")
                            .takes_value(true)
@@ -79,14 +79,15 @@ pub fn main() {
     let project_name = matches.value_of("PROJECT_NAME").unwrap();
     let daemonize = matches.is_present("daemonize");
     let muxed_dir = matches.value_of("PROJECT_DIR");
-    let trail: Vec<&str> = matches.values_of("REST").unwrap().collect();
 
     match project_name {
         "new" => {
-            let mut cd = process::Command::new("muxednew");
-            let cmd = trail.iter().fold(&mut cd, |c, i| c.arg(i));
-            let result = cmd.output()
-                .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+            let mut cmd = process::Command::new("muxednew");
+            if matches.is_present("REST") {
+                let trail: Vec<&str> = matches.values_of("REST").unwrap().collect();
+                trail.iter().fold(&mut cmd, |c, i| c.arg(i));
+            };
+            let result = cmd.output().unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
             println!("{}", String::from_utf8_lossy(&result.stdout));
             println!("{}", String::from_utf8_lossy(&result.stderr));
