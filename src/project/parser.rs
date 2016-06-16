@@ -454,12 +454,12 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Command = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().find(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
-    }).collect();
+    }).unwrap();
 
-    let root = match remains[0] {
+    let root = match remains {
         Command::SendKeys(ref k) => k,
         _ => panic!("nope")
     };
