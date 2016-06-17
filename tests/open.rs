@@ -13,8 +13,6 @@ mod open {
     use std::path::PathBuf;
     use std::io::prelude::*;
     use helpers::*;
-    use std::thread::sleep;
-    use std::time::Duration;
 
     fn setup(contents: &'static [u8]) -> (String, PathBuf) {
         let project_name = format!("muxed_int_test_{}", random::<u16>());
