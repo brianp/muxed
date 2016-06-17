@@ -39,13 +39,10 @@ mod open {
     fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name, config_path.parent().unwrap());
-        // Needed as send-keys commands may not be finished executing when we go
-        // to introspect. In the future make all test templates touch a named
-        // .finished file in the last pane/window. Loop until the file exists.
-        // Once it is found we know it's time for inspection. This is better
-        // than sleeping as we may sleep longer than needed. Especially for
-        // tests that don't require the wait time at all.
-        sleep(Duration::new(1,0));
+        let completed = PathBuf::from(format!("/tmp/{}.complete", project_name));
+        let exec = format!("touch {}", completed.display());
+        send_keys(&project_name, &exec);
+        wait_on(&completed);
         let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session

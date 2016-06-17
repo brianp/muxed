@@ -2,9 +2,11 @@
 
 use regex::Regex;
 use std::process::Command;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::thread::sleep;
+use std::time::Duration;
 
 /// List windows will give details about the active sessions in testing.
 /// target: A string represented by the {named_session}:{named_window}
@@ -43,6 +45,23 @@ pub fn kill_session(target: &String) -> () {
         .arg(target)
         .output()
         .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+}
+
+pub fn send_keys(target: &String, exec: &String) -> () {
+    Command::new("tmux")
+        .arg("send-keys")
+        .arg("-t")
+        .arg(target)
+        .arg(exec)
+        .arg("KPEnter")
+        .output()
+        .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+}
+
+pub fn wait_on(file: &PathBuf) -> () {
+    while !file.exists() {
+        sleep(Duration::from_millis(10));
+    }
 }
 
 #[derive(Debug)]
