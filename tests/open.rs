@@ -143,7 +143,7 @@ windows:
   - editor: ''
 ";
         let session = test_with_contents(contents);
-        let active_dir = session.active_dir.as_str().unwrap();
+        let active_dir = session.windows.get("editor").unwrap().get("Dir").unwrap().as_str().unwrap();
         let _ = fs::remove_dir(dir);
         assert_eq!(active_dir, "/tmp/Directory With Spaces");
     }

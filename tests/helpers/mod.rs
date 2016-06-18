@@ -90,11 +90,12 @@ impl TmuxSessionValue {
 pub struct TmuxSession {
     pub num_of_windows: usize,
     pub windows: HashMap<String, HashMap<String, TmuxSessionValue>>,
-    // Active dir is specific to a window, not a session. This should be in the
-    // windows HashMap
-    pub active_dir: TmuxSessionValue,
     pub window_active: TmuxSessionValue
 }
+
+// windows:
+//   Panes: Integer
+//   Dir: String
 
 impl TmuxSession {
     pub fn from_string(results: &String) -> TmuxSession {
@@ -110,6 +111,7 @@ impl TmuxSession {
             for cap in window_name.captures_iter(line) {
                 let name = cap.at(1).unwrap();
                 h.insert("Panes".to_string(), TmuxSession::count_panes(line));
+                h.insert("Dir".to_string(), TmuxSession::retrieve_capture(&line, r"\(Dir: (.*)\)"));
                 windows.insert(name.to_string(), h.clone());
             }
         }
@@ -117,7 +119,6 @@ impl TmuxSession {
         TmuxSession {
           num_of_windows: window_lines.len(),
           windows: windows,
-          active_dir: TmuxSession::retrieve_capture(&window_lines[0], r"\(Dir: (.*)\)"),
           window_active: TmuxSession::retrieve_capture(&window_lines[0], r"\s(.*)\*")
         }
     }
