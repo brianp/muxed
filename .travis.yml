@@ -9,7 +9,6 @@ matrix:
   allow_failures:
     - rust: nightly
     - env: TMUX_VERSION=master
-    - env: TMUX_VERSION=1.9a
   exclude:
     - rust: nightly
       env: TMUX_VERSION=master
@@ -20,13 +19,9 @@ matrix:
     - rust: nightly
       env: TMUX_VERSION=1.9a
     - rust: nightly
-      env: ARCH=x86_64 TMUX_VERSION=2.2
-    - rust: nightly
       env: ARCH=i686 TMUX_VERSION=2.2
 
 env:
-  - ARCH=x86_64
-    TMUX_VERSION=2.2
   - ARCH=i686
     TMUX_VERSION=2.2
   - TMUX_VERSION=master
