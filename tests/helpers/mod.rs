@@ -16,7 +16,7 @@ pub fn list_windows(target: &String) -> String {
                      .arg("-t")
                      .arg(target)
                      .arg("-F")
-                     .arg("'#{window_index}: #{window_name}  (#{window_panes} panes) (Dir: #{pane_current_path})'")
+                     .arg("'#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) (Dir: #{pane_current_path})'")
                      .output()
                      .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
@@ -68,7 +68,10 @@ pub fn wait_on(file: &PathBuf) -> () {
 pub struct TmuxSession {
     pub num_of_windows: usize,
     pub windows: HashMap<String, HashMap<String, usize>>,
-    pub active_dir: String
+    // Active dir is specific to a window, not a session. This should be in the
+    // windows HashMap
+    pub active_dir: String,
+    pub window_active: String
 }
 
 impl TmuxSession {
@@ -92,7 +95,8 @@ impl TmuxSession {
         TmuxSession {
           num_of_windows: window_lines.len(),
           windows: windows,
-          active_dir: TmuxSession::active_dir(&window_lines[0])
+          active_dir: TmuxSession::active_dir(&window_lines[0]),
+          window_active: TmuxSession::window_active(&window_lines[0])
         }
     }
 
@@ -105,6 +109,17 @@ impl TmuxSession {
         }
 
         dir.to_string()
+    }
+
+    pub fn window_active(line: &str) -> String {
+        let active = Regex::new(r"\s(.*)\*").unwrap();
+        let mut window: &str = "";
+
+        for cap in active.captures_iter(line) {
+            window = cap.at(1).unwrap_or("");
+        }
+
+        window.to_string()
     }
 
     pub fn count_panes(line: &str) -> usize {

@@ -147,4 +147,29 @@ windows:
         let _ = fs::remove_dir(dir);
         assert_eq!(active_dir, "/tmp/Directory With Spaces");
     }
+
+    #[test]
+    fn expect_focus_on_the_first_window() {
+        let contents = b"---
+windows: ['ssh', 'git']
+";
+        let session = test_with_contents(contents);
+        assert_eq!(session.window_active, "ssh")
+    }
+
+// This test should exist but we currently don't do anything to list panes.
+//    #[test]
+//    fn expect_focus_on_the_top_pane() {
+//        let contents = b"---
+//windows:
+//  - ssh:
+//    layout: main-horizontal
+//    panes:
+//      - ''
+//      - ''
+//  - git: ''
+//";
+//        let session = test_with_contents(contents);
+//        assert_eq!(session.pane_active, "ssh.0")
+//    }
 }
