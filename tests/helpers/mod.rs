@@ -64,14 +64,36 @@ pub fn wait_on(file: &PathBuf) -> () {
     }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum TmuxSessionValue {
+  Usize(usize),
+  String(String)
+}
+
+impl TmuxSessionValue {
+    pub fn as_str(&self) -> Option<&str> {
+        match self {
+            &TmuxSessionValue::String(ref s) => Some(s),
+            _ => None
+        }
+    }
+
+    pub fn as_usize(&self) -> Option<usize> {
+        match self {
+            &TmuxSessionValue::Usize(s) => Some(s),
+            _ => None
+        }
+    }
+}
+
 #[derive(Debug)]
 pub struct TmuxSession {
     pub num_of_windows: usize,
-    pub windows: HashMap<String, HashMap<String, usize>>,
+    pub windows: HashMap<String, HashMap<String, TmuxSessionValue>>,
     // Active dir is specific to a window, not a session. This should be in the
     // windows HashMap
-    pub active_dir: String,
-    pub window_active: String
+    pub active_dir: TmuxSessionValue,
+    pub window_active: TmuxSessionValue
 }
 
 impl TmuxSession {
@@ -81,7 +103,7 @@ impl TmuxSession {
         let lines: Vec<&str> = results.split("\n").collect();
         let (_, window_lines) = lines.split_last().unwrap();
 
-        let mut windows: HashMap<String, HashMap<String, usize>> = HashMap::new();
+        let mut windows: HashMap<String, HashMap<String, TmuxSessionValue>> = HashMap::new();
         let mut h = HashMap::new();
 
         for line in window_lines {
@@ -95,34 +117,23 @@ impl TmuxSession {
         TmuxSession {
           num_of_windows: window_lines.len(),
           windows: windows,
-          active_dir: TmuxSession::active_dir(&window_lines[0]),
-          window_active: TmuxSession::window_active(&window_lines[0])
+          active_dir: TmuxSession::retrieve_capture(&window_lines[0], r"\(Dir: (.*)\)"),
+          window_active: TmuxSession::retrieve_capture(&window_lines[0], r"\s(.*)\*")
         }
     }
 
-    pub fn active_dir(line: &str) -> String {
-        let panes = Regex::new(r"\(Dir: (.*)\)").unwrap();
-        let mut dir: &str = "";
+    pub fn retrieve_capture(line: &str, pattern: &str) -> TmuxSessionValue {
+        let reg = Regex::new(pattern).unwrap();
+        let mut val: &str = "";
 
-        for cap in panes.captures_iter(line) {
-            dir = cap.at(1).unwrap_or("Nope");
+        for cap in reg.captures_iter(line) {
+            val = cap.at(1).unwrap_or("Nope");
         }
 
-        dir.to_string()
+        TmuxSessionValue::String(val.to_string())
     }
 
-    pub fn window_active(line: &str) -> String {
-        let active = Regex::new(r"\s(.*)\*").unwrap();
-        let mut window: &str = "";
-
-        for cap in active.captures_iter(line) {
-            window = cap.at(1).unwrap_or("");
-        }
-
-        window.to_string()
-    }
-
-    pub fn count_panes(line: &str) -> usize {
+    pub fn count_panes(line: &str) -> TmuxSessionValue {
         let panes = Regex::new(r"\((\d*) panes\)").unwrap();
         let mut num: &str = "";
 
@@ -130,27 +141,27 @@ impl TmuxSession {
             num = cap.at(1).unwrap_or("0");
         }
 
-        usize::from_str(num).unwrap()
+        TmuxSessionValue::Usize(usize::from_str(num).unwrap())
     }
 }
 
 #[test]
 fn count_panes_returns_two() {
     let num = TmuxSession::count_panes("1: ssh (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-    assert_eq!(num, 2)
+    assert_eq!(num.as_usize().unwrap(), 2)
 }
 
 #[test]
 fn count_panes_returns_one() {
     let num = TmuxSession::count_panes("1: ssh (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
-    assert_eq!(num, 1)
+    assert_eq!(num.as_usize().unwrap(), 1)
 }
 
 #[test]
 fn parses_with_trailing_whitespace_after_window_name() {
     let config = "1: ssh  (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -159,7 +170,7 @@ fn parses_with_trailing_whitespace_after_window_name() {
 fn parses_with_previous_flag() {
     let config = "1: ssh- (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -168,7 +179,7 @@ fn parses_with_previous_flag() {
 fn parses_with_dollar_sign_flag() {
     let config = "1: ssh$ (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -177,7 +188,7 @@ fn parses_with_dollar_sign_flag() {
 fn parses_with_window_flag() {
     let config = "1: ssh* (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
+    let panes = session.windows.get("ssh").unwrap().get("Panes").unwrap().as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -197,9 +208,9 @@ fn count_four_total_panes() {
                   2: vim- (1 panes) [173x42] [layout b5be,173x42,0,0,1] @1
                   3: bash* (2 panes) [173x42] [layout b5bf,173x42,0,0,2] @2 (active)\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let num = session.windows.get("ssh").unwrap().get("Panes").unwrap().to_owned();
-    let num1 = session.windows.get("vim").unwrap().get("Panes").unwrap().to_owned();
-    let num2 = session.windows.get("bash").unwrap().get("Panes").unwrap().to_owned();
+    let num = session.windows.get("ssh").unwrap().get("Panes").unwrap().as_usize().unwrap();
+    let num1 = session.windows.get("vim").unwrap().get("Panes").unwrap().as_usize().unwrap();
+    let num2 = session.windows.get("bash").unwrap().get("Panes").unwrap().as_usize().unwrap();
     assert_eq!(num, 1);
     assert_eq!(num1, 1);
     assert_eq!(num2, 2)

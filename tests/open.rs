@@ -86,7 +86,7 @@ windows:
       panes: ['ls', 'vi']
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
+        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().as_usize().unwrap();
         assert_eq!(num, 2)
     }
 
@@ -102,8 +102,8 @@ windows:
       panes: ['ls', 'vi', 'ls']
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
-        let num1 = session.windows.get("tests").unwrap().get("Panes").unwrap().to_owned();
+        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().as_usize().unwrap();
+        let num1 = session.windows.get("tests").unwrap().get("Panes").unwrap().as_usize().unwrap();
         assert_eq!(num, 2);
         assert_eq!(num1, 3)
     }
@@ -129,7 +129,7 @@ windows:
         -
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
+        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().as_usize().unwrap();
         assert_eq!(num, 2)
     }
 
@@ -143,7 +143,7 @@ windows:
   - editor: ''
 ";
         let session = test_with_contents(contents);
-        let active_dir = session.active_dir;
+        let active_dir = session.active_dir.as_str().unwrap();
         let _ = fs::remove_dir(dir);
         assert_eq!(active_dir, "/tmp/Directory With Spaces");
     }
@@ -154,7 +154,8 @@ windows:
 windows: ['ssh', 'git']
 ";
         let session = test_with_contents(contents);
-        assert_eq!(session.window_active, "ssh")
+        let window_active = session.window_active.as_str().unwrap();
+        assert_eq!(window_active, "ssh")
     }
 
 // This test should exist but we currently don't do anything to list panes.
