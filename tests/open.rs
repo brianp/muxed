@@ -37,6 +37,10 @@ mod open {
     fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name, config_path.parent().unwrap());
+        let completed = PathBuf::from(format!("/tmp/{}.complete", project_name));
+        let exec = format!("touch {}", completed.display());
+        send_keys(&project_name, &exec);
+        wait_on(&completed);
         let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session
@@ -127,5 +131,20 @@ windows:
         let session = test_with_contents(contents);
         let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
         assert_eq!(num, 2)
+    }
+
+    #[test]
+    fn expect_to_open_in_directory_containing_spaces() {
+        let dir = PathBuf::from("/tmp/Directory With Spaces/");
+        if !dir.exists() { println!("{:?}", fs::create_dir(&dir)) };
+        let contents = b"---
+root: /tmp/Directory With Spaces/
+windows:
+  - editor: ''
+";
+        let session = test_with_contents(contents);
+        let active_dir = session.active_dir;
+        let _ = fs::remove_dir(dir);
+        assert_eq!(active_dir, "/tmp/Directory With Spaces");
     }
 }
