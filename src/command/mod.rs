@@ -66,6 +66,22 @@ pub struct Attach {
     pub name: String
 }
 
+/// Used to move focus back to the first window.
+/// target: The target window. In the format `{session}:{window}`.
+#[derive(Debug)]
+#[derive(Clone)]
+pub struct SelectWindow {
+    pub target: String
+}
+
+/// Used to move focus back to the top pane.
+/// target: The target pane. In the format `{session}:{window}.{pane-target}`.
+#[derive(Debug)]
+#[derive(Clone)]
+pub struct SelectPane {
+    pub target: String
+}
+
 /// The Command enum. Commands represent the series of commands sent to the
 /// running tmux process to build a users env. This is an enum to support
 /// containing all the commands that require running in a single Vec. This
@@ -78,5 +94,7 @@ pub enum Command {
     Split(Split),
     Layout(Layout),
     SendKeys(SendKeys),
-    Attach(Attach)
+    Attach(Attach),
+    SelectWindow(SelectWindow),
+    SelectPane(SelectPane)
 }
