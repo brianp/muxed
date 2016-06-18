@@ -49,7 +49,7 @@ mod open {
     #[test]
     fn opens_3_windows_from_array() {
         let contents = b"---
-windows: ['vi', 'ls', 'git']
+windows: ['ls', 'vi', 'git']
 ";
         let session = test_with_contents(contents);
         assert_eq!(session.num_of_windows, 3)
@@ -61,7 +61,7 @@ windows: ['vi', 'ls', 'git']
 windows:
   - editor:
       layout: 'main-vertical'
-      panes: ['vi', 'ls']
+      panes: ['ls', 'vi']
   - stuff: ''
 ";
         let session = test_with_contents(contents);
@@ -83,7 +83,7 @@ windows: [1, 'ls', 3]
 windows:
   - editor:
       layout: 'main-vertical'
-      panes: ['vi', 'ls']
+      panes: ['ls', 'vi']
 ";
         let session = test_with_contents(contents);
         let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
@@ -96,10 +96,10 @@ windows:
 windows:
   - editor:
       layout: 'main-vertical'
-      panes: ['vi', 'ls']
+      panes: ['ls', 'vi']
   - tests:
       layout: 'main-vertical'
-      panes: ['vi', 'ls', 'ls']
+      panes: ['ls', 'vi', 'ls']
 ";
         let session = test_with_contents(contents);
         let num = session.windows.get("editor").unwrap().get("Panes").unwrap().to_owned();
