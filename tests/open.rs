@@ -86,7 +86,7 @@ windows:
       panes: ['ls', 'vi']
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().as_usize().unwrap();
+        let num = session.windows.get("editor").unwrap().panes.as_usize().unwrap();
         assert_eq!(num, 2)
     }
 
@@ -102,8 +102,8 @@ windows:
       panes: ['ls', 'vi', 'ls']
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().as_usize().unwrap();
-        let num1 = session.windows.get("tests").unwrap().get("Panes").unwrap().as_usize().unwrap();
+        let num = session.windows.get("editor").unwrap().panes.as_usize().unwrap();
+        let num1 = session.windows.get("tests").unwrap().panes.as_usize().unwrap();
         assert_eq!(num, 2);
         assert_eq!(num1, 3)
     }
@@ -129,7 +129,7 @@ windows:
         -
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().get("Panes").unwrap().as_usize().unwrap();
+        let num = session.windows.get("editor").unwrap().panes.as_usize().unwrap();
         assert_eq!(num, 2)
     }
 
@@ -143,9 +143,9 @@ windows:
   - editor: ''
 ";
         let session = test_with_contents(contents);
-        let active_dir = session.windows.get("editor").unwrap().get("Dir").unwrap().as_str().unwrap();
+        let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
         let _ = fs::remove_dir(dir);
-        assert_eq!(active_dir, "/tmp/Directory With Spaces");
+        assert_eq!(pane_current_path, "/tmp/Directory With Spaces");
     }
 
     #[test]
