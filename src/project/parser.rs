@@ -2,7 +2,7 @@
 /// processed later.
 
 use yaml_rust::Yaml;
-use command::{Command, Session, SendKeys, Split, Layout, Window, Attach};
+use command::*;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 

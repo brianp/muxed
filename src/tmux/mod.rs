@@ -155,6 +155,34 @@ pub fn send_keys(target: &String, exec: &String) -> () {
     call(format!("send-keys -t {} '{}' KPEnter", target, exec));
 }
 
+/// This is used to re-select the first window before
+/// attaching to the session.
+///
+/// # Examples
+///
+/// ```
+/// tmux::select_window("muxed:cargo.0".to_string());
+/// ```
+///
+/// target: A string represented by the {named_session}:{named_window}.{pane}
+pub fn select_window(target: &String) -> () {
+    call(format!("select-window -t {}", target));
+}
+
+/// This is used to re-select the top pane in the first window before
+/// attaching to the session.
+///
+/// # Examples
+///
+/// ```
+/// tmux::select_pane("muxed:cargo.top".to_string());
+/// ```
+///
+/// target: A string represented by the {named_session}:{named_window}.{pane}
+pub fn select_pane(target: &String) -> () {
+    call(format!("select-pane -t {}", target));
+}
+
 /// List Windows is used firgure out if a named session is already running.
 ///
 /// # Examples
