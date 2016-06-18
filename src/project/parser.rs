@@ -114,8 +114,6 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
         };
     };
 
-    if !daemonize { commands.push(Command::Attach(Attach{name: project_name.clone()})) };
-
     let (first, commands) = commands.split_first().unwrap();
     let mut remains = commands.to_vec();
 
@@ -125,9 +123,14 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                 name: project_name.clone(),
                 window_name: w.name.clone()
             }));
+
+            remains.push(Command::SelectWindow(SelectWindow{target: format!("{}:{}", &project_name, &w.name)}));
+            remains.push(Command::SelectPane(SelectPane{target: format!("{}:{}.top", &project_name, &w.name)}));
         },
         _ => {}
     };
+
+    if !daemonize { remains.push(Command::Attach(Attach{name: project_name.clone()})) };
 
     Ok(remains)
 }
@@ -465,4 +468,32 @@ windows:
     };
 
     assert_eq!(root.exec, "cd \"~/JustPlainSimple Technologies Inc./financials/ledgers\"")
+}
+
+#[test]
+pub fn expect_1_select_window() {
+    let s = "---
+windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SelectWindow(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 1)
+}
+
+#[test]
+pub fn expect_1_select_pane() {
+    let s = "---
+windows: ['cargo', 'vim', 'git']
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+        &Command::SelectPane(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 1)
 }
