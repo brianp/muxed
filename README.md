@@ -4,11 +4,9 @@ Muxed
 
 ## Another TMUX project manager
 
-Currently this project is _not stable_ and in active development (May, 2016). This means it compiles on Rustlang stable and can be used to manage projects in the "happy path."
-
-What's the happy path mean? You must meet all requirements and use simple configs.
-
-Work on stability, setup, and resilience are planned for the immediate future.
+Currently this project is _semi-stable_ and in active development (June, 2016).
+Muxed is usable with simple project configs, and testable with config you may already have (see the `-p` option.)
+Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
 ## Setup
 
