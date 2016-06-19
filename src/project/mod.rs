@@ -4,7 +4,7 @@
 
 use std::path::{Path, PathBuf};
 use std::io::prelude::*;
-use std::fs::File;
+use std::fs::{File, create_dir};
 use yaml_rust::{YamlLoader, Yaml};
 use command::{Command, Attach};
 use tmux::{has_session};
@@ -39,6 +39,12 @@ pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yam
     let home = try!(homedir().map_err(|e| e));
     let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
     let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
+
+    if !Path::new(muxed_dir).exists() {
+        try!(create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e)));
+        println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir);
+        println!("Creating that now \u{1F44C}\n")
+    };
 
     let config = format!("{}/{}.yml", muxed_dir, project_name);
     let path = Path::new(&config);
