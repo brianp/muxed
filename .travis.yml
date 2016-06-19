@@ -9,6 +9,7 @@ matrix:
   allow_failures:
     - rust: nightly
     - env: TMUX_VERSION=master
+    - env: TMUX_VERSION=1.9a
   exclude:
     - rust: nightly
       env: TMUX_VERSION=master
