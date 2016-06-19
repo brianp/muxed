@@ -52,7 +52,7 @@ pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yam
 }
 
 /// Return the users homedir as a string.
-#[cfg(not(test))] fn homedir() -> Result<PathBuf, String>{
+#[cfg(not(test))] fn homedir() -> Result<PathBuf, String> {
     match home_dir() {
         Some(dir) => Ok(dir),
         None      => Err(String::from("We couldn't find your home directory."))
