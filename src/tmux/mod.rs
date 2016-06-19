@@ -30,7 +30,7 @@ static TMUX_NAME: &'static str = "tmux";
 /// This function will make an `unsafe` call out to the system to execute tmux
 /// related commands.
 fn call(command: String) -> () {
-    let line = format!("{} {}", TMUX_NAME, command);
+    let line = format!("{} {} {}", TMUX_NAME, command, ">/dev/null");
     let system_call = CString::new(line.clone()).unwrap();
     //println!("{}", line.clone());
     unsafe { system(system_call.as_ptr()); };
