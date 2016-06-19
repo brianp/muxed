@@ -133,6 +133,7 @@ impl TmuxSession {
 
         for cap in reg.captures_iter(line) {
             val = cap.at(1).unwrap_or("Nope");
+            break;
         }
 
         SessionValue::String(val.to_string())
@@ -219,4 +220,11 @@ fn count_four_total_panes() {
     assert_eq!(num, 1);
     assert_eq!(num1, 1);
     assert_eq!(num2, 2)
+}
+
+#[test]
+fn expect_vim1_to_be_captured() {
+    let line = "2: vim1* (1 panes) vim2* (Dir: /Projects/muxed)";
+    let result = TmuxSession::retrieve_capture(&line, r"\s(vim[0-9])\*");
+    assert_eq!(result.as_str().unwrap(), "vim1")
 }
