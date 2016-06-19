@@ -5,7 +5,7 @@ Muxed
 ## Another TMUX project manager
 
 Currently this project is _semi-stable_ and in active development (June, 2016).
-Muxed is usable with simple project configs, and testable with config you may already have (see the `-p` option.)
+Muxed is usable with simple project configs, and testable with configs you may already have (see the `-p` option.)
 Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
 ## Setup
