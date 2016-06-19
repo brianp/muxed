@@ -188,14 +188,14 @@ pub fn select_pane(target: &String) -> () {
 /// # Examples
 ///
 /// ```
-/// tmux::list_windows("muxed:cargo".to_string());
+/// tmux::has_session("muxed".to_string());
 /// => ExitStatus
 /// ```
 ///
 /// target: A string represented by the {named_session}
-pub fn list_windows(target: &String) -> ExitStatus {
+pub fn has_session(target: &String) -> ExitStatus {
     let output = Command::new("tmux")
-                     .arg("list-windows")
+                     .arg("has-session")
                      .arg("-t")
                      .arg(target)
                      .output()
