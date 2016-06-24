@@ -12,7 +12,8 @@ use project::parser;
 use project::processor;
 use clap::{Arg, App, AppSettings};
 use command::Command;
-use std::process;
+use std::{process, env};
+use std::process::exit;
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -51,20 +52,26 @@ macro_rules! try_or_err (
 /// $ ./muxed projectName
 /// ```
 pub fn main() {
-    let matches = App::new("Muxed")
+    let mut app = App::new("Muxed")
                       .version(env!("CARGO_PKG_VERSION"))
                       .author("Brian Pearce")
                       .about("Another TMUX project manager")
                       .setting(AppSettings::TrailingVarArg)
+                      .usage("muxed [FLAGS] [OPTIONS] <PROJECT_NAME>")
                       .arg(Arg::with_name("PROJECT_NAME")
                            .help("The name of your poject to open")
                            .index(1)
-                           .required(true)
+                           .multiple(false)
                            .takes_value(true))
                       .arg(Arg::with_name("daemonize")
                            .short("d")
                            .multiple(false)
                            .help("If you want to create a muxed session without connecting to it"))
+                      .arg(Arg::with_name("help")
+                           .short("h")
+                           .long("help")
+                           .help("Prints help information")
+                           .takes_value(false))
                       .arg(Arg::with_name("PROJECT_DIR")
                            .short("p")
                            .multiple(false)
@@ -73,12 +80,22 @@ pub fn main() {
                            .help("The directory your project config files live in. Defaults to ~/.muxed/"))
                       .arg(Arg::with_name("REST")
                           .multiple(true)
-                          .hidden(true))
-                      .get_matches();
+                          .hidden(true));
 
-    let project_name = matches.value_of("PROJECT_NAME").unwrap();
-    let daemonize = matches.is_present("daemonize");
-    let muxed_dir = matches.value_of("PROJECT_DIR");
+    let matches = &app.get_matches_from_safe_borrow(env::args()).unwrap();
+
+    let project_name: &str;
+    if matches.value_of("PROJECT_NAME").is_some() {
+        project_name = matches.value_of("PROJECT_NAME").unwrap();
+    } else {
+        println!("No project name specified.");
+        println!("error: The following required arguments were not provided:
+<PROJECT_NAME>
+
+USAGE:
+muxed <PROJECT_NAME>");
+        exit(1);
+    };
 
     match project_name {
         "new" => {
@@ -87,20 +104,31 @@ pub fn main() {
                 let trail: Vec<&str> = matches.values_of("REST").unwrap().collect();
                 trail.iter().fold(&mut cmd, |c, i| c.arg(i));
             };
-            let result = cmd.output().unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
+            if matches.is_present("help") { cmd.arg("--help"); };
+
+            let result = try_or_err!(cmd.output().map_err(|e| format!("It looks like muxednew might not be installed or we don't have access to it.\nWe received this system error while trying to call the subcommand: `{}`", e)));
+            // Lets add an error code they can call on for more details. Why
+            // isn't muxed new installed?
             println!("{}", String::from_utf8_lossy(&result.stdout));
             println!("{}", String::from_utf8_lossy(&result.stderr));
-            return;
+            if let Some(c) = result.status.code() { exit(c); };
         }
-        // Continue on
+        // No SubCommands found continue on.
         _     => {}
     }
 
+    if matches.is_present("help") {
+        let _ = &app.print_help();
+        println!("\n");
+        exit(0);
+    };
+
     let project_name = project_name.to_string();
+    let daemonize = matches.is_present("daemonize");
+    let muxed_dir = matches.value_of("PROJECT_DIR");
 
     let commands: Vec<Command>;
-    // This refactoring could make a good conference talk example
     match project::session_exists(&project_name) {
         Some(c) => {
             commands = vec!(c);
