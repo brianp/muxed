@@ -37,10 +37,10 @@ windows:
 ```
 
 This will create a new tmux session with three windows named *editor*,
-*processes* and *logs*. By default your view will be on the last window opened,
-which in this case is *logs*. The first window will have two panes split
-vertically, the left will have the editor *vi* running and the right will have a
-shell listing of your current working directory.
+*processes* and *logs*. By default your view will be on the first window opened,
+on the top-most pane, which in this case is *logs*. The first window will have
+two panes split vertically, the left will have the editor *vi* running and the
+right will have a shell listing of your current working directory.
 
 A one liner for creating the above config:
 ```bash
