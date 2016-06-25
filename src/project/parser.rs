@@ -35,8 +35,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
             let mut commands2 = vec!();
 
             // SendKeys to change to the `root` directory
-            if root.is_some() {
-                let r = root.clone().unwrap();
+            if let Some(r) = root.clone() {
                 commands2.push(Command::SendKeys(SendKeys{
                     target: target.clone(),
                     exec: format!("cd \"{}\"", r)
@@ -44,8 +43,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
             };
 
             // SendKeys for the Pre option
-            if pre.is_some() {
-                let p = pre.clone().unwrap();
+            if let Some(p) = pre.clone() {
                 commands2.push(Command::SendKeys(SendKeys{
                     target: target.clone(),
                     exec: p
@@ -79,8 +77,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                             commands.append(&mut common_commands(t.to_string()));
 
                             // SendKeys for the exec command
-                            if v.as_str().is_some() {
-                                let ex = v.as_str().unwrap();
+                            if let Some(ex) = v.as_str() {
                                 if !ex.is_empty() {
                                     commands.push(Command::SendKeys(SendKeys{
                                         target: format!("{}:{}", project_name, k.as_str().unwrap()).to_string(),
@@ -159,8 +156,7 @@ fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T) -> Result<Ve
 
         // Execute given commands in each new pane after all splits are
         // complete.
-        if pane.as_str().is_some() {
-            let p = pane.as_str().unwrap();
+        if let Some(p) = pane.as_str() {
             if !p.is_empty() {
                 commands.push(Command::SendKeys(SendKeys{
                     target: t.to_string(),
