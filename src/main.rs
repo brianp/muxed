@@ -23,7 +23,7 @@ macro_rules! try_or_err (
             Err(e) => {
               println!("Muxed ran in to a problem:");
               println!("{}", e);
-              return
+              exit(1);
             }
         }
     })
