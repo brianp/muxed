@@ -84,9 +84,17 @@ pub fn main() {
 
     let matches = &app.get_matches_from_safe_borrow(env::args()).unwrap();
 
+    // We check for help twice. We don't want to short circuit early incase help
+    // is supposed to get passed to the subcommand.
     let project_name: &str;
     if matches.value_of("PROJECT_NAME").is_some() {
         project_name = matches.value_of("PROJECT_NAME").unwrap();
+    } else if matches.is_present("help") {
+        let _ = &app.print_help();
+        println!("\n");
+        println!("SUBCOMMANDS:");
+        println!("    new    The name of your poject to create\n");
+        exit(0);
     } else {
         println!("No project name specified.");
         println!("error: The following required arguments were not provided:
@@ -107,7 +115,7 @@ muxed <PROJECT_NAME>");
 
             if matches.is_present("help") { cmd.arg("--help"); };
 
-            let result = try_or_err!(cmd.output().map_err(|e| format!("It looks like muxednew might not be installed or we don't have access to it.\nWe received this system error while trying to call the subcommand: `{}`", e)));
+            let result = try_or_err!(cmd.output().map_err(|e| format!("It looks like muxednew might not be installed or we don't have access to it.\nWe received this system error while trying to call the subcommand `new`: `{}`", e)));
             // Lets add an error code they can call on for more details. Why
             // isn't muxed new installed?
             println!("{}", String::from_utf8_lossy(&result.stdout));
@@ -121,6 +129,8 @@ muxed <PROJECT_NAME>");
     if matches.is_present("help") {
         let _ = &app.print_help();
         println!("\n");
+        println!("SUBCOMMANDS:");
+        println!("    new    The name of your poject to create\n");
         exit(0);
     };
 
