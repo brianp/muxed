@@ -40,14 +40,18 @@ packageall: package packageosx
 package: release cpmuxednew target/pkgs/muxed-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz
 target/pkgs/muxed-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz:
 	mkdir -p target/pkgs/
-	cd target/release && tar -cvzf muxed-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz muxed muxednew
+	cd target/release && tar -cvzf muxed-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz muxed
 	mv target/release/muxed-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz target/pkgs/
+	cd target/release && tar -cvzf muxed-complete-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz muxed muxednew
+	mv target/release/muxed-complete-$(VERSION_TAG)-x86_64-unknown-linux-gnu.tar.gz target/pkgs/
 
 packageosx: releaseosx cpmuxednewosx target/pkgs/muxed-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz
 target/pkgs/muxed-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz:
 	mkdir -p target/pkgs/
-	cd target/x86_64-apple-darwin/release && tar -cvzf muxed-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz muxed muxednew
+	cd target/x86_64-apple-darwin/release && tar -cvzf muxed-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz muxed
 	mv target/x86_64-apple-darwin/release/muxed-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz target/pkgs/
+	cd target/x86_64-apple-darwin/release && tar -cvzf muxed-complete-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz muxed muxednew
+	mv target/x86_64-apple-darwin/release/muxed-complete-$(VERSION_TAG)-x86_64-apple-darwin.tar.gz target/pkgs/
 
 help:
 	@echo doc: create public doc
