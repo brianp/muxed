@@ -1,3 +1,17 @@
+<a name="v0.5.0"></a>
+## v0.5.0
+Feature:
+ - Added `new` SubCommand for generating new project files.
+
+Bug:
+ - Silence un-needed output.
+
+Refactored:
+ - Expressions in project/parser.rs to utilize `if let`.
+ - Removed the linker from ./cargo/config. It had conflicts when actually
+   building on osx.
+ - When help is displayed.
+
 <a name="v0.4.0"></a>
 ## v0.4.0 (2016-06-19)
 Enhancement:
