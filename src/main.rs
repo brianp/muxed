@@ -10,6 +10,7 @@ mod project;
 
 use project::parser;
 use project::processor;
+use tmux::config::Config;
 use clap::{Arg, App, AppSettings};
 use command::Command;
 use std::{process, env};
@@ -144,8 +145,9 @@ muxed <PROJECT_NAME>");
             commands = vec!(c);
         },
         None => {
+            let config = Config::from_string(tmux::get_config());
             let yaml = try_or_err!(project::read(&project_name, &muxed_dir));
-            commands = try_or_err!(parser::main(&yaml, &project_name, daemonize));
+            commands = try_or_err!(parser::call(&yaml, &project_name, daemonize, config));
         }
     };
 

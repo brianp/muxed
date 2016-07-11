@@ -5,6 +5,8 @@
 /// call. All functions go through this `call` function as a common gateway to
 /// system calls and can all be easily logged there.
 
+pub mod config;
+
 use libc::system;
 use std::ffi::CString;
 use std::process::{Command, ExitStatus};
@@ -194,7 +196,7 @@ pub fn select_pane(target: &String) -> () {
 ///
 /// target: A string represented by the {named_session}
 pub fn has_session(target: &String) -> ExitStatus {
-    let output = Command::new("tmux")
+    let output = Command::new(TMUX_NAME)
                      .arg("has-session")
                      .arg("-t")
                      .arg(target)
@@ -202,4 +204,21 @@ pub fn has_session(target: &String) -> ExitStatus {
                      .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
     output.status
+}
+
+/// Read the tmux config and return a config object
+///
+/// # Examples
+///
+/// ```
+/// tmux::get_config();
+/// => "some-option false\npane-base-index 0"
+/// ```
+pub fn get_config() -> String {
+    let output = Command::new(TMUX_NAME)
+                     .args(&["start-server", ";", "show-options", "-g"])
+                     .output()
+                     .unwrap_or_else(|e| { panic!("couldn't get tmux options: {}", e) });
+
+    String::from_utf8_lossy(&output.stdout).to_string()
 }
