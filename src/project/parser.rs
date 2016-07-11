@@ -123,7 +123,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             }));
 
             remains.push(Command::SelectWindow(SelectWindow{target: format!("{}:{}", &project_name, &w.name)}));
-            remains.push(Command::SelectPane(SelectPane{target: format!("{}:{}.top", &project_name, &w.name)}));
+            remains.push(Command::SelectPane(SelectPane{target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index)}));
         },
         _ => {}
     };
