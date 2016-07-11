@@ -145,7 +145,9 @@ windows:
         let session = test_with_contents(contents);
         let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
         let _ = fs::remove_dir(dir);
-        assert_eq!(pane_current_path, "/tmp/Directory With Spaces");
+        // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
+        // resulting in `pane_current_path` being `/private/tmp/Direct…`
+        assert!(pane_current_path.contains("/tmp/Directory With Spaces"));
     }
 
     #[test]
