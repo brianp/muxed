@@ -3,16 +3,17 @@
 
 use yaml_rust::Yaml;
 use command::*;
+use tmux::config::Config;
 
 #[cfg(test)] use yaml_rust::{YamlLoader};
 
-/// Here was pass in the parsed yaml and project name. The purpose of this main
+/// Here was pass in the parsed yaml and project name. The purpose of this call
 /// loop is to build the stack of commands that are run to setup a users tmux
 /// session.
 ///
 /// yaml_string: The parsed yaml from the config file.
 /// project_name: The name of the project.
-pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> Result<Vec<Command>, String> {
+pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmux_config: Config) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
 
     // There should only be one doc but it's a vec so loop it.
@@ -66,7 +67,7 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
                             }));
 
                             let target = format!("{}:{}", project_name, k.as_str().unwrap());
-                            commands.append(&mut try!(pane_matcher(v, &target, &common_commands)));
+                            commands.append(&mut try!(pane_matcher(v, &target, &common_commands, &tmux_config)));
                         } else {
                             commands.push(Command::Window(Window{
                                 session_name: project_name.clone(),
@@ -134,14 +135,15 @@ pub fn main(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool) -> 
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T) -> Result<Vec<Command>, String>
+fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T, tmux_config: &Config) -> Result<Vec<Command>, String>
     where T : Fn(String) -> Vec<Command> {
 
     let mut commands = vec!();
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
     for (i, pane) in panes.iter().enumerate() {
-        let t = format!("{}.{}", target, i);
+        let index_base = tmux_config.pane_base_index;
+        let t = format!("{}.{}", target, i+index_base);
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len()-1) {
@@ -185,7 +187,7 @@ pub fn expect_1_session() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Session(_) => true,
         _ => false
     }).collect();
@@ -199,7 +201,7 @@ pub fn expect_2_windows_from_array() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -213,7 +215,7 @@ pub fn expect_1_attach() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Attach(_) => true,
         _ => false
     }).collect();
@@ -227,7 +229,7 @@ pub fn expect_2_windows_with_mixed_type_names() {
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -243,7 +245,7 @@ windows:
   - git: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Window(_) => true,
         _ => false
     }).collect();
@@ -257,7 +259,7 @@ windows:
   - editor:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let result = main(&yaml, &"muxed".to_string(), false);
+    let result = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0});
     assert!(result.is_ok())
 }
 
@@ -269,7 +271,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
     }).collect();
@@ -284,7 +286,7 @@ windows:
   - : ls
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let result = main(&yaml, &"muxed".to_string(), false);
+    let result = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0});
     assert!(result.is_err())
 }
 
@@ -298,7 +300,7 @@ windows:
         -
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let result = main(&yaml, &"muxed".to_string(), false);
+    let result = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0});
     assert!(result.is_ok())
 }
 
@@ -312,7 +314,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
     }).collect();
@@ -330,7 +332,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Split(_) => true,
         _ => false
     }).collect();
@@ -348,7 +350,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Layout(_) => true,
         _ => false
     }).collect();
@@ -366,7 +368,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Session(_) => true,
         _ => false
     }).collect();
@@ -383,7 +385,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::Layout(_) => true,
         _ => false
     }).collect();
@@ -403,7 +405,7 @@ windows:
   - logs:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
     }).collect();
@@ -420,7 +422,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
     }).collect();
@@ -436,7 +438,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
     }).collect();
@@ -453,7 +455,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Command = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().find(|x| match x {
+    let remains: Command = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().find(|x| match x {
         &Command::SendKeys(_) => true,
         _ => false
     }).unwrap();
@@ -472,7 +474,7 @@ pub fn expect_1_select_window() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SelectWindow(_) => true,
         _ => false
     }).collect();
@@ -486,7 +488,7 @@ pub fn expect_1_select_pane() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = main(&yaml, &"muxed".to_string(), false).unwrap().into_iter().filter(|x| match x {
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
         &Command::SelectPane(_) => true,
         _ => false
     }).collect();
