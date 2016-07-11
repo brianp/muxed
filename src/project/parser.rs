@@ -142,8 +142,7 @@ fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T, tmux_config:
     let panes = window["panes"].as_vec().expect("Something is wrong with panes.");
 
     for (i, pane) in panes.iter().enumerate() {
-        let index_base = tmux_config.pane_base_index;
-        let t = format!("{}.{}", target, i+index_base);
+        let t = format!("{}.{}", target, i+tmux_config.pane_base_index);
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len()-1) {
