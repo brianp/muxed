@@ -6,7 +6,7 @@ authors = ["Brian Pearce"]
 [dependencies]
 libc      = "0.2.10"
 yaml-rust = { version = "0.3.2", default-features = false }
-clap      = { version = "2.9.2", default-features = false, git = "https://github.com/kbknapp/clap-rs.git" }
+clap      = { version = "2.9.2", default-features = false }
 
 [dev-dependencies]
 rand      = "0.3"
