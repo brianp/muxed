@@ -4,55 +4,28 @@ Muxed
 
 ## Another TMUX project manager
 
-Currently this project is _semi-stable_ and in active development (June, 2016).
+Currently this project is _semi-stable_ and in active development (July, 2016).
 Muxed is usable with simple project configs, and testable with configs you may already have (see the `-p` option.)
 Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
-## Setup
+## Muxed Tools
 
-### 1. Create a new `.muxed` project directory.
+**muxed**: Provides the functionality for opening and parsing your project configs to
+launch a TMUX session.
 
-```bash
-$ mkdir ~/.muxed/
-```
-
-### 2. Create a new yaml config for your project.
-The config file name should match your project name, and will be used to call on the project in step 4.
-
-```bash
-$ touch ~/.muxed/my_project.yml
-```
-
-### 3. Copy a simple config in to your project config file.
-
-Example config:
-```yaml
-root: "~/"
-windows:
-  - editor:
-      layout: "main-vertical"
-      panes: ["vi", "ls -alh"]
-  - processes: "ls /proc"
-  - logs: "tail -f /var/log/dmesg"
-```
-
-This will create a new tmux session with three windows named *editor*,
-*processes* and *logs*. By default your view will be on the first window opened,
-on the top-most pane, which in this case is *logs*. The first window will have
-two panes split vertically, the left will have the editor *vi* running and the
-right will have a shell listing of your current working directory.
-
-A one liner for creating the above config:
-```bash
-$ printf 'root: "~/"\nwindows:\n  - editor:\n      layout: "main-vertical"\n      panes: ["vi", "ls -alh"]\n  - processes: "ls /proc"\n  - logs: "tail -f /var/log/dmesg"' > ~/.muxed/my_project.yml
-```
+**muxednew**: Provides a template generator to create new project files. See the `new`
+subcommand in [Usage](#usage-options).
 
 ## Installation
 
 ### Download:
 
-See the [releases](https://github.com/brianp/muxed/releases) page for muxed packages. Download and untar the package as desired.
-Make sure the `muxed` binary is somewhere in your `$PATH`. I generally move the binary in to `/usr/local/bin`.
+See the [releases](https://github.com/brianp/muxed/releases) page for muxed packages.
+Download and untar the package as desired. The muxed-complete package contains
+both `muxed` and `muxednew`. The stand alone muxed package
+only contains the `muxed` bin.
+Make sure the `muxed` and `muxednew` bins are somewhere in your `$PATH`. I
+generally move the bins in to `/usr/local/bin`.
 
 ```bash
 $ tar -xvzf muxed-VERSION-SYSTEM.tar.gz
@@ -74,6 +47,51 @@ $ cargo run -- --help
 $ cargo run my_project
 ```
 
+## Setup
+
+### 1. Create a new project file.
+
+If this is your first run, muxed will create the `~/.muxed/` directory for you.
+
+```bash
+$ muxed new my_project
+Looks like this is your first time here. Muxed could't find the configuration directory: `/home/vagrant/.muxed`
+Creating that now 👌
+
+✌ The template file my_project.yml has been written to /home/vagrant/.muxed
+Happy tmuxing!
+```
+
+The generated template will look like this (but with some inline docs):
+```yaml
+root: "~/"
+windows:
+  - editor:
+      layout: "main-vertical"
+      panes: ["vi", "ls -alh"]
+  - processes: "ls /proc"
+  - logs: "tail -f /var/log/dmesg"
+```
+
+This config will create a new tmux session with three windows named *editor*,
+*processes* and *logs*. By default your view will be on the first window opened,
+on the first pane, which in this case is *vi* in the *editor* window. The first window will have
+two panes split vertically, the left will have the editor *vi* running and the
+right will have a shell listing of your current working directory.
+
+
+### 2. Edit your template
+Now you can use your favourite editor and make changes to the config as desired.
+
+```bash
+$ $EDITOR ~/.muxed/my_project.yml
+```
+
+### 3. Open TMUX with your muxed config
+```bash
+$ muxed my_project
+```
+
 ## Usage Options
 
 ```shell
@@ -90,6 +108,9 @@ OPTIONS:
 
 ARGS:
     <PROJECT_NAME>    The name of your poject to open
+
+SUBCOMMANDS:
+    new    The name of your poject to create
 ```
 
 ## Inspiration
