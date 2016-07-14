@@ -27,7 +27,7 @@ only contains the `muxed` bin.
 Make sure the `muxed` and `muxednew` bins are somewhere in your `$PATH`. I
 generally move the bins in to `/usr/local/bin`.
 
-```bash
+```shell
 $ tar -xvzf muxed-VERSION-SYSTEM.tar.gz
 x muxed
 $ mv muxed /usr/local/bin
@@ -40,7 +40,7 @@ $ muxed my_project
 Have rust stable (or nightly at the risk of it not working) installed.
 Clone this repo. Then run cargo to build the source, and again use cargo to run the app.
 
-```bash
+```shell
 $ git clone git@github.com:brianp/muxed.git
 $ cargo build
 $ cargo run -- --help
@@ -53,7 +53,7 @@ $ cargo run my_project
 
 If this is your first run, muxed will create the `~/.muxed/` directory for you.
 
-```bash
+```shell
 $ muxed new my_project
 Looks like this is your first time here. Muxed could't find the configuration directory: `/home/vagrant/.muxed`
 Creating that now 👌
@@ -83,12 +83,12 @@ right will have a shell listing of your current working directory.
 ### 2. Edit your template
 Now you can use your favourite editor and make changes to the config as desired.
 
-```bash
+```shell
 $ $EDITOR ~/.muxed/my_project.yml
 ```
 
 ### 3. Open TMUX with your muxed config
-```bash
+```shell
 $ muxed my_project
 ```
 
