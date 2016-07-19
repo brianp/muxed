@@ -1,14 +1,20 @@
 //! The tmux config data we want
+/// This assists in the parsing and accessibility of a users tmux configuration
+/// options. Once the data is parsed we move it into a config struct for easy
+/// access.
 
 use std::collections::HashMap;
 use std::str::FromStr;
 
+/// A simple struct for accessing parsed config options we want to know about.
 #[derive(Debug, Clone)]
 pub struct Config {
     pub base_index: usize,
     pub pane_base_index: usize 
 }
 
+/// The parser of config options. A string of output is passed in. It's simple
+/// key value pairs in the format of `key value\n`
 impl Config {
     pub fn from_string(options: String) -> Config {
         let lines = options.lines();
