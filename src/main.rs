@@ -30,6 +30,13 @@ macro_rules! try_or_err (
     })
 );
 
+pub fn help(mut app: App) -> () {
+    let _ = &app.print_help();
+    println!("\n");
+    println!("SUBCOMMANDS:");
+    println!("    new    The name of your poject to create\n");
+}
+
 /// The main execution method.
 /// Currently accepts a single option. The option represents a configuration
 /// file in the same naming format. Given a project file name `projectName.yml`
@@ -91,10 +98,7 @@ pub fn main() {
     if matches.value_of("PROJECT_NAME").is_some() {
         project_name = matches.value_of("PROJECT_NAME").unwrap();
     } else if matches.is_present("help") {
-        let _ = &app.print_help();
-        println!("\n");
-        println!("SUBCOMMANDS:");
-        println!("    new    The name of your poject to create\n");
+        help(app);
         exit(0);
     } else {
         println!("No project name specified.");
@@ -128,10 +132,7 @@ muxed <PROJECT_NAME>");
     }
 
     if matches.is_present("help") {
-        let _ = &app.print_help();
-        println!("\n");
-        println!("SUBCOMMANDS:");
-        println!("    new    The name of your poject to create\n");
+        help(app);
         exit(0);
     };
 
