@@ -12,7 +12,8 @@
         - git
         - autotools-dev
         - automake
-        - clang-3.5
+        - cmake
+        - clang
 
     #- name: uninstall apt-get packages
     #  apt: name={{ item }} state=absent force=yes
@@ -20,7 +21,7 @@
     #    - tmux
 
     - name: download rust installer
-      get_url: url=http://static.rust-lang.org/rustup.sh dest=/usr/bin/rustup mode=a+x validate_certs=no
+      get_url: url=https://static.rust-lang.org/rustup.sh dest=/usr/bin/rustup mode=a+x validate_certs=no
 
     - name: install rust
       command: rustup #--yes
