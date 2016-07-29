@@ -39,7 +39,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             if let Some(r) = root.clone() {
                 commands2.push(Command::SendKeys(SendKeys{
                     target: target.clone(),
-                    exec: format!("cd \"{}\"", r)
+                    exec: format!("cd {}", &r.replace(" ", "\\ "))
                 }));
             };
 
@@ -464,7 +464,7 @@ windows:
         _ => panic!("nope")
     };
 
-    assert_eq!(root.exec, "cd \"~/JustPlainSimple Technologies Inc./financials/ledgers\"")
+    assert_eq!(root.exec, "cd ~/JustPlainSimple\\ Technologies\\ Inc./financials/ledgers")
 }
 
 #[test]
