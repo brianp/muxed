@@ -23,9 +23,19 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             None    => None
         };
 
-        let pre = match doc["pre"].as_str() {
-            Some(x) => Some(x.to_string()),
-            None    => None
+        let pre = match doc["pre"] {
+            // See if pre contains an array or a string. If it's an array we
+            // need to check the values of it again to verify they are strings.
+            Yaml::String(ref x) => Some(vec!(Some(x.to_string()))),
+            Yaml::Array(ref x)  => Some(
+                x.iter().map(|y|
+                    match y {
+                        &Yaml::String(ref z)  => Some(z.to_string()),
+                        _ => None
+                    }
+                ).collect()
+            ),
+            _ => None
         };
 
         // A clojure used to capture the current local root and pre Options.
@@ -45,10 +55,14 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
 
             // SendKeys for the Pre option
             if let Some(p) = pre.clone() {
-                commands2.push(Command::SendKeys(SendKeys{
-                    target: target.clone(),
-                    exec: p
-                }));
+                for v in p.iter() {
+                    if let &Some(ref r) = v {
+                        commands2.push(Command::SendKeys(SendKeys{
+                            target: target.clone(),
+                            exec: r.clone()
+                        }));
+                    };
+                };
             };
 
             commands2
@@ -394,6 +408,7 @@ windows:
 
 #[test]
 pub fn expect_three_send_keys_commands_from_pre() {
+    // pre gets run on all 2 panes and 1 window for a total of 3
     let s = "---
 pre: 'ls'
 windows:
@@ -410,6 +425,24 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 3)
+}
+
+#[test]
+pub fn expect_two_send_keys_commands_from_pre() {
+    let s = "---
+pre:
+ - 'ls'
+ - 'ls'
+windows:
+  - editor:
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 2)
 }
 
 #[test]
