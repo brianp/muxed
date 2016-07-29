@@ -394,6 +394,7 @@ windows:
 
 #[test]
 pub fn expect_three_send_keys_commands_from_pre() {
+    // pre gets run on all 2 panes and 1 window for a total of 3
     let s = "---
 pre: 'ls'
 windows:
@@ -410,6 +411,24 @@ windows:
     }).collect();
 
     assert_eq!(remains.len(), 3)
+}
+
+#[test]
+pub fn expect_two_send_keys_commands_from_pre() {
+    let s = "---
+pre:
+ - 'ls'
+ - 'ls'
+windows:
+  - editor:
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let remains: Vec<Command> = call(&yaml, &"muxed".to_string(), false, Config{base_index: 0, pane_base_index: 0}).unwrap().into_iter().filter(|x| match x {
+        &Command::SendKeys(_) => true,
+        _ => false
+    }).collect();
+
+    assert_eq!(remains.len(), 2)
 }
 
 #[test]
