@@ -12,6 +12,7 @@ mod open {
     use std::fs;
     use std::path::PathBuf;
     use std::io::prelude::*;
+    use std::env::home_dir;
     use helpers::*;
 
     fn setup(contents: &'static [u8]) -> (String, PathBuf) {
@@ -148,6 +149,30 @@ windows:
         // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
         // resulting in `pane_current_path` being `/private/tmp/Direct…`
         assert!(pane_current_path.contains("/tmp/Directory With Spaces"));
+    }
+
+    #[test]
+    fn expect_home_var_to_open_in_home_dir() {
+        let contents = b"---
+root: '$HOME'
+windows:
+  - editor: ''
+";
+        let session = test_with_contents(contents);
+        let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
+        assert_eq!(pane_current_path, home_dir().unwrap().to_str().unwrap());
+    }
+
+    #[test]
+    fn expect_tilde_slash_to_open_in_home_dir() {
+        let contents = b"---
+root: ~/
+windows:
+  - editor: ''
+";
+        let session = test_with_contents(contents);
+        let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
+        assert_eq!(pane_current_path, home_dir().unwrap().to_str().unwrap());
     }
 
     #[test]
