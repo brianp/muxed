@@ -19,7 +19,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
     // There should only be one doc but it's a vec so loop it.
     for doc in yaml_string {
         let root = match doc["root"].as_str() {
-            Some(x) => Some(x.to_string()),
+            Some(x) => Some(x.to_string().replace(" ", "\\ ")),
             None    => None
         };
 
@@ -39,7 +39,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             if let Some(r) = root.clone() {
                 commands2.push(Command::SendKeys(SendKeys{
                     target: target.clone(),
-                    exec: format!("cd {}", &r.replace(" ", "\\ "))
+                    exec: format!("cd {}", r)
                 }));
             };
 
