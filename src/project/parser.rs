@@ -23,9 +23,19 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             None    => None
         };
 
-        let pre = match doc["pre"].as_str() {
-            Some(x) => Some(x.to_string()),
-            None    => None
+        let pre = match doc["pre"] {
+            // See if pre contains an array or a string. If it's an array we
+            // need to check the values of it again to verify they are strings.
+            Yaml::String(ref x) => Some(vec!(Some(x.to_string()))),
+            Yaml::Array(ref x)  => Some(
+                x.iter().map(|y|
+                    match y {
+                        &Yaml::String(ref z)  => Some(z.to_string()),
+                        _ => None
+                    }
+                ).collect()
+            ),
+            _ => None
         };
 
         // A clojure used to capture the current local root and pre Options.
@@ -45,10 +55,14 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
 
             // SendKeys for the Pre option
             if let Some(p) = pre.clone() {
-                commands2.push(Command::SendKeys(SendKeys{
-                    target: target.clone(),
-                    exec: p
-                }));
+                for v in p.iter() {
+                    if let &Some(ref r) = v {
+                        commands2.push(Command::SendKeys(SendKeys{
+                            target: target.clone(),
+                            exec: r.clone()
+                        }));
+                    };
+                };
             };
 
             commands2
