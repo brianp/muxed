@@ -74,6 +74,14 @@ pub struct SelectPane {
     pub target: String
 }
 
+/// Used for executing the `pre` option to execute commands before building the
+/// tmux session.
+/// exec: The command to execute
+#[derive(Debug, Clone)]
+pub struct Pre {
+    pub exec: String
+}
+
 /// The Command enum. Commands represent the series of commands sent to the
 /// running tmux process to build a users env. This is an enum to support
 /// containing all the commands that require running in a single Vec. This
@@ -87,5 +95,6 @@ pub enum Command {
     SendKeys(SendKeys),
     Attach(Attach),
     SelectWindow(SelectWindow),
-    SelectPane(SelectPane)
+    SelectPane(SelectPane),
+    Pre(Pre)
 }

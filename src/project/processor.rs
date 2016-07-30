@@ -3,6 +3,7 @@
 
 use command::Command;
 use tmux;
+use std::process;
 
 /// Processing of the commands. A simple match occurs to handle the tmux calls
 /// needed based off the command provided. The commands are processed first in,
@@ -31,7 +32,18 @@ pub fn main(commands: &Vec<Command>) -> () {
             &Command::SendKeys(ref c)     => tmux::send_keys(&c.target, &c.exec),
             &Command::Attach(ref c)       => tmux::attach(&c.name),
             &Command::SelectWindow(ref c) => tmux::select_window(&c.target),
-            &Command::SelectPane(ref c)   => tmux::select_pane(&c.target)
+            &Command::SelectPane(ref c)   => tmux::select_pane(&c.target),
+            &Command::Pre(ref c)          => system_calls(&c.exec)
         }
     };
+}
+
+fn system_calls(cmd_string: &String) -> () {
+    let cmd_array: Vec<&str> = cmd_string.split(" ").collect();
+    let (program, args) = cmd_array.split_first().expect("Couldn't find args for pre option");
+
+    process::Command::new(program)
+        .args(args)
+        .output()
+        .expect("Didn't execute the process for the pre option.");
 }
