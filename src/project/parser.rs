@@ -407,10 +407,10 @@ windows:
 }
 
 #[test]
-pub fn expect_three_send_keys_commands_from_pre() {
+pub fn expect_three_send_keys_commands_from_pre_window() {
     // pre gets run on all 2 panes and 1 window for a total of 3
     let s = "---
-pre: 'ls'
+pre_window: 'ls'
 windows:
   - editor:
       panes:
@@ -428,9 +428,9 @@ windows:
 }
 
 #[test]
-pub fn expect_two_send_keys_commands_from_pre() {
+pub fn expect_two_send_keys_commands_from_pre_window() {
     let s = "---
-pre:
+pre_window:
  - 'ls'
  - 'ls'
 windows:
