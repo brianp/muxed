@@ -23,7 +23,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             None    => None
         };
 
-        let pre = match doc["pre"] {
+        let pre_window = match doc["pre_window"] {
             // See if pre contains an array or a string. If it's an array we
             // need to check the values of it again to verify they are strings.
             Yaml::String(ref x) => Some(vec!(Some(x.to_string()))),
@@ -41,7 +41,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
         // A clojure used to capture the current local root and pre Options.
         // This way we can call the clojure to create common SendKeys command
         // like changing the directory or executing a system command from the
-        // `pre` option.
+        // `pre_window` option.
         let common_commands = |target: String| -> Vec<Command> {
             let mut commands2 = vec!();
 
@@ -54,7 +54,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             };
 
             // SendKeys for the Pre option
-            if let Some(p) = pre.clone() {
+            if let Some(p) = pre_window.clone() {
                 for v in p.iter() {
                     if let &Some(ref r) = v {
                         commands2.push(Command::SendKeys(SendKeys{
@@ -165,7 +165,7 @@ fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T, tmux_config:
             }));
         };
 
-        // Call the common_commands clojure to execute `cd` and `pre` options in
+        // Call the common_commands clojure to execute `cd` and `pre_window` options in
         // pane splits.
         commands.append(&mut common_commands(t.to_string()));
 
@@ -407,10 +407,10 @@ windows:
 }
 
 #[test]
-pub fn expect_three_send_keys_commands_from_pre() {
+pub fn expect_three_send_keys_commands_from_pre_window() {
     // pre gets run on all 2 panes and 1 window for a total of 3
     let s = "---
-pre: 'ls'
+pre_window: 'ls'
 windows:
   - editor:
       panes:
@@ -428,9 +428,9 @@ windows:
 }
 
 #[test]
-pub fn expect_two_send_keys_commands_from_pre() {
+pub fn expect_two_send_keys_commands_from_pre_window() {
     let s = "---
-pre:
+pre_window:
  - 'ls'
  - 'ls'
 windows:
