@@ -194,6 +194,23 @@ fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T, tmux_config:
     Ok(commands)
 }
 
+fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
+    match node {
+        // See if pre contains an array or a string. If it's an array we
+        // need to check the values of it again to verify they are strings.
+        &Yaml::String(ref x) => Some(vec!(Some(x.to_string()))),
+        &Yaml::Array(ref x)  => Some(
+            x.iter().map(|y|
+                match y {
+                    &Yaml::String(ref z)  => Some(z.to_string()),
+                    _ => None
+                }
+            ).collect()
+        ),
+        _ => None
+    }
+}
+
 #[test]
 pub fn expect_1_session() {
     let s = "---
@@ -526,4 +543,46 @@ windows: ['cargo', 'vim', 'git']
     }).collect();
 
     assert_eq!(remains.len(), 1)
+}
+
+#[test]
+pub fn expect_vec_of_option_string() {
+    let s = "---
+pre: ls -alh
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let pre = pre_matcher(&yaml[0]["pre"]);
+    assert_eq!(pre.unwrap(), vec!(Some("ls -alh".to_string())))
+}
+
+#[test]
+pub fn expect_vec_of_option_strings() {
+    let s = "---
+pre:
+  - ls -alh
+  - tail -f
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let pre = pre_matcher(&yaml[0]["pre"]);
+    assert_eq!(pre.unwrap(), vec!(Some("ls -alh".to_string()), Some("tail -f".to_string())))
+}
+
+#[test]
+pub fn expect_some_from_pre_matcher() {
+    let s = "---
+pre: ls -alh
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let pre = pre_matcher(&yaml[0]["pre"]);
+    assert!(pre.is_some())
+}
+
+#[test]
+pub fn expect_none_from_pre_matcher() {
+    let s = "---
+pre:
+";
+    let yaml = YamlLoader::load_from_str(s).unwrap();
+    let pre = pre_matcher(&yaml[0]["pre"]);
+    assert!(pre.is_none())
 }
