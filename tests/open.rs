@@ -15,7 +15,7 @@ mod open {
     use std::env::home_dir;
     use helpers::*;
 
-    fn setup(contents: &'static [u8]) -> (String, PathBuf) {
+    fn setup(contents: &[u8]) -> (String, PathBuf) {
         let project_name = format!("muxed_int_test_{}", random::<u16>());
         let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
         let project_path = PathBuf::from(&project_file);
@@ -35,7 +35,7 @@ mod open {
         kill_session(&project_name);
     }
 
-    fn test_with_contents(contents: &'static [u8]) -> TmuxSession {
+    fn test_with_contents(contents: &[u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name, config_path.parent().unwrap());
         let completed = PathBuf::from(format!("/tmp/{}.complete", project_name));
@@ -183,6 +183,67 @@ windows: ['ssh', 'git']
         let session = test_with_contents(contents);
         let window_active = session.window_active.as_str().unwrap();
         assert_eq!(window_active, "ssh")
+    }
+
+    #[test]
+    fn expect_pre_to_create_file() {
+        let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+        let contents = format!("---
+pre: touch {}
+windows: ['ssh', 'git']
+", file.display());
+        let _ = test_with_contents(contents.as_bytes());
+        assert!(file.exists());
+        let _ = fs::remove_file(file);
+    }
+
+    #[test]
+    fn expect_pre_to_create_two_files() {
+        let file1 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+        let file2 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+        let contents = format!("---
+pre:
+  - touch {}
+  - touch {}
+windows: ['ssh', 'git']
+", file1.display(), file2.display());
+        let _ = test_with_contents(contents.as_bytes());
+        assert!(file1.exists());
+        assert!(file2.exists());
+        let _ = fs::remove_file(file1);
+        let _ = fs::remove_file(file2);
+    }
+
+    #[test]
+    fn expect_pre_window_to_be_called_for_each_window() {
+        let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+        let contents = format!("---
+pre_window: echo 'pre_window' >> {}
+windows: ['ssh', 'git']
+", file.display());
+        let _ = test_with_contents(contents.as_bytes());
+        let mut f = File::open(&file).unwrap();
+        let mut s = String::new();
+        let _ = f.read_to_string(&mut s);
+        assert_eq!(s.lines().count(), 2);
+        let _ = fs::remove_file(&file);
+    }
+
+    #[test]
+    fn expect_pre_window_to_be_called_twice_for_each_window() {
+        let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+        let contents = format!("---
+pre_window:
+ - echo 'pre_window' >> {}
+ - echo 'pre_window' >> {}
+windows: ['ssh', 'git']
+", file.display(), file.display());
+        let _ = test_with_contents(contents.as_bytes());
+        let mut f = File::open(&file).unwrap();
+        let mut s = String::new();
+        let _ = f.read_to_string(&mut s);
+        assert_eq!(s.lines().count(), 4);
+        let _ = fs::remove_file(&file);
     }
 
 // This test should exist but we currently don't do anything to list panes.
