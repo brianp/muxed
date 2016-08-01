@@ -60,7 +60,8 @@ pub fn send_keys(target: &String, exec: &String) -> () {
 
 pub fn wait_on(file: &PathBuf) -> () {
     while !file.exists() {
-        sleep(Duration::from_millis(10));
+        // Wait increased from 10 to 750 due to the pre_window tests.
+        sleep(Duration::from_millis(750));
     }
 }
 
