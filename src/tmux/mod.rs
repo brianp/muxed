@@ -15,30 +15,6 @@ use std::io;
 /// The program to call commands on.
 static TMUX_NAME: &'static str = "tmux";
 
-/// The gateway to calling any functions on tmux. All public functions in this
-/// module will be fed through this `call` function. This functions purpose is to
-/// turn string based tmux function calls in to a `CString` and call out to the
-/// system with it.
-///
-/// command: The command we will send to tmux on the host system for execution.
-///
-/// # Examples
-///
-/// ```
-/// call("new-window -t muxed -c ~/Projects/muxed/".to_string());
-/// ```
-///
-/// # Safety
-///
-/// This function will make an `unsafe` call out to the system to execute tmux
-/// related commands.
-fn call(command: String) -> () {
-    let line = format!("{} {} {}", TMUX_NAME, command, ">/dev/null");
-    let system_call = CString::new(line.clone()).unwrap();
-    //println!("{}", line.clone());
-    unsafe { system(system_call.as_ptr()); };
-}
-
 /// The gateway to calling any functions on tmux. Most public functions in this
 /// module will be fed through this `call` function. This safely creates a new
 /// thread to execute the command on. We say "Most" public functions will use
@@ -68,7 +44,10 @@ fn call1(args: &[&str]) -> Result<Output, io::Error> {
 /// ```
 /// session_name: The active tmux session name.
 pub fn attach(session_name: &String) -> () {
-    call(format!("attach -t {}", session_name));
+    let line = format!("{} attach -t {} {}", TMUX_NAME, session_name, ">/dev/null");
+    let system_call = CString::new(line.clone()).unwrap();
+    //println!("{}", line.clone());
+    unsafe { system(system_call.as_ptr()); };
 }
 
 /// New session is the first call made in any sequence of commands. It initiates
