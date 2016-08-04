@@ -100,7 +100,8 @@ pub fn attach(session_name: &String) -> () {
 /// tmp_name: The name for the temp initial window that is created with a new
 /// session.
 pub fn new_session(session_name: &String, window_name: &String) -> () {
-    call(format!("new -d -s {} -n {}", session_name, window_name));
+    //call(format!("new -d -s {} -n {}", session_name, window_name));
+    call1(&["new", "-d", "-s", session_name, "-n", window_name]);
 }
 
 /// Split window acts as the command to target named windows in a session to
@@ -118,7 +119,8 @@ pub fn new_session(session_name: &String, window_name: &String) -> () {
 /// root: An `Option<String>` passed to the -c argument to change the current
 /// directory.
 pub fn split_window(target: &String) -> () {
-    call(format!("split-window -t {}", target));
+    //call(format!("split-window -t {}", target));
+    call1(&["split-window", "-t", target]);
 }
 
 /// New window opens a new window in the named session with the provided window
@@ -135,7 +137,8 @@ pub fn split_window(target: &String) -> () {
 /// root: An `Option<String>` passed to the -c argument to change the current
 /// directory.
 pub fn new_window(session_name: &String, window_name: &String) -> () {
-    call(format!("new-window -t {} -n {}", session_name, window_name));
+    //call(format!("new-window -t {} -n {}", session_name, window_name));
+    call1(&["new-window", "-t", session_name, "-n", window_name]);
 }
 
 /// The layout function will adjust the layout of a tmux window that already has
@@ -153,7 +156,8 @@ pub fn new_window(session_name: &String, window_name: &String) -> () {
 /// target: A string represented by the {named_session}:{named_window}.{pane}
 /// layout: The predefined tmux named layout.
 pub fn layout(target: &String, layout: &String) -> () {
-    call(format!("select-layout -t {} {}", target, layout));
+    //call(format!("select-layout -t {} {}", target, layout));
+    call1(&["select-layout", "-t", target, layout]);
 }
 
 /// Send Keys executes literal key commands in specified target windows. This is
@@ -172,7 +176,8 @@ pub fn layout(target: &String, layout: &String) -> () {
 /// target: A string represented by the {named_session}:{named_window}.{pane}
 /// exec: The system command to be executed in a particular pane.
 pub fn send_keys(target: &String, exec: &String) -> () {
-    call(format!("send-keys -t {} '{}' KPEnter", target, exec));
+    //call(format!("send-keys -t {} '{}' KPEnter", target, exec));
+    call1(&["send-keys", "-t", target, exec, "KPEnter"]);
 }
 
 /// This is used to re-select the first window before
@@ -186,7 +191,8 @@ pub fn send_keys(target: &String, exec: &String) -> () {
 ///
 /// target: A string represented by the {named_session}:{named_window}.{pane}
 pub fn select_window(target: &String) -> () {
-    call(format!("select-window -t {}", target));
+    //call(format!("select-window -t {}", target));
+    call1(&["select-window", "-t", target]);
 }
 
 /// This is used to re-select the top pane in the first window before
@@ -200,7 +206,8 @@ pub fn select_window(target: &String) -> () {
 ///
 /// target: A string represented by the {named_session}:{named_window}.{pane}
 pub fn select_pane(target: &String) -> () {
-    call(format!("select-pane -t {}", target));
+    //call(format!("select-pane -t {}", target));
+    call1(&["select-pane", "-t", target]);
 }
 
 /// List Windows is used firgure out if a named session is already running.
