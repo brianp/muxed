@@ -193,13 +193,7 @@ pub fn select_pane(target: &String) -> () {
 ///
 /// target: A string represented by the {named_session}
 pub fn has_session(target: &String) -> ExitStatus {
-    let output = Command::new(TMUX_NAME)
-                     .arg("has-session")
-                     .arg("-t")
-                     .arg(target)
-                     .output()
-                     .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
-
+    let output = call(&["has-session", "-t", target]).expect("failed to see if the session existed");
     output.status
 }
 
@@ -212,10 +206,6 @@ pub fn has_session(target: &String) -> ExitStatus {
 /// => "some-option false\npane-base-index 0"
 /// ```
 pub fn get_config() -> String {
-    let output = Command::new(TMUX_NAME)
-                     .args(&["start-server", ";", "show-options", "-g"])
-                     .output()
-                     .unwrap_or_else(|e| { panic!("couldn't get tmux options: {}", e) });
-
+    let output = call(&["start-server", ";", "show-options", "-g"]).expect("couldn't get tmux options");
     String::from_utf8_lossy(&output.stdout).to_string()
 }
