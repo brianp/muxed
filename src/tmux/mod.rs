@@ -9,7 +9,8 @@ pub mod config;
 
 use libc::system;
 use std::ffi::CString;
-use std::process::{Command, ExitStatus};
+use std::process::{Command, ExitStatus, Output};
+use std::io;
 
 /// The program to call commands on.
 static TMUX_NAME: &'static str = "tmux";
@@ -38,7 +39,19 @@ fn call(command: String) -> () {
     unsafe { system(system_call.as_ptr()); };
 }
 
-fn call1(args: &[&str]) -> () {
+/// The gateway to calling any functions on tmux. Most public functions in this
+/// module will be fed through this `call` function. This safely creates a new
+/// thread to execute the command on. We say "Most" public functions will use
+/// this as `attach` specificaly does not use it.
+///
+/// args: The command we will send to tmux on the host system for execution.
+///
+/// # Examples
+///
+/// ```
+/// call(&["new-window", "-t", "muxed", "-c", "~/Projects/muxed/"]);
+/// ```
+fn call1(args: &[&str]) -> Result<Output, io::Error> {
     //println!("{}", line.clone());
     Command::new(TMUX_NAME).args(args).output()
 }
