@@ -38,6 +38,11 @@ fn call(command: String) -> () {
     unsafe { system(system_call.as_ptr()); };
 }
 
+fn call1(args: &[&str]) -> () {
+    //println!("{}", line.clone());
+    Command::new(TMUX_NAME).args(args).output()
+}
+
 /// Attach is called as the last function in a set of commands. After the tmux
 /// env has been setup by all previous commands this attaches the user to their
 /// daemonized tmux session.
