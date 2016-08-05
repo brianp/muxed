@@ -115,7 +115,7 @@ muxed <PROJECT_NAME>");
             let mut cmd = process::Command::new("muxednew");
             if matches.is_present("REST") {
                 let trail: Vec<&str> = matches.values_of("REST").unwrap().collect();
-                trail.iter().fold(&mut cmd, |c, i| c.arg(i));
+                cmd.args(trail.as_slice());
             };
 
             if matches.is_present("help") { cmd.arg("--help"); };
