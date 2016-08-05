@@ -28,7 +28,7 @@ static TMUX_NAME: &'static str = "tmux";
 /// let _ = call(&["new-window", "-t", "muxed", "-c", "~/Projects/muxed/"]);
 /// ```
 fn call(args: &[&str]) -> Result<Output, io::Error> {
-    println!("{:?}", &args);
+    //println!("{:?}", &args);
     Command::new(TMUX_NAME).args(args).output()
 }
 
