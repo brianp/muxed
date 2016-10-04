@@ -262,16 +262,16 @@ windows: ['ssh', 'git']
         let _ = fs::remove_file(&file);
     }
 
-//    #[test]
-//    fn expect_session_name_brians_session() {
-//        let contents = b"---
-//name: 'Brians Session'
-//windows: ['ssh', 'git']
-//";
-//        let session = test_with_contents(contents);
-//        let name = session.name.as_str().unwrap();
-//        assert_eq!(name, "Brians Session")
-//    }
+    #[test]
+    fn expect_session_name_brians_session() {
+        let contents = b"---
+name: 'Brians Session'
+windows: ['ssh', 'git']
+";
+        let session = test_with_contents(contents);
+        let name = session.name.as_str().unwrap();
+        assert_eq!(name, "Brians Session")
+    }
 
 // This test should exist but we currently don't do anything to list panes.
 //    #[test]
