@@ -94,9 +94,9 @@ pub fn main() {
 
     // We check for help twice. We don't want to short circuit early incase help
     // is supposed to get passed to the subcommand.
-    let project_name: &str;
+    let project_call: &str;
     if matches.value_of("PROJECT_NAME").is_some() {
-        project_name = matches.value_of("PROJECT_NAME").unwrap();
+        project_call = matches.value_of("PROJECT_NAME").unwrap();
     } else if matches.is_present("help") {
         help(app);
         exit(0);
@@ -110,7 +110,7 @@ muxed <PROJECT_NAME>");
         exit(1);
     };
 
-    match project_name {
+    match project_call {
         "new" => {
             let mut cmd = process::Command::new("muxednew");
             if matches.is_present("REST") {
@@ -136,9 +136,12 @@ muxed <PROJECT_NAME>");
         exit(0);
     };
 
-    let project_name = project_name.to_string();
     let daemonize = matches.is_present("daemonize");
     let muxed_dir = matches.value_of("PROJECT_DIR");
+    let project_call = project_call.to_string();
+
+    let yaml = try_or_err!(project::read(&project_call, &muxed_dir));
+    let project_name = &yaml[0]["name"].as_str().unwrap_or(&project_call).to_string();
 
     let commands: Vec<Command>;
     match project::session_exists(&project_name) {
@@ -147,7 +150,6 @@ muxed <PROJECT_NAME>");
         },
         None => {
             let config = Config::from_string(tmux::get_config());
-            let yaml = try_or_err!(project::read(&project_name, &muxed_dir));
             commands = try_or_err!(parser::call(&yaml, &project_name, daemonize, config));
         }
     };
