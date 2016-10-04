@@ -69,7 +69,8 @@ pub fn wait_on(file: &PathBuf) -> () {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum SessionValue {
   Usize(usize),
-  String(String)
+  String(String),
+  Empty,
 }
 
 impl SessionValue {
@@ -102,15 +103,15 @@ pub struct WindowValues {
     pub pane_current_path: SessionValue,
 }
 
-static NAME_CAPTURE: &'static str = r"\(Session: (.*)\)";
-static PANE_PATH_CAPTURE: &'static str = r"\(Dir: (.*)\) ";
-static WINDOW_NAME_CAPTURE: &'static str = r":\s(\w*)[$\*-]?\s+\(";
-static WINDOW_ACTIVE_CAPTURE: &'static str = r"\s(.*)\*";
-static PANES_COUNT_CAPTURE: &'static str = r"\((\d*) panes\)";
+static NAME_REGEX:              &'static str = r"\(Session: (.*)\)";
+static WINDOW_NAME_REGEX:       &'static str = r":\s(\w*)[$\*-]?\s+\(";
+static WINDOW_ACTIVE_REGEX:     &'static str = r"\s(.*)\*";
+static PANE_CURRENT_PATH_REGEX: &'static str = r"\(Dir: (.*)\) ";
+static PANES_COUNT_REGEX:       &'static str = r"\((\d*) panes\)";
 
 impl TmuxSession {
     pub fn from_string(results: &String) -> TmuxSession {
-        let window_name = Regex::new(WINDOW_NAME_CAPTURE).unwrap();
+        let window_name = Regex::new(WINDOW_NAME_REGEX).unwrap();
 
         let lines: Vec<&str> = results.split("\n").collect();
         let (_, window_lines) = lines.split_last().unwrap();
@@ -118,43 +119,40 @@ impl TmuxSession {
         let mut windows: HashMap<String, WindowValues> = HashMap::new();
 
         for line in window_lines {
-            for cap in window_name.captures_iter(line) {
-                let name = cap.at(1).unwrap();
+            let cap = window_name.captures(line).unwrap();
+            let name = cap.at(1).unwrap();
 
-                let win_val = WindowValues{
-                    panes: TmuxSession::count_panes(line),
-                    pane_current_path: TmuxSession::retrieve_capture(&line, PANE_PATH_CAPTURE).unwrap()
-                };
+            let win_val = WindowValues{
+                panes: TmuxSession::count_panes(line),
+                pane_current_path: TmuxSession::retrieve_capture(&line, PANE_CURRENT_PATH_REGEX).unwrap_or(SessionValue::Empty)
+            };
 
-                windows.insert(name.to_string(), win_val.clone());
-            }
+            windows.insert(name.to_string(), win_val.clone());
         }
 
         TmuxSession {
           num_of_windows: window_lines.len(),
           windows: windows,
-          window_active: TmuxSession::retrieve_capture(&window_lines[0], WINDOW_ACTIVE_CAPTURE).unwrap(),
-          name: TmuxSession::retrieve_capture(&window_lines[0], NAME_CAPTURE).unwrap()
+          window_active: TmuxSession::retrieve_capture(&window_lines[0], WINDOW_ACTIVE_REGEX).unwrap_or(SessionValue::Empty),
+          name: TmuxSession::retrieve_capture(&window_lines[0], NAME_REGEX).unwrap_or(SessionValue::Empty)
         }
     }
 
     pub fn retrieve_capture(line: &str, pattern: &str) -> Result<SessionValue, String> {
         let reg = Regex::new(pattern).unwrap();
-        let mut val: &str = "";
 
-        for cap in reg.captures_iter(line) {
-            val = match cap.at(1) {
-                Some(x) => x,
-                None    => return Err("No capture".to_string())
+        if let Some(caps) = reg.captures(line) {
+            return match caps.at(1) {
+               Some(x) => Ok(SessionValue::String(x.to_string())),
+               None    => Err("No capture".to_string())
             };
-            break;
-        }
+        };
 
-        Ok(SessionValue::String(val.to_string()))
+        Err("No capture".to_string())
     }
 
     pub fn count_panes(line: &str) -> SessionValue {
-        let panes = Regex::new(PANES_COUNT_CAPTURE).unwrap();
+        let panes = Regex::new(PANES_COUNT_REGEX).unwrap();
         let mut num: &str = "";
 
         for cap in panes.captures_iter(line) {

@@ -53,7 +53,7 @@ mod open {
         open_muxed(&project_name, config_path.parent().unwrap());
 
         let completed = PathBuf::from(format!("/tmp/{}.complete", project_name));
-        let exec = format!("touch {}", completed.display());
+        let exec = format!("touch '{}'", completed.display());
 
         send_keys(&project_name, &exec);
         wait_on(&completed);
