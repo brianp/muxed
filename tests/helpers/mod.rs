@@ -10,13 +10,14 @@ use std::time::Duration;
 
 /// List windows will give details about the active sessions in testing.
 /// target: A string represented by the {named_session}:{named_window}
+/// tmux list-windows -t TARGET -F '#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) (Dir: #{pane_current_path}) (Session: #{session_name})'
 pub fn list_windows(target: &String) -> String {
     let output = Command::new("tmux")
                      .arg("list-windows")
                      .arg("-t")
                      .arg(target)
                      .arg("-F")
-                     .arg("'#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) (Dir: #{pane_current_path})'")
+                     .arg("'#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) (Dir: #{pane_current_path}) (Session: #{session_name})'")
                      .output()
                      .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 
@@ -68,7 +69,8 @@ pub fn wait_on(file: &PathBuf) -> () {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum SessionValue {
   Usize(usize),
-  String(String)
+  String(String),
+  Empty,
 }
 
 impl SessionValue {
@@ -91,18 +93,25 @@ impl SessionValue {
 pub struct TmuxSession {
     pub num_of_windows: usize,
     pub windows: HashMap<String, WindowValues>,
-    pub window_active: SessionValue
+    pub window_active: SessionValue,
+    pub name: SessionValue,
 }
 
 #[derive(Debug, Clone)]
 pub struct WindowValues {
     pub panes: SessionValue,
-    pub pane_current_path: SessionValue
+    pub pane_current_path: SessionValue,
 }
+
+static NAME_REGEX:              &'static str = r"\(Session: (.*)\)";
+static WINDOW_NAME_REGEX:       &'static str = r":\s(\w*)[$\*-]?\s+\(";
+static WINDOW_ACTIVE_REGEX:     &'static str = r"\s(.*)\*";
+static PANE_CURRENT_PATH_REGEX: &'static str = r"\(Dir: (.*)\) ";
+static PANES_COUNT_REGEX:       &'static str = r"\((\d*) panes\)";
 
 impl TmuxSession {
     pub fn from_string(results: &String) -> TmuxSession {
-        let window_name = Regex::new(r":\s(\w*)[$\*-]?\s+\(").unwrap();
+        let window_name = Regex::new(WINDOW_NAME_REGEX).unwrap();
 
         let lines: Vec<&str> = results.split("\n").collect();
         let (_, window_lines) = lines.split_last().unwrap();
@@ -110,38 +119,40 @@ impl TmuxSession {
         let mut windows: HashMap<String, WindowValues> = HashMap::new();
 
         for line in window_lines {
-            for cap in window_name.captures_iter(line) {
-                let name = cap.at(1).unwrap();
-                let win_val = WindowValues{
-                    panes: TmuxSession::count_panes(line),
-                    pane_current_path: TmuxSession::retrieve_capture(&line, r"\(Dir: (.*)\)")
-                };
+            let cap = window_name.captures(line).unwrap();
+            let name = cap.at(1).unwrap();
 
-                windows.insert(name.to_string(), win_val.clone());
-            }
+            let win_val = WindowValues{
+                panes: TmuxSession::count_panes(line),
+                pane_current_path: TmuxSession::retrieve_capture(&line, PANE_CURRENT_PATH_REGEX).unwrap_or(SessionValue::Empty)
+            };
+
+            windows.insert(name.to_string(), win_val.clone());
         }
 
         TmuxSession {
           num_of_windows: window_lines.len(),
           windows: windows,
-          window_active: TmuxSession::retrieve_capture(&window_lines[0], r"\s(.*)\*")
+          window_active: TmuxSession::retrieve_capture(&window_lines[0], WINDOW_ACTIVE_REGEX).unwrap_or(SessionValue::Empty),
+          name: TmuxSession::retrieve_capture(&window_lines[0], NAME_REGEX).unwrap_or(SessionValue::Empty)
         }
     }
 
-    pub fn retrieve_capture(line: &str, pattern: &str) -> SessionValue {
+    pub fn retrieve_capture(line: &str, pattern: &str) -> Result<SessionValue, String> {
         let reg = Regex::new(pattern).unwrap();
-        let mut val: &str = "";
 
-        for cap in reg.captures_iter(line) {
-            val = cap.at(1).unwrap_or("Nope");
-            break;
-        }
+        if let Some(caps) = reg.captures(line) {
+            return match caps.at(1) {
+               Some(x) => Ok(SessionValue::String(x.to_string())),
+               None    => Err("No capture".to_string())
+            };
+        };
 
-        SessionValue::String(val.to_string())
+        Err("No capture".to_string())
     }
 
     pub fn count_panes(line: &str) -> SessionValue {
-        let panes = Regex::new(r"\((\d*) panes\)").unwrap();
+        let panes = Regex::new(PANES_COUNT_REGEX).unwrap();
         let mut num: &str = "";
 
         for cap in panes.captures_iter(line) {
@@ -154,19 +165,19 @@ impl TmuxSession {
 
 #[test]
 fn count_panes_returns_two() {
-    let num = TmuxSession::count_panes("1: ssh (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+    let num = TmuxSession::count_panes("1: ssh  (2 panes) (Dir: /Projects/muxed) (session: muxed)");
     assert_eq!(num.as_usize().unwrap(), 2)
 }
 
 #[test]
 fn count_panes_returns_one() {
-    let num = TmuxSession::count_panes("1: ssh (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0");
+    let num = TmuxSession::count_panes("1: ssh  (1 panes) (Dir: /Projects/muxed) (session: muxed)");
     assert_eq!(num.as_usize().unwrap(), 1)
 }
 
 #[test]
 fn parses_with_trailing_whitespace_after_window_name() {
-    let config = "1: ssh  (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let config = "1: ssh  (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
     let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
@@ -175,7 +186,7 @@ fn parses_with_trailing_whitespace_after_window_name() {
 
 #[test]
 fn parses_with_previous_flag() {
-    let config = "1: ssh- (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let config = "1: ssh- (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
     let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
@@ -184,7 +195,7 @@ fn parses_with_previous_flag() {
 
 #[test]
 fn parses_with_dollar_sign_flag() {
-    let config = "1: ssh$ (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let config = "1: ssh$ (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
     let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
@@ -193,7 +204,7 @@ fn parses_with_dollar_sign_flag() {
 
 #[test]
 fn parses_with_window_flag() {
-    let config = "1: ssh* (2 panes) [173x42] [layout b5bd,173x42,0,0,0] @0\n";
+    let config = "1: ssh* (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
     let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
@@ -202,18 +213,18 @@ fn parses_with_window_flag() {
 
 #[test]
 fn count_three_windows() {
-    let config = "1: ssh  (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0
-                  2: vim- (1 panes) [173x42] [layout b5be,173x42,0,0,1] @1
-                  3: bash* (2 panes) [173x42] [layout b5bf,173x42,0,0,2] @2 (active)\n";
+    let config = "1: ssh  (1 panes) (Dir: /Projects/muxed) (Session: muxed)
+                  2: vim- (1 panes) (Dir: /Projects/muxed) (Session: muxed)
+                  3: bash* (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let num = TmuxSession::from_string(&config.to_string()).num_of_windows;
     assert_eq!(num, 3)
 }
 
 #[test]
 fn count_four_total_panes() {
-    let config = "1: ssh  (1 panes) [173x42] [layout b5bd,173x42,0,0,0] @0
-                  2: vim- (1 panes) [173x42] [layout b5be,173x42,0,0,1] @1
-                  3: bash* (2 panes) [173x42] [layout b5bf,173x42,0,0,2] @2 (active)\n";
+    let config = "1: ssh  (1 panes) (Dir: /Projects/muxed) (Session: muxed)
+                  2: vim- (1 panes) (Dir: /Projects/muxed) (Session: muxed)
+                  3: bash* (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
     let num = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
     let num1 = session.windows.get("vim").unwrap().panes.as_usize().unwrap();
@@ -224,8 +235,64 @@ fn count_four_total_panes() {
 }
 
 #[test]
-fn expect_vim1_to_be_captured() {
-    let line = "2: vim1* (1 panes) vim2* (Dir: /Projects/muxed)";
-    let result = TmuxSession::retrieve_capture(&line, r"\s(vim[0-9])\*");
+fn expect_ok_session_name_capture() {
+    let line = "2: vim1* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, NAME_REGEX);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn expect_err_session_name_capture() {
+    let line = "2: vim1* (1 panes) (Dir: /Projects/muxed) (Session:)";
+    let result = TmuxSession::retrieve_capture(&line, NAME_REGEX);
+    assert!(result.is_err())
+}
+
+#[test]
+fn expect_muxed_to_be_captured_as_session() {
+    let line = "2: vim1* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, NAME_REGEX).unwrap();
+    assert_eq!(result.as_str().unwrap(), "muxed")
+}
+
+#[test]
+fn expect_ok_window_name_capture() {
+    let line = "2: vim1* (1 panes) vim2* (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, WINDOW_NAME_REGEX);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn expect_err_window_name_capture() {
+    let line = "2: (1 panes) vim2* (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, WINDOW_NAME_REGEX);
+    assert!(result.is_err())
+}
+
+#[test]
+fn expect_vim1_window_name_capture() {
+    let line = "2: vim1* (1 panes) vim2* (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, WINDOW_NAME_REGEX).unwrap();
     assert_eq!(result.as_str().unwrap(), "vim1")
+}
+
+#[test]
+fn expect_ok_active_window_capture() {
+    let line = "2: vim* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, WINDOW_ACTIVE_REGEX);
+    assert!(result.is_ok())
+}
+
+#[test]
+fn expect_err_active_window_capture() {
+    let line = "2: vim (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, WINDOW_ACTIVE_REGEX);
+    assert!(result.is_err())
+}
+
+#[test]
+fn expect_vim_active_window_capture() {
+    let line = "2: vim* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
+    let result = TmuxSession::retrieve_capture(&line, WINDOW_ACTIVE_REGEX).unwrap();
+    assert_eq!(result.as_str().unwrap(), "vim")
 }

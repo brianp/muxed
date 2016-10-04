@@ -3,6 +3,7 @@
 extern crate libc;
 extern crate rand;
 extern crate regex;
+extern crate yaml_rust;
 
 mod helpers;
 
@@ -13,10 +14,22 @@ mod open {
     use std::path::PathBuf;
     use std::io::prelude::*;
     use std::env::home_dir;
+    use std::str;
     use helpers::*;
+    use yaml_rust::YamlLoader;
+
+    fn project_name(contents: &[u8]) -> String {
+        let string_content = str::from_utf8(contents).unwrap();
+        let yaml = YamlLoader::load_from_str(string_content).unwrap();
+
+        match yaml[0]["name"].as_str() {
+            Some(x) => x.to_string(),
+            None    => format!("muxed_int_test_{}", random::<u16>())
+        }
+    }
 
     fn setup(contents: &[u8]) -> (String, PathBuf) {
-        let project_name = format!("muxed_int_test_{}", random::<u16>());
+        let project_name = project_name(&contents);
         let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
         let project_path = PathBuf::from(&project_file);
 
@@ -38,10 +51,13 @@ mod open {
     fn test_with_contents(contents: &[u8]) -> TmuxSession {
         let (project_name, config_path) = setup(contents);
         open_muxed(&project_name, config_path.parent().unwrap());
+
         let completed = PathBuf::from(format!("/tmp/{}.complete", project_name));
-        let exec = format!("touch {}", completed.display());
+        let exec = format!("touch '{}'", completed.display());
+
         send_keys(&project_name, &exec);
         wait_on(&completed);
+
         let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
         cleanup(&project_name, &config_path);
         session
@@ -244,6 +260,17 @@ windows: ['ssh', 'git']
         let _ = f.read_to_string(&mut s);
         assert_eq!(s.lines().count(), 4);
         let _ = fs::remove_file(&file);
+    }
+
+    #[test]
+    fn expect_session_name_brians_session() {
+        let contents = b"---
+name: 'Brians Session'
+windows: ['ssh', 'git']
+";
+        let session = test_with_contents(contents);
+        let name = session.name.as_str().unwrap();
+        assert_eq!(name, "Brians Session")
     }
 
 // This test should exist but we currently don't do anything to list panes.
