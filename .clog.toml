@@ -1,7 +1,6 @@
 [clog]
-repository = "https://github.com/brianp/muxed.git"
-
-chagelog = "CHANGELOG.md"
+link-style = "github"
+changelog = "CHANGELOG.md"
 
 [sections]
 Performance = ["perf"]

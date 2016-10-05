@@ -26,3 +26,7 @@
     - name: install rust
       command: rustup #--yes
       sudo: no
+
+    - name: install clog
+      command: cargo install clog-cli
+      sudo: no
