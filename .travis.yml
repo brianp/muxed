@@ -15,6 +15,8 @@ matrix:
     - rust: nightly
       env: TMUX_VERSION=master
     - rust: nightly
+      env: TMUX_VERSION=2.2
+    - rust: nightly
       env: TMUX_VERSION=2.1
     - rust: nightly
       env: TMUX_VERSION=2.0
@@ -27,6 +29,8 @@ matrix:
     - os: osx
       env: TMUX_VERSION=master
     - os: osx
+      env: TMUX_VERSION=2.2
+    - os: osx
       env: TMUX_VERSION=2.1
     - os: osx
       env: TMUX_VERSION=2.0
@@ -37,6 +41,7 @@ matrix:
 
 env:
   - TMUX_VERSION=master
+  - TMUX_VERSION=2.3
   - TMUX_VERSION=2.2
   - TMUX_VERSION=2.1
   - TMUX_VERSION=2.0
