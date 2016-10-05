@@ -44,7 +44,7 @@ fn call(args: &[&str]) -> Result<Output, io::Error> {
 /// ```
 /// session_name: The active tmux session name.
 pub fn attach(session_name: &String) -> () {
-    let line = format!("{} attach -t {} {}", TMUX_NAME, session_name, ">/dev/null");
+    let line = format!("{} attach -t '{}' {}", TMUX_NAME, session_name, ">/dev/null");
     let system_call = CString::new(line.clone()).unwrap();
     //println!("{}", line.clone());
     unsafe { system(system_call.as_ptr()); };
