@@ -1,11 +1,7 @@
-Muxed
+Muxed - “Another TMUX project manager”
 =====
 [![Build Status](https://travis-ci.org/brianp/muxed.png?branch=master)](https://travis-ci.org/brianp/muxed)
 
-## Another TMUX project manager
-
-Currently this project is _semi-stable_ and in active development (July, 2016).
-Muxed is usable with simple project configs, and testable with configs you may already have (see the `-p` option.)
 Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
 ## Muxed Tools
