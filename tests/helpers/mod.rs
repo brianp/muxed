@@ -68,9 +68,9 @@ pub fn wait_on(file: &PathBuf) -> () {
 
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub enum SessionValue {
-  Usize(usize),
-  String(String),
-  Empty,
+    Usize(usize),
+    String(String),
+    Empty,
 }
 
 impl SessionValue {
