@@ -1,0 +1,122 @@
+image: "brianp/muxedbuild-muxed:latest"
+
+variables:
+  MUXEDNEW_VERSION: 0.3.0
+  MUXEDSNAPSHOT_VERSION: 0.1.0
+  LINUX_TARGET: x86_64-unknown-linux-gnu
+  OSX_TARGET: x86_64-apple-darwin
+
+stages:
+  - compile
+  - bundle
+
+before_script:
+  - rustc --version && cargo --version
+
+compile-muxed-linux:
+  image: "brianp/muxedbuild-muxed:latest"
+  stage: compile
+  only:
+    - tags
+  variables:
+    TARGET: $LINUX_TARGET
+  script:
+    - cargo build --release --target $TARGET
+    - mkdir /builds/brianp/muxed/built/
+    - cp ./target/$TARGET/release/muxed /builds/brianp/muxed/built/
+  artifacts:
+    when: on_success
+    expire_in: '2 weeks'
+    paths:
+      - built/muxed
+
+compile-muxednew-linux:
+  image: "brianp/muxedbuild-muxed:latest"
+  stage: compile
+  only:
+    - tags
+  variables:
+    TARGET: $LINUX_TARGET
+  script:
+    - git clone --branch $MUXEDNEW_VERSION https://github.com/brianp/muxednew --depth 1 /builds/brianp/muxednew/
+    - cd /builds/brianp/muxednew && cargo build --release --target $TARGET
+    - mkdir /builds/brianp/muxed/built/
+    - cp /builds/brianp/muxednew/target/$TARGET/release/muxednew /builds/brianp/muxed/built/
+  artifacts:
+    when: on_success
+    expire_in: '2 weeks'
+    name: "muxednew"
+    paths:
+      - built/muxednew
+
+bundle-linux:
+  image: "brianp/muxedbuild-muxed:latest"
+  stage: bundle
+  only:
+    - tags
+  variables:
+    TARGET: $LINUX_TARGET
+  script:
+    - cd ./built/ && tar -cvzf muxed-${CI_BUILD_REF_NAME}-$TARGET.tar.gz muxed muxednew
+  artifacts:
+    expire_in: '2 months'
+    when: on_success
+    paths:
+      - built/muxed-${CI_BUILD_REF_NAME}-$TARGET.tar.gz
+  dependencies:
+    - compile-muxed-linux
+    - compile-muxednew-linux
+
+compile-muxed-osx:
+  image: "brianp/muxedbuild-osx-stable:latest"
+  stage: compile
+  only:
+    - tags
+  variables:
+    TARGET: $OSX_TARGET
+  script:
+    - cargo build --release --target $TARGET
+    - mkdir /builds/brianp/muxed/built/
+    - cp ./target/$TARGET/release/muxed /builds/brianp/muxed/built/
+  artifacts:
+    when: on_success
+    expire_in: '2 weeks'
+    paths:
+      - built/muxed
+
+compile-muxednew-osx:
+  image: "brianp/muxedbuild-osx-stable:latest"
+  stage: compile
+  only:
+    - tags
+  variables:
+    TARGET: $OSX_TARGET
+  script:
+    - git clone --branch $MUXEDNEW_VERSION https://github.com/brianp/muxednew --depth 1 /builds/brianp/muxednew/
+    - cd /builds/brianp/muxednew && cargo build --release --target $TARGET
+    - mkdir /builds/brianp/muxed/built/
+    - cp /builds/brianp/muxednew/target/$TARGET/release/muxednew /builds/brianp/muxed/built/
+  artifacts:
+    when: on_success
+    expire_in: '2 weeks'
+    name: "muxednew"
+    paths:
+      - built/muxednew
+
+bundle-osx:
+  image: "brianp/muxedbuild-osx-stable:latest"
+  stage: bundle
+  only:
+    - tags
+  variables:
+    TARGET: $OSX_TARGET
+  script:
+    - cd ./built/ && tar -cvzf muxed-${CI_BUILD_REF_NAME}-$TARGET.tar.gz muxed muxednew
+  artifacts:
+    expire_in: '2 months'
+    when: on_success
+    paths:
+      - built/muxed-${CI_BUILD_REF_NAME}-$TARGET.tar.gz
+  dependencies:
+    - compile-muxed-osx
+    - compile-muxednew-osx
