@@ -7,11 +7,64 @@ variables:
   OSX_TARGET: x86_64-apple-darwin
 
 stages:
+  - test
   - compile
   - bundle
 
 before_script:
   - rustc --version && cargo --version
+
+.tmux-test: &tmux-test
+  image: "brianp/muxedbuild-test-linux-stable:latest"
+  stage: test
+  script:
+    - cd /tmux
+    - git checkout $TMUX_VERSION
+    - sh autogen.sh
+    - ./configure --prefix=$HOME/tmux && make && make install
+    - tmux -V
+    - cd /builds/brianp/muxed
+    - cargo test
+  cache:
+    paths:
+      - /.cargo/
+
+test-tmux-master:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: master
+  allow_failure: true
+
+test-tmux-2.3:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: '2.3'
+
+test-tmux-2.2:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: '2.2'
+
+test-tmux-2.1:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: '2.1'
+
+test-tmux-2.0:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: '2.0'
+
+test-tmux-1.9:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: '1.9a'
+  allow_failure: true
+
+test-tmux-1.8:
+  <<: *tmux-test
+  variables:
+    TMUX_VERSION: '1.8'
 
 compile-muxed-linux:
   image: "brianp/muxedbuild-muxed:latest"
