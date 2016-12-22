@@ -124,7 +124,6 @@ muxed <PROJECT_NAME>");
             // Lets add an error code they can call on for more details. Why
             // isn't muxed new installed?
             println!("{}", String::from_utf8_lossy(&result.stdout));
-            println!("{}", String::from_utf8_lossy(&result.stderr));
             if let Some(c) = result.status.code() { exit(c); };
         }
         // No SubCommands found continue on.
