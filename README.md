@@ -113,4 +113,4 @@ SUBCOMMANDS:
 This project has been inspired by the work done on the [tmuxinator](https://github.com/tmuxinator/tmuxinator) project. Check it out for a `ruby` based tmux session management solution.
 
 ## Copyright
-Copyright (c) 2014-2016 Brian Pearce. See [LICENSE](https://github.com/brianp/muxed/blob/master/LICENSE) for further details.
+Copyright (c) 2014-2017 Brian Pearce. See [LICENSE](https://github.com/brianp/muxed/blob/master/LICENSE) for further details.
