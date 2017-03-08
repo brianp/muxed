@@ -120,7 +120,7 @@ impl TmuxSession {
 
         for line in window_lines {
             let cap = window_name.captures(line).unwrap();
-            let name = cap.at(1).unwrap();
+            let name = cap.get(1).unwrap().as_str();
 
             let win_val = WindowValues{
                 panes: TmuxSession::count_panes(line),
@@ -142,8 +142,8 @@ impl TmuxSession {
         let reg = Regex::new(pattern).unwrap();
 
         if let Some(caps) = reg.captures(line) {
-            return match caps.at(1) {
-               Some(x) => Ok(SessionValue::String(x.to_string())),
+            return match caps.get(1) {
+               Some(x) => Ok(SessionValue::String(x.as_str().to_string())),
                None    => Err("No capture".to_string())
             };
         };
@@ -156,7 +156,10 @@ impl TmuxSession {
         let mut num: &str = "";
 
         for cap in panes.captures_iter(line) {
-            num = cap.at(1).unwrap_or("0");
+            num = match cap.get(1) {
+                Some(x) => x.as_str(),
+                None    => "0"
+            }
         }
 
         SessionValue::Usize(usize::from_str(num).unwrap())
