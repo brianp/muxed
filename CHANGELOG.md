@@ -1,3 +1,31 @@
+<a name="0.6.0"></a>
+## 0.6.0 (2017-03-08)
+
+#### Documentation
+
+* **README:**
+  *  No longer claim to be unstable ([0aae01fc](0aae01fc))
+  *  Change shell samples to `shell` md ([01ad036f](01ad036f))
+  *  Docs around muxednew ([05ee2222](05ee2222))
+* **changelog:**  Add perf and imp to the changelog ([f5aca741](f5aca741))
+* **clog.toml:**  Make changelogs easier ([682a53b6](682a53b6))
+* **tmux/mod.rs#call1:**  Update the docs for call1 ([68164956](68164956))
+
+#### Features
+
+* **Pre:**  Allow the Pre config option ([4d2bf1b8](4d2bf1b8))
+* **issue-17:**  Allow pre to accept arrays ([fbe8ebaf](fbe8ebaf))
+
+#### Improvements
+
+* **Command::Pre:**  Add the Pre command ([7ef112b3](7ef112b3))
+* **optparse:**  Swap clap for docopt ([065f8e1a](065f8e1a))
+
+#### Bug Fixes
+
+* **Attach:**  Attach to named sessions with spaces ([c5a5020d](c5a5020d))
+* **issue-24:**  Allow pre_window config option ([05703e3f](05703e3f), closes [#24](24))
+
 <a name="v0.5.0"></a>
 ## v0.5.0
 Feature:
