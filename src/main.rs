@@ -1,7 +1,9 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-extern crate clap;
 extern crate libc;
 extern crate yaml_rust;
+extern crate docopt;
+extern crate rustc_serialize;
+
 #[cfg(test)] extern crate rand;
 
 mod tmux;
@@ -11,10 +13,10 @@ mod project;
 use project::parser;
 use project::processor;
 use tmux::config::Config;
-use clap::{Arg, App, AppSettings};
 use command::Command;
 use std::{process, env};
 use std::process::exit;
+use docopt::Docopt;
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -22,19 +24,43 @@ macro_rules! try_or_err (
         match $expr {
             Ok(val) => val,
             Err(e) => {
-              println!("Muxed ran in to a problem:");
-              println!("{}", e);
-              exit(1);
+                println!("Muxed ran in to a problem:");
+                println!("{}", e);
+                exit(1);
             }
         }
     })
 );
 
-pub fn help(mut app: App) -> () {
-    let _ = &app.print_help();
-    println!("\n");
-    println!("SUBCOMMANDS:");
-    println!("    new    The name of your poject to create\n");
+static USAGE: &'static str = "
+Usage:
+    muxed [options] <project>
+    muxed new [options] <project>
+    muxed (-h | --help)
+    muxed (-v | --version)
+
+Flags:
+    -d                  If you want to create a muxed session without connecting to it
+    -h, --help          Prints help information
+    -v, --version       Prints version information
+
+Options:
+    -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
+
+Args:
+    <project>           The name of your project to open
+
+Subcommands:
+    new                 The name of your project to create
+";
+
+#[derive(Debug, RustcDecodable)]
+struct Args {
+    flag_d: bool,
+    flag_v: bool,
+    flag_p: Option<String>,
+    arg_project: String,
+    cmd_new: bool,
 }
 
 /// The main execution method.
@@ -60,87 +86,34 @@ pub fn help(mut app: App) -> () {
 /// $ ./muxed projectName
 /// ```
 pub fn main() {
-    let mut app = App::new("Muxed")
-                      .version(env!("CARGO_PKG_VERSION"))
-                      .author("Brian Pearce")
-                      .about("Another TMUX project manager")
-                      .setting(AppSettings::TrailingVarArg)
-                      .usage("muxed [FLAGS] [OPTIONS] <PROJECT_NAME>")
-                      .arg(Arg::with_name("PROJECT_NAME")
-                           .help("The name of your poject to open")
-                           .index(1)
-                           .multiple(false)
-                           .takes_value(true))
-                      .arg(Arg::with_name("daemonize")
-                           .short("d")
-                           .multiple(false)
-                           .help("If you want to create a muxed session without connecting to it"))
-                      .arg(Arg::with_name("help")
-                           .short("h")
-                           .long("help")
-                           .help("Prints help information")
-                           .takes_value(false))
-                      .arg(Arg::with_name("PROJECT_DIR")
-                           .short("p")
-                           .multiple(false)
-                           .value_name("PROJECT_DIR")
-                           .takes_value(true)
-                           .help("The directory your project config files live in. Defaults to ~/.muxed/"))
-                      .arg(Arg::with_name("REST")
-                          .multiple(true)
-                          .hidden(true));
+    // First see if we have a subcommand. If we do we want to
+    // skip decoding for docopt and passoff execution to the 
+    // subcommand bin.
+    let mut input: std::env::Args = env::args();
 
-    let matches = &app.get_matches_from_safe_borrow(env::args()).unwrap();
-
-    // We check for help twice. We don't want to short circuit early incase help
-    // is supposed to get passed to the subcommand.
-    let project_call: &str;
-    if matches.value_of("PROJECT_NAME").is_some() {
-        project_call = matches.value_of("PROJECT_NAME").unwrap();
-    } else if matches.is_present("help") {
-        help(app);
-        exit(0);
-    } else {
-        println!("No project name specified.");
-        println!("error: The following required arguments were not provided:
-<PROJECT_NAME>
-
-USAGE:
-muxed <PROJECT_NAME>");
-        exit(1);
-    };
-
-    match project_call {
-        "new" => {
-            let mut cmd = process::Command::new("muxednew");
-            if matches.is_present("REST") {
-                let trail: Vec<&str> = matches.values_of("REST").unwrap().collect();
-                cmd.args(trail.as_slice());
-            };
-
-            if matches.is_present("help") { cmd.arg("--help"); };
-
-            let result = try_or_err!(cmd.output().map_err(|e| format!("It looks like muxednew might not be installed or we don't have access to it.\nWe received this system error while trying to call the subcommand `new`: `{}`", e)));
-            // Lets add an error code they can call on for more details. Why
-            // isn't muxed new installed?
-            println!("{}", String::from_utf8_lossy(&result.stdout));
-            if let Some(c) = result.status.code() { exit(c); };
+    if let Some(x) = input.nth(1) {
+        match x.as_ref(){
+            "new" => run_subcommand("muxednew", input),
+            _     => {}
         }
-        // No SubCommands found continue on.
-        _     => {}
     }
 
-    if matches.is_present("help") {
-        help(app);
+    let args: Args = Docopt::new(USAGE)
+                        .and_then(|d| d.decode())
+                        .unwrap_or_else(|e| e.exit());
+
+    if args.flag_v {
+        println!("Muxed {}", env!("CARGO_PKG_VERSION"));
         exit(0);
     };
 
-    let daemonize = matches.is_present("daemonize");
-    let muxed_dir = matches.value_of("PROJECT_DIR");
-    let project_call = project_call.to_string();
+    let muxed_dir = match args.flag_p {
+        Some(ref x) => Some(x.as_str()),
+        None        => None
+    };
 
-    let yaml = try_or_err!(project::read(&project_call, &muxed_dir));
-    let project_name = &yaml[0]["name"].as_str().unwrap_or(&project_call).to_string();
+    let yaml = try_or_err!(project::read(&args.arg_project, &muxed_dir));
+    let project_name = &yaml[0]["name"].as_str().unwrap_or(&args.arg_project).to_string();
 
     let commands: Vec<Command>;
     match project::session_exists(&project_name) {
@@ -149,9 +122,22 @@ muxed <PROJECT_NAME>");
         },
         None => {
             let config = Config::from_string(tmux::get_config());
-            commands = try_or_err!(parser::call(&yaml, &project_name, daemonize, config));
+            commands = try_or_err!(parser::call(&yaml, &project_name, args.flag_d, config));
         }
     };
 
     processor::main(&commands)
+}
+
+pub fn run_subcommand(subc: &str, input: std::env::Args) {
+    let mut cmd = process::Command::new(subc);
+    let trail: Vec<String> = input.collect();
+    cmd.args(trail.as_slice());
+
+    let result = try_or_err!(cmd.output().map_err(|e| format!("It looks like {} might not be installed or we don't have access to it.\nWe received this system error while trying to call the subcommand `{}`: `{}`", subc, subc, e)));
+    // Lets add an error code they can call on for more details. Why
+    // isn't muxed new installed?
+    println!("{}", String::from_utf8_lossy(&result.stdout));
+    if let Some(c) = result.status.code() { exit(c); };
+    exit(0);
 }
