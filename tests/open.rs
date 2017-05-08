@@ -103,7 +103,7 @@ windows:
       panes: ['ls', 'vi']
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().panes.as_usize().unwrap();
+        let num = session.windows["editor"].panes.as_usize().unwrap();
         assert_eq!(num, 2)
     }
 
@@ -119,8 +119,8 @@ windows:
       panes: ['ls', 'vi', 'ls']
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().panes.as_usize().unwrap();
-        let num1 = session.windows.get("tests").unwrap().panes.as_usize().unwrap();
+        let num = session.windows["editor"].panes.as_usize().unwrap();
+        let num1 = session.windows["tests"].panes.as_usize().unwrap();
         assert_eq!(num, 2);
         assert_eq!(num1, 3)
     }
@@ -146,7 +146,7 @@ windows:
         -
 ";
         let session = test_with_contents(contents);
-        let num = session.windows.get("editor").unwrap().panes.as_usize().unwrap();
+        let num = session.windows["editor"].panes.as_usize().unwrap();
         assert_eq!(num, 2)
     }
 
@@ -160,7 +160,7 @@ windows:
   - editor: ''
 ";
         let session = test_with_contents(contents);
-        let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
+        let pane_current_path = session.windows["editor"].pane_current_path.as_str().unwrap();
         let _ = fs::remove_dir(dir);
         // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
         // resulting in `pane_current_path` being `/private/tmp/Direct…`
@@ -175,7 +175,7 @@ windows:
   - editor: ''
 ";
         let session = test_with_contents(contents);
-        let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
+        let pane_current_path = session.windows["editor"].pane_current_path.as_str().unwrap();
         assert_eq!(pane_current_path, home_dir().unwrap().to_str().unwrap());
     }
 
@@ -187,7 +187,7 @@ windows:
   - editor: ''
 ";
         let session = test_with_contents(contents);
-        let pane_current_path = session.windows.get("editor").unwrap().pane_current_path.as_str().unwrap();
+        let pane_current_path = session.windows["editor"].pane_current_path.as_str().unwrap();
         assert_eq!(pane_current_path, home_dir().unwrap().to_str().unwrap());
     }
 
