@@ -182,7 +182,7 @@ fn count_panes_returns_one() {
 fn parses_with_trailing_whitespace_after_window_name() {
     let config = "1: ssh  (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
+    let panes = session.windows["ssh"].panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -191,7 +191,7 @@ fn parses_with_trailing_whitespace_after_window_name() {
 fn parses_with_previous_flag() {
     let config = "1: ssh- (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
+    let panes = session.windows["ssh"].panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -200,7 +200,7 @@ fn parses_with_previous_flag() {
 fn parses_with_dollar_sign_flag() {
     let config = "1: ssh$ (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
+    let panes = session.windows["ssh"].panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -209,7 +209,7 @@ fn parses_with_dollar_sign_flag() {
 fn parses_with_window_flag() {
     let config = "1: ssh* (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let panes = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
+    let panes = session.windows["ssh"].panes.as_usize().unwrap();
     assert_eq!(session.num_of_windows, 1);
     assert_eq!(panes, 2)
 }
@@ -229,9 +229,9 @@ fn count_four_total_panes() {
                   2: vim- (1 panes) (Dir: /Projects/muxed) (Session: muxed)
                   3: bash* (2 panes) (Dir: /Projects/muxed) (Session: muxed)\n";
     let session = TmuxSession::from_string(&config.to_string());
-    let num = session.windows.get("ssh").unwrap().panes.as_usize().unwrap();
-    let num1 = session.windows.get("vim").unwrap().panes.as_usize().unwrap();
-    let num2 = session.windows.get("bash").unwrap().panes.as_usize().unwrap();
+    let num = session.windows["ssh"].panes.as_usize().unwrap();
+    let num1 = session.windows["vim"].panes.as_usize().unwrap();
+    let num2 = session.windows["bash"].panes.as_usize().unwrap();
     assert_eq!(num, 1);
     assert_eq!(num1, 1);
     assert_eq!(num2, 2)
