@@ -124,7 +124,7 @@ impl TmuxSession {
 
             let win_val = WindowValues{
                 panes: TmuxSession::count_panes(line),
-                pane_current_path: TmuxSession::retrieve_capture(&line, PANE_CURRENT_PATH_REGEX).unwrap_or(SessionValue::Empty)
+                pane_current_path: TmuxSession::retrieve_capture(line, PANE_CURRENT_PATH_REGEX).unwrap_or(SessionValue::Empty)
             };
 
             windows.insert(name.to_string(), win_val.clone());
@@ -133,8 +133,8 @@ impl TmuxSession {
         TmuxSession {
           num_of_windows: window_lines.len(),
           windows: windows,
-          window_active: TmuxSession::retrieve_capture(&window_lines[0], WINDOW_ACTIVE_REGEX).unwrap_or(SessionValue::Empty),
-          name: TmuxSession::retrieve_capture(&window_lines[0], NAME_REGEX).unwrap_or(SessionValue::Empty)
+          window_active: TmuxSession::retrieve_capture(window_lines[0], WINDOW_ACTIVE_REGEX).unwrap_or(SessionValue::Empty),
+          name: TmuxSession::retrieve_capture(window_lines[0], NAME_REGEX).unwrap_or(SessionValue::Empty)
         }
     }
 
@@ -240,62 +240,62 @@ fn count_four_total_panes() {
 #[test]
 fn expect_ok_session_name_capture() {
     let line = "2: vim1* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, NAME_REGEX);
+    let result = TmuxSession::retrieve_capture(line, NAME_REGEX);
     assert!(result.is_ok())
 }
 
 #[test]
 fn expect_err_session_name_capture() {
     let line = "2: vim1* (1 panes) (Dir: /Projects/muxed) (Session:)";
-    let result = TmuxSession::retrieve_capture(&line, NAME_REGEX);
+    let result = TmuxSession::retrieve_capture(line, NAME_REGEX);
     assert!(result.is_err())
 }
 
 #[test]
 fn expect_muxed_to_be_captured_as_session() {
     let line = "2: vim1* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, NAME_REGEX).unwrap();
+    let result = TmuxSession::retrieve_capture(line, NAME_REGEX).unwrap();
     assert_eq!(result.as_str().unwrap(), "muxed")
 }
 
 #[test]
 fn expect_ok_window_name_capture() {
     let line = "2: vim1* (1 panes) vim2* (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, WINDOW_NAME_REGEX);
+    let result = TmuxSession::retrieve_capture(line, WINDOW_NAME_REGEX);
     assert!(result.is_ok())
 }
 
 #[test]
 fn expect_err_window_name_capture() {
     let line = "2: (1 panes) vim2* (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, WINDOW_NAME_REGEX);
+    let result = TmuxSession::retrieve_capture(line, WINDOW_NAME_REGEX);
     assert!(result.is_err())
 }
 
 #[test]
 fn expect_vim1_window_name_capture() {
     let line = "2: vim1* (1 panes) vim2* (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, WINDOW_NAME_REGEX).unwrap();
+    let result = TmuxSession::retrieve_capture(line, WINDOW_NAME_REGEX).unwrap();
     assert_eq!(result.as_str().unwrap(), "vim1")
 }
 
 #[test]
 fn expect_ok_active_window_capture() {
     let line = "2: vim* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, WINDOW_ACTIVE_REGEX);
+    let result = TmuxSession::retrieve_capture(line, WINDOW_ACTIVE_REGEX);
     assert!(result.is_ok())
 }
 
 #[test]
 fn expect_err_active_window_capture() {
     let line = "2: vim (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, WINDOW_ACTIVE_REGEX);
+    let result = TmuxSession::retrieve_capture(line, WINDOW_ACTIVE_REGEX);
     assert!(result.is_err())
 }
 
 #[test]
 fn expect_vim_active_window_capture() {
     let line = "2: vim* (1 panes) (Dir: /Projects/muxed) (Session: muxed)";
-    let result = TmuxSession::retrieve_capture(&line, WINDOW_ACTIVE_REGEX).unwrap();
+    let result = TmuxSession::retrieve_capture(line, WINDOW_ACTIVE_REGEX).unwrap();
     assert_eq!(result.as_str().unwrap(), "vim")
 }

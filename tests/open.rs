@@ -29,7 +29,7 @@ mod open {
     }
 
     fn setup(contents: &[u8]) -> (String, PathBuf) {
-        let project_name = project_name(&contents);
+        let project_name = project_name(contents);
         let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
         let project_path = PathBuf::from(&project_file);
 
@@ -42,10 +42,10 @@ mod open {
         (project_name, project_path.clone())
     }
 
-    fn cleanup(project_name: &String, config_path: &PathBuf) -> () {
+    fn cleanup(project_name: &str, config_path: &PathBuf) -> () {
         let _ = fs::remove_file(config_path);
         let _ = fs::remove_dir(config_path.parent().unwrap());
-        kill_session(&project_name);
+        kill_session(project_name);
     }
 
     fn test_with_contents(contents: &[u8]) -> TmuxSession {
