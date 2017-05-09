@@ -39,7 +39,7 @@ pub fn open_muxed(project: &String, project_root: &Path) -> () {
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
-pub fn kill_session(target: &String) -> () {
+pub fn kill_session(target: &str) -> () {
     Command::new("tmux")
         .arg("kill-session")
         .arg("-t")
@@ -110,7 +110,7 @@ static PANE_CURRENT_PATH_REGEX: &'static str = r"\(Dir: (.*)\) ";
 static PANES_COUNT_REGEX:       &'static str = r"\((\d*) panes\)";
 
 impl TmuxSession {
-    pub fn from_string(results: &String) -> TmuxSession {
+    pub fn from_string(results: &str) -> TmuxSession {
         let window_name = Regex::new(WINDOW_NAME_REGEX).unwrap();
 
         let lines: Vec<&str> = results.split("\n").collect();
