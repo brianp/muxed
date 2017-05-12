@@ -24,7 +24,7 @@ pub fn list_windows(target: &String) -> String {
     String::from_utf8_lossy(&output.stdout).into_owned()
 }
 
-pub fn open_muxed(project: &String, project_root: &Path) -> () {
+pub fn open_muxed(project: &str, project_root: &Path) -> () {
     println!("root: {}", project_root.display());
     let output = Command::new("./target/debug/muxed")
         .arg("-d")
@@ -48,7 +48,7 @@ pub fn kill_session(target: &str) -> () {
         .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
 }
 
-pub fn send_keys(target: &String, exec: &String) -> () {
+pub fn send_keys(target: &str, exec: &str) -> () {
     Command::new("tmux")
         .arg("send-keys")
         .arg("-t")
