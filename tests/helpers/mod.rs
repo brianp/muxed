@@ -75,15 +75,15 @@ pub enum SessionValue {
 
 impl SessionValue {
     pub fn as_str(&self) -> Option<&str> {
-        match self {
-            &SessionValue::String(ref s) => Some(s),
+        match *self {
+            SessionValue::String(ref s) => Some(s),
             _ => None
         }
     }
 
     pub fn as_usize(&self) -> Option<usize> {
-        match self {
-            &SessionValue::Usize(s) => Some(s),
+        match *self {
+            SessionValue::Usize(s) => Some(s),
             _ => None
         }
     }
