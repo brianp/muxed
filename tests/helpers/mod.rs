@@ -113,7 +113,7 @@ impl TmuxSession {
     pub fn from_string(results: &str) -> TmuxSession {
         let window_name = Regex::new(WINDOW_NAME_REGEX).unwrap();
 
-        let lines: Vec<&str> = results.split("\n").collect();
+        let lines: Vec<&str> = results.split('\n').collect();
         let (_, window_lines) = lines.split_last().unwrap();
 
         let mut windows: HashMap<String, WindowValues> = HashMap::new();
