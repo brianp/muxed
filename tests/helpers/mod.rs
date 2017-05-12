@@ -9,9 +9,9 @@ use std::thread::sleep;
 use std::time::Duration;
 
 /// List windows will give details about the active sessions in testing.
-/// target: A string represented by the {named_session}:{named_window}
-/// tmux list-windows -t TARGET -F '#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) (Dir: #{pane_current_path}) (Session: #{session_name})'
-pub fn list_windows(target: &String) -> String {
+/// target: A string represented by the `{named_session}:{named_window}`
+/// `tmux list-windows -t TARGET -F #{window_index}: window_name}#{?window_active,*, } (#{window_panes} panes) (Dir: #{pane_current_path}) (Session: #{session_name})`
+pub fn list_windows(target: &str) -> String {
     let output = Command::new("tmux")
                      .arg("list-windows")
                      .arg("-t")
