@@ -116,13 +116,13 @@ pub fn main() {
     let project_name = &yaml[0]["name"].as_str().unwrap_or(&args.arg_project).to_string();
 
     let commands: Vec<Command>;
-    match project::session_exists(&project_name) {
+    match project::session_exists(project_name) {
         Some(c) => {
             commands = vec!(c);
         },
         None => {
             let config = Config::from_string(tmux::get_config());
-            commands = try_or_err!(parser::call(&yaml, &project_name, args.flag_d, config));
+            commands = try_or_err!(parser::call(&yaml, project_name, args.flag_d, config));
         }
     };
 

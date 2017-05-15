@@ -192,7 +192,7 @@ pub fn select_pane(target: &String) -> () {
 /// ```
 ///
 /// target: A string represented by the {named_session}
-pub fn has_session(target: &String) -> ExitStatus {
+pub fn has_session(target: &str) -> ExitStatus {
     let output = call(&["has-session", "-t", target]).expect("failed to see if the session existed");
     output.status
 }

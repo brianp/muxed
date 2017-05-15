@@ -73,10 +73,11 @@ pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yam
 /// Find out if a tmux session is already active with this name. If it is active
 /// return Some<Command::Attach> with a command to attach to the session. If a
 /// session is not active return None and let the app carry on.
-pub fn session_exists(project_name: &String) -> Option<Command> {
-    match has_session(project_name).success() {
-      true  => Some(Command::Attach(Attach{name: project_name.clone()})),
-      false => None
+pub fn session_exists(project_name: &str) -> Option<Command> {
+    if has_session(project_name).success() {
+      Some(Command::Attach(Attach{name: project_name.to_string()}))
+    } else {
+      None
     }
 }
 
