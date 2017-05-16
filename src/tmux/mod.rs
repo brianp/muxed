@@ -42,7 +42,7 @@ fn call(args: &[&str]) -> Result<Output, io::Error> {
 /// let session_name = "muxed".to_string();
 /// tmux::attach(muxed);
 /// ```
-/// session_name: The active tmux session name.
+/// `session_name: The active tmux session name.
 pub fn attach(session_name: &String) -> () {
     let line = format!("{} attach -t '{}' {}", TMUX_NAME, session_name, ">/dev/null");
     let system_call = CString::new(line.clone()).unwrap();
@@ -62,8 +62,8 @@ pub fn attach(session_name: &String) -> () {
 /// named window, and we close this window out before attaching the user. This
 /// allows for us to treat all user defined windows the same.
 ///
-/// session_name: The name of the session being created.
-/// tmp_name: The named first window that we will close out.
+/// `session_name`: The name of the session being created.
+/// `tmp_name`: The named first window that we will close out.
 ///
 /// # Examples
 ///
@@ -75,8 +75,8 @@ pub fn attach(session_name: &String) -> () {
 /// tmux::new_session(session_name, tmp_window_name);
 /// ```
 ///
-/// session_name: The active tmux session name.
-/// tmp_name: The name for the temp initial window that is created with a new
+/// `session_name`: The active tmux session name.
+/// `tmp_name`: The name for the temp initial window that is created with a new
 /// session.
 pub fn new_session(session_name: &String, window_name: &String) -> () {
     let _ = call(&["new", "-d", "-s", session_name, "-n", window_name]);
@@ -93,8 +93,8 @@ pub fn new_session(session_name: &String, window_name: &String) -> () {
 /// tmux::split_window(target, None);
 /// ```
 ///
-/// target: A string represented by the {named_session}:{named_window}.{pane}
-/// root: An `Option<String>` passed to the -c argument to change the current
+/// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
+/// `root`: An `Option<String>` passed to the `-c` argument to change the current
 /// directory.
 pub fn split_window(target: &String) -> () {
     let _ = call(&["split-window", "-t", target]);
@@ -111,7 +111,7 @@ pub fn split_window(target: &String) -> () {
 ///
 /// session_name: The active tmux session name.
 /// window_name: The desired window name for the new window.
-/// root: An `Option<String>` passed to the -c argument to change the current
+/// `root`: An `Option<String>` passed to the `-c` argument to change the current
 /// directory.
 pub fn new_window(session_name: &String, window_name: &String) -> () {
     let _ = call(&["new-window", "-t", session_name, "-n", window_name]);
@@ -129,8 +129,8 @@ pub fn new_window(session_name: &String, window_name: &String) -> () {
 /// tmux::layout("muxed:cargo.0".to_string(), "main-vertical".to_string(), None);
 /// ```
 ///
-/// target: A string represented by the {named_session}:{named_window}.{pane}
-/// layout: The predefined tmux named layout.
+/// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
+/// `layout`: The predefined tmux named layout.
 pub fn layout(target: &String, layout: &String) -> () {
     let _ = call(&["select-layout", "-t", target, layout]);
 }
@@ -148,8 +148,8 @@ pub fn layout(target: &String, layout: &String) -> () {
 /// tmux::send_keys("muxed:cargo.0".to_string(), "vim .".to_string());
 /// ```
 ///
-/// target: A string represented by the {named_session}:{named_window}.{pane}
-/// exec: The system command to be executed in a particular pane.
+/// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
+/// `exec`: The system command to be executed in a particular pane.
 pub fn send_keys(target: &String, exec: &String) -> () {
     let _ = call(&["send-keys", "-t", target, exec, "KPEnter"]);
 }
@@ -163,7 +163,7 @@ pub fn send_keys(target: &String, exec: &String) -> () {
 /// tmux::select_window("muxed:cargo.0".to_string());
 /// ```
 ///
-/// target: A string represented by the {named_session}:{named_window}.{pane}
+/// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
 pub fn select_window(target: &String) -> () {
     let _ = call(&["select-window", "-t", target]);
 }
@@ -177,7 +177,7 @@ pub fn select_window(target: &String) -> () {
 /// tmux::select_pane("muxed:cargo.top".to_string());
 /// ```
 ///
-/// target: A string represented by the {named_session}:{named_window}.{pane}
+/// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
 pub fn select_pane(target: &String) -> () {
     let _ = call(&["select-pane", "-t", target]);
 }
@@ -191,7 +191,7 @@ pub fn select_pane(target: &String) -> () {
 /// => ExitStatus
 /// ```
 ///
-/// target: A string represented by the {named_session}
+/// `target`: A string represented by the `{named_session}`
 pub fn has_session(target: &str) -> ExitStatus {
     let output = call(&["has-session", "-t", target]).expect("failed to see if the session existed");
     output.status
