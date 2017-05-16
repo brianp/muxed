@@ -35,7 +35,7 @@ static MUXED_FOLDER: &'static str = "muxed";
 ///
 /// project_name: The name of the project, corresponding to the project config
 /// file.
-pub fn read(project_name: &String, project_dir: &Option<&str>) -> Result<Vec<Yaml>, String> {
+pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>, String> {
     let home = try!(homedir().map_err(|e| e));
     let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
     let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
