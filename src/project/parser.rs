@@ -116,8 +116,8 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
     let (first, commands) = commands.split_first().unwrap();
     let mut remains = commands.to_vec();
 
-    match first {
-        &Command::Window(ref w) => {
+    match *first {
+        Command::Window(ref w) => {
             remains.insert(0, Command::Session(Session{
                 name: project_name.clone(),
                 window_name: w.name.clone()
@@ -195,14 +195,14 @@ fn pane_matcher<T>(window: &Yaml, target: &str, common_commands: T, tmux_config:
 }
 
 fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
-    match node {
+    match *node {
         // See if pre contains an array or a string. If it's an array we
         // need to check the values of it again to verify they are strings.
-        &Yaml::String(ref x) => Some(vec!(Some(x.to_string()))),
-        &Yaml::Array(ref x)  => Some(
+        Yaml::String(ref x) => Some(vec!(Some(x.to_string()))),
+        Yaml::Array(ref x)  => Some(
             x.iter().map(|y|
-                match y {
-                    &Yaml::String(ref z)  => Some(z.to_string()),
+                match *y {
+                    Yaml::String(ref z)  => Some(z.to_string()),
                     _ => None
                 }
             ).collect()
