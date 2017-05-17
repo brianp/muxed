@@ -16,8 +16,8 @@ use tmux::config::Config;
 pub fn call(yaml_string: &[Yaml], project_name: &str, daemonize: bool, tmux_config: &Config) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
 
-    // There should only be one doc but it's a vec so loop it.
-    let ref doc = yaml_string[0];
+    // There should only be one doc but it's a vec so take the first.
+    let doc = &yaml_string[0];
 
     let root = match doc["root"].as_str() {
         Some(x) => Some(x.to_string().replace(" ", "\\ ")),
