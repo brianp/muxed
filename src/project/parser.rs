@@ -11,9 +11,9 @@ use tmux::config::Config;
 /// loop is to build the stack of commands that are run to setup a users tmux
 /// session.
 ///
-pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmux_config: Config) -> Result<Vec<Command>, String> {
 /// `yaml_string`: The parsed yaml from the config file.
 /// `project_name`: The name of the project.
+pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_config: Config) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
 
     // There should only be one doc but it's a vec so loop it.
@@ -64,7 +64,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
                 for (k, v) in h {
                     if v.as_hash().is_some() {
                         commands.push(Command::Window(Window{
-                            session_name: project_name.clone(),
+                            session_name: project_name.to_string(),
                             name: k.as_str().unwrap().to_string()
                         }));
 
@@ -72,7 +72,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
                         commands.append(&mut try!(pane_matcher(v, &target, &common_commands, &tmux_config)));
                     } else {
                         commands.push(Command::Window(Window{
-                            session_name: project_name.clone(),
+                            session_name: project_name.to_string(),
                             name: try!(k.as_str().ok_or_else(|| "Windows require being named in your config.").map(|x| x.to_string()))
                         }));
 
@@ -93,7 +93,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             },
             &Yaml::String(ref s) => {
                 commands.push(Command::Window(Window{
-                    session_name: project_name.clone(),
+                    session_name: project_name.to_string(),
                     name: s.clone()
                 }));
 
@@ -102,7 +102,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
             },
             &Yaml::Integer(ref s) => {
                 commands.push(Command::Window(Window{
-                    session_name: project_name.clone(),
+                    session_name: project_name.to_string(),
                     name: s.to_string()
                 }));
 
@@ -120,6 +120,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
         Command::Window(ref w) => {
             remains.insert(0, Command::Session(Session{
                 name: project_name.clone(),
+                name: project_name.to_string(),
                 window_name: w.name.clone()
             }));
 
@@ -142,7 +143,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmu
         };
     };
 
-    if !daemonize { remains.push(Command::Attach(Attach{name: project_name.clone()})) };
+    if !daemonize { remains.push(Command::Attach(Attach{name: project_name.to_string()})) };
 
     Ok(remains)
 }
