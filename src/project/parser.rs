@@ -13,7 +13,7 @@ use tmux::config::Config;
 ///
 /// `yaml_string`: The parsed yaml from the config file.
 /// `project_name`: The name of the project.
-pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_config: &Config) -> Result<Vec<Command>, String> {
+pub fn call(yaml_string: &[Yaml], project_name: &str, daemonize: bool, tmux_config: &Config) -> Result<Vec<Command>, String> {
     let mut commands: Vec<Command> = vec!();
 
     // There should only be one doc but it's a vec so loop it.

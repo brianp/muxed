@@ -22,7 +22,7 @@ use std::process;
 /// ```
 ///
 /// commands: The stack of commands to process.
-pub fn main(commands: &Vec<Command>) -> () {
+pub fn main(commands: &[Command]) -> () {
     for c in commands {
         match *c {
             Command::Session(ref c)      => tmux::new_session(&c.name, &c.window_name),
