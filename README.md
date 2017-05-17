@@ -91,22 +91,25 @@ $ muxed my_project
 ## Usage Options
 
 ```shell
-USAGE:
-    muxed [FLAGS] [OPTIONS] <PROJECT_NAME>
+Usage:
+    muxed [options] <project>
+    muxed new [options] <project>
+    muxed (-h | --help)
+    muxed (-v | --version)
 
-FLAGS:
-    -d               If you want to create a muxed session without connecting to it
-    -h, --help       Prints help information
-    -V, --version    Prints version information
+Flags:
+    -d                  If you want to create a muxed session without connecting to it
+    -h, --help          Prints help information
+    -v, --version       Prints version information
 
-OPTIONS:
-    -p <PROJECT_DIR>        The directory your project config files live in. Defaults to ~/.muxed/
+Options:
+    -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
 
-ARGS:
-    <PROJECT_NAME>    The name of your poject to open
+Args:
+    <project>           The name of your project to open
 
-SUBCOMMANDS:
-    new    The name of your poject to create
+Subcommands:
+    new                 The name of your project to create
 ```
 
 ## Inspiration
