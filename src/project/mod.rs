@@ -33,7 +33,7 @@ static MUXED_FOLDER: &'static str = "muxed";
 /// let yaml: Result<Vec<Yaml>, String> = read("compiler".to_string());
 /// ```
 ///
-/// project_name: The name of the project, corresponding to the project config
+/// `project_name`: The name of the project, corresponding to the project config
 /// file.
 pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>, String> {
     let home = try!(homedir().map_err(|e| e));
@@ -71,7 +71,7 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
 }
 
 /// Find out if a tmux session is already active with this name. If it is active
-/// return Some<Command::Attach> with a command to attach to the session. If a
+/// return `Some<Command::Attach>` with a command to attach to the session. If a
 /// session is not active return None and let the app carry on.
 pub fn session_exists(project_name: &str) -> Option<Command> {
     if has_session(project_name).success() {

@@ -1,7 +1,7 @@
 //! The interface for interacting with TMUX sessions. All the commands that are
 /// built up during the parsing phase get matched to functions here. The
 /// functions in this module all build up strings the get passed to a private
-/// call. The private call converts them to CStrings and makes an "unsafe" system
+/// call. The private call converts them to `CStrings` and makes an "unsafe" system
 /// call. All functions go through this `call` function as a common gateway to
 /// system calls and can all be easily logged there.
 
@@ -109,8 +109,8 @@ pub fn split_window(target: &String) -> () {
 /// tmux::new_window("muxed".to_string(), "vim".to_string(), None);
 /// ```
 ///
-/// session_name: The active tmux session name.
-/// window_name: The desired window name for the new window.
+/// `session_name`: The active tmux session name.
+/// `window_name`: The desired window name for the new window.
 /// `root`: An `Option<String>` passed to the `-c` argument to change the current
 /// directory.
 pub fn new_window(session_name: &String, window_name: &String) -> () {

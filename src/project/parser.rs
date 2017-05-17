@@ -11,9 +11,9 @@ use tmux::config::Config;
 /// loop is to build the stack of commands that are run to setup a users tmux
 /// session.
 ///
-/// yaml_string: The parsed yaml from the config file.
-/// project_name: The name of the project.
 pub fn call(yaml_string: &Vec<Yaml>, project_name: &String, daemonize: bool, tmux_config: Config) -> Result<Vec<Command>, String> {
+/// `yaml_string`: The parsed yaml from the config file.
+/// `project_name`: The name of the project.
     let mut commands: Vec<Command> = vec!();
 
     // There should only be one doc but it's a vec so loop it.

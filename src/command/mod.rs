@@ -1,8 +1,8 @@
 //! The structures used to manage commands sent over to tmux.
 
 /// The Session command is used to fire up a new daemonized session in tmux.
-/// name: The Name of a named tmux session.
-/// tmp_window_name: The randomized tmp window name created for the first window
+/// `name`: The Name of a named tmux session.
+/// `tmp_window_name`: The randomized tmp window name created for the first window
 /// of the session. This window is closed before attaching.
 #[derive(Debug, Clone)]
 pub struct Session {
@@ -12,9 +12,9 @@ pub struct Session {
 
 /// The Window command is used to identify every new window opened in the tmux
 /// session.
-/// session_name: The name of the session.
-/// name: The named window to be opened.
-/// root: An `Option<String>` containing a possible root directory passed to the
+/// `session_name`: The name of the session.
+/// `name`: The named window to be opened.
+/// `root`: An `Option<String>` containing a possible root directory passed to the
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Window {
@@ -24,8 +24,8 @@ pub struct Window {
 
 /// The Split is used to call split-window on a particular window in the
 /// session.
-/// target: The target window. In the format `{session}:{window}.{paneIndex}`.
-/// root: An `Option<String>` containing a possible root directory passed to the
+/// `target`: The target window. In the format `{session}:{window}.{paneIndex}`.
+/// `root`: An `Option<String>` containing a possible root directory passed to the
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Split {
@@ -34,15 +34,15 @@ pub struct Split {
 
 /// The Layout command calls select-layout with a specific pre-defined tmux
 /// layout option see `tmux select-layout --help` for more options.
-/// target: The target window. In the format `{session}:{window}.{paneIndex}`.
-/// layout: The type of layout. ex `main-horizontal`.
+/// `target`: The target window. In the format `{session}:{window}.{paneIndex}`.
+/// `layout`: The type of layout. ex `main-horizontal`.
 #[derive(Debug, Clone)]
 pub struct Layout {
     pub target: String,
     pub layout: String,
 }
 
-/// A generic SendKeys command used to send "typed" commands to tmux. This is
+/// A generic `SendKeys` command used to send "typed" commands to tmux. This is
 /// used to initialize processes or tasks in specific window. Such as starting log
 /// tails or running servers.
 /// target: The target window. In the format `{session}:{window}.{paneIndex}`.
