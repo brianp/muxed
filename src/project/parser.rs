@@ -43,8 +43,8 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_c
 
         // SendKeys for the Pre option
         if let Some(p) = pre_window.clone() {
-            for v in p.iter() {
-                if let &Some(ref r) = v {
+            for v in &p {
+                if let Some(ref r) = *v {
                     commands2.push(Command::SendKeys(SendKeys{
                         target: target.clone(),
                         exec: r.clone()
@@ -59,8 +59,8 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_c
     let windows = doc["windows"].as_vec().expect("No Windows have been defined.");
 
     for window in windows.iter() {
-        match window {
-            &Yaml::Hash(ref h)  => {
+        match *window {
+            Yaml::Hash(ref h)  => {
                 for (k, v) in h {
                     if v.as_hash().is_some() {
                         commands.push(Command::Window(Window{
@@ -91,7 +91,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_c
                     }
                 }
             },
-            &Yaml::String(ref s) => {
+            Yaml::String(ref s) => {
                 commands.push(Command::Window(Window{
                     session_name: project_name.to_string(),
                     name: s.clone()
@@ -100,7 +100,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_c
                 let t = format!("{}:{}", &project_name, &s);
                 commands.append(&mut common_commands(t.to_string()));
             },
-            &Yaml::Integer(ref s) => {
+            Yaml::Integer(ref s) => {
                 commands.push(Command::Window(Window{
                     session_name: project_name.to_string(),
                     name: s.to_string()
@@ -116,17 +116,14 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_c
     let (first, commands) = commands.split_first().unwrap();
     let mut remains = commands.to_vec();
 
-    match *first {
-        Command::Window(ref w) => {
-            remains.insert(0, Command::Session(Session{
-                name: project_name.to_string(),
-                window_name: w.name.clone()
-            }));
+    if let Command::Window(ref w) = *first {
+        remains.insert(0, Command::Session(Session{
+            name: project_name.to_string(),
+            window_name: w.name.clone()
+        }));
 
-            remains.push(Command::SelectWindow(SelectWindow{target: format!("{}:{}", &project_name, &w.name)}));
-            remains.push(Command::SelectPane(SelectPane{target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index)}));
-        },
-        _ => {}
+        remains.push(Command::SelectWindow(SelectWindow{target: format!("{}:{}", &project_name, &w.name)}));
+        remains.push(Command::SelectPane(SelectPane{target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index)}));
     };
 
     // FIXME: Due to inserting the Pre commands into the 0 position in the stack,
@@ -134,7 +131,7 @@ pub fn call(yaml_string: &Vec<Yaml>, project_name: &str, daemonize: bool, tmux_c
     let pre = pre_matcher(&doc["pre"]);
     if let Some(ref p) = pre {
         for v in p.iter() {
-            if let &Some(ref r) = v {
+            if let Some(ref r) = *v {
                 remains.insert(0, Command::Pre(Pre{
                     exec: r.clone()
                 }));
