@@ -122,7 +122,7 @@ pub fn main() {
         },
         None => {
             let config = Config::from_string(tmux::get_config());
-            commands = try_or_err!(parser::call(&yaml, project_name, args.flag_d, config));
+            commands = try_or_err!(parser::call(&yaml, project_name, args.flag_d, &config));
         }
     };
 
