@@ -21,7 +21,7 @@ impl Config {
         let mut config: HashMap<&str, &str> = HashMap::new();
 
         for line in lines {
-            let opt: Vec<&str> = line.split(" ").collect();
+            let opt: Vec<&str> = line.split(' ').collect();
             config.insert(opt[0], opt[1]);
         }
 
