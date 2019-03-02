@@ -4,13 +4,12 @@
 /// call. The private call converts them to `CStrings` and makes an "unsafe" system
 /// call. All functions go through this `call` function as a common gateway to
 /// system calls and can all be easily logged there.
-
 pub mod config;
 
 use libc::system;
 use std::ffi::CString;
-use std::process::{Command, ExitStatus, Output};
 use std::io;
+use std::process::{Command, ExitStatus, Output};
 
 /// The program to call commands on.
 static TMUX_NAME: &'static str = "tmux";
@@ -44,10 +43,15 @@ fn call(args: &[&str]) -> Result<Output, io::Error> {
 /// ```
 /// `session_name: The active tmux session name.
 pub fn attach(session_name: &str) -> () {
-    let line = format!("{} attach -t '{}' {}", TMUX_NAME, session_name, ">/dev/null");
+    let line = format!(
+        "{} attach -t '{}' {}",
+        TMUX_NAME, session_name, ">/dev/null"
+    );
     let system_call = CString::new(line.clone()).unwrap();
     //println!("{}", line.clone());
-    unsafe { system(system_call.as_ptr()); };
+    unsafe {
+        system(system_call.as_ptr());
+    };
 }
 
 /// New session is the first call made in any sequence of commands. It initiates
@@ -193,7 +197,8 @@ pub fn select_pane(target: &str) -> () {
 ///
 /// `target`: A string represented by the `{named_session}`
 pub fn has_session(target: &str) -> ExitStatus {
-    let output = call(&["has-session", "-t", target]).expect("failed to see if the session existed");
+    let output =
+        call(&["has-session", "-t", target]).expect("failed to see if the session existed");
     output.status
 }
 
@@ -206,6 +211,7 @@ pub fn has_session(target: &str) -> ExitStatus {
 /// => "some-option false\npane-base-index 0"
 /// ```
 pub fn get_config() -> String {
-    let output = call(&["start-server", ";", "show-options", "-g"]).expect("couldn't get tmux options");
+    let output =
+        call(&["start-server", ";", "show-options", "-g"]).expect("couldn't get tmux options");
     String::from_utf8_lossy(&output.stdout).to_string()
 }

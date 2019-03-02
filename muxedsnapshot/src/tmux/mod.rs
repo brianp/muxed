@@ -1,0 +1,49 @@
+pub mod session;
+pub mod window;
+pub mod pane;
+
+use self::session::Session;
+use self::window::Window;
+use self::pane::Pane;
+
+pub fn inspect(name: &str) -> Result<Session, String> {
+    let windows = match windows_for(name) {
+        Ok(x)  => x,
+        Err(e) => return Err(e)
+    };
+
+    let windows1 = windows
+                      .into_iter()
+                      .map(|w| Window::from_window(panes_for(name, &w).unwrap(), w))
+                      .collect();
+
+    Ok(Session::new(name, windows1))
+}
+
+fn windows_for(target: &str) -> Result<Vec<Window>, String> {
+    let err = format!("\u{1F613} The session {} was not found.", target);
+    let output = try!(Window::window_list(target).map_err(|e| format!("{} - {}", err, e)));
+
+    let windows = String::from_utf8_lossy(&output.stdout)
+                      .lines()
+                      .filter_map(|line| Window::from_line(line) )
+                      .collect::<Vec<_>>();
+
+    if windows.is_empty() {
+        return Err(err)
+    }
+
+    Ok(windows)
+}
+
+fn panes_for(session_name: &str, w: &Window) -> Result<Vec<Pane>, String> {
+    let target = format!("{}:{}", &session_name, &w.name);
+    let output = try!(Pane::pane_list(&target).map_err(|e| format!("We couldn't find panes for the {} window - {}", &target, e)));
+
+    let panes = String::from_utf8_lossy(&output.stdout)
+                    .lines()
+                    .filter_map(|line| Pane::from_line(line) )
+                    .collect::<Vec<_>>();
+
+    Ok(panes)
+}

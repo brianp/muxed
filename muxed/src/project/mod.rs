@@ -1,16 +1,18 @@
 //! The project module takes care of muxed related initialization. Locating the
+use command::{Attach, Command};
+#[cfg(test)]
+use rand::random;
+#[cfg(not(test))]
+use std::env::home_dir;
+#[cfg(test)]
+use std::fs;
+use std::fs::{create_dir, File};
+use std::io::prelude::*;
 /// users home directory. Finding the desired config files, and reading the
 /// configs in.
-
 use std::path::{Path, PathBuf};
-use std::io::prelude::*;
-use std::fs::{File, create_dir};
-use yaml_rust::{YamlLoader, Yaml};
-use command::{Command, Attach};
-use tmux::{has_session};
-#[cfg(not(test))] use std::env::home_dir;
-#[cfg(test)] use rand::random;
-#[cfg(test)] use std::fs;
+use tmux::has_session;
+use yaml_rust::{Yaml, YamlLoader};
 
 pub mod parser;
 pub mod processor;
@@ -51,22 +53,26 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
 
     let mut file = try!(File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, muxed_dir, e.to_string())));
     let mut contents = String::new();
-    try!(file.read_to_string(&mut contents).map_err(|e| e.to_string()));
+    try!(file
+        .read_to_string(&mut contents)
+        .map_err(|e| e.to_string()));
 
     let parsed_yaml = try!(YamlLoader::load_from_str(&contents).map_err(|e| e.to_string()));
     Ok(parsed_yaml)
 }
 
 /// Return the users homedir as a string.
-#[cfg(not(test))] fn homedir() -> Result<PathBuf, String> {
+#[cfg(not(test))]
+fn homedir() -> Result<PathBuf, String> {
     match home_dir() {
         Some(dir) => Ok(dir),
-        None      => Err(String::from("We couldn't find your home directory."))
+        None => Err(String::from("We couldn't find your home directory.")),
     }
 }
 
 /// Return the temp dir as the users home dir during testing.
-#[cfg(test)] fn homedir() -> Result<PathBuf, String> {
+#[cfg(test)]
+fn homedir() -> Result<PathBuf, String> {
     Ok(PathBuf::from("/tmp"))
 }
 
@@ -75,9 +81,11 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
 /// session is not active return None and let the app carry on.
 pub fn session_exists(project_name: &str) -> Option<Command> {
     if has_session(project_name).success() {
-      Some(Command::Attach(Attach{name: project_name.to_string()}))
+        Some(Command::Attach(Attach {
+            name: project_name.to_string(),
+        }))
     } else {
-      None
+        None
     }
 }
 
@@ -108,9 +116,11 @@ fn good_file_returns_ok() {
     let path = Path::new(&name1);
     let _ = fs::create_dir(Path::new("/tmp/.muxed/"));
     let mut buffer = File::create(path).unwrap();
-    let _ = buffer.write(b"---
+    let _ = buffer.write(
+        b"---
 windows: ['cargo', 'vim', 'git']
-");
+",
+    );
 
     let result = read(&format!("{}", name), &None);
     let _ = fs::remove_file(path);

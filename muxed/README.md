@@ -12,29 +12,15 @@ launch a TMUX session.
 **muxednew**: Provides a template generator to create new project files. See the `new`
 subcommand in [Usage](#usage-options).
 
-**muxedsnapshot**: This is a tool to generate project configuration files. The
-template will be generated off a currently running TMUX session. This will include:
-
- - Session name
- - Windows
-  - Names
-  - Layouts
-  - Active Window
-  - Panes
-    - Current paths
-    - Running processes
-    - Active Pane
-
-See the `snapshot` subcommand in [Usage](#usage-options).
-
 ## Installation
 
 ### Download:
 
 See the [releases](https://github.com/brianp/muxed/releases) page for muxed packages.
-Download and untar the package as desired. The complete package contains
-both `muxed`, `muxednew`, and `muxedsnapshot`.
-Make sure all bins are somewhere in your `$PATH`. I
+Download and untar the package as desired. The muxed-complete package contains
+both `muxed` and `muxednew`. The stand alone muxed package
+only contains the `muxed` bin.
+Make sure the `muxed` and `muxednew` bins are somewhere in your `$PATH`. I
 generally move the bins in to `/usr/local/bin`.
 
 ```shell
