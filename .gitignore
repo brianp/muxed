@@ -1,8 +1,5 @@
 doc/*
 target/*
 build/*
-test
-main
-muxed
 .vagrant/*
 .ds_store
