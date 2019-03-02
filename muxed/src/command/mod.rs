@@ -7,7 +7,7 @@
 #[derive(Debug, Clone)]
 pub struct Session {
     pub name: String,
-    pub window_name: String
+    pub window_name: String,
 }
 
 /// The Window command is used to identify every new window opened in the tmux
@@ -19,7 +19,7 @@ pub struct Session {
 #[derive(Debug, Clone)]
 pub struct Window {
     pub session_name: String,
-    pub name: String
+    pub name: String,
 }
 
 /// The Split is used to call split-window on a particular window in the
@@ -29,7 +29,7 @@ pub struct Window {
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Split {
-    pub target: String
+    pub target: String,
 }
 
 /// The Layout command calls select-layout with a specific pre-defined tmux
@@ -50,28 +50,28 @@ pub struct Layout {
 #[derive(Debug, Clone)]
 pub struct SendKeys {
     pub target: String,
-    pub exec: String
+    pub exec: String,
 }
 
 /// Used to attach to the daemonized session.
 /// name: The named session to attach too.
 #[derive(Debug, Clone)]
 pub struct Attach {
-    pub name: String
+    pub name: String,
 }
 
 /// Used to move focus back to the first window.
 /// target: The target window. In the format `{session}:{window}`.
 #[derive(Debug, Clone)]
 pub struct SelectWindow {
-    pub target: String
+    pub target: String,
 }
 
 /// Used to move focus back to the top pane.
 /// target: The target pane. In the format `{session}:{window}.{pane-target}`.
 #[derive(Debug, Clone)]
 pub struct SelectPane {
-    pub target: String
+    pub target: String,
 }
 
 /// Used for executing the `pre` option to execute commands before building the
@@ -79,7 +79,7 @@ pub struct SelectPane {
 /// exec: The command to execute
 #[derive(Debug, Clone)]
 pub struct Pre {
-    pub exec: String
+    pub exec: String,
 }
 
 /// The Command enum. Commands represent the series of commands sent to the
@@ -96,5 +96,5 @@ pub enum Command {
     Attach(Attach),
     SelectWindow(SelectWindow),
     SelectPane(SelectPane),
-    Pre(Pre)
+    Pre(Pre),
 }

@@ -1,22 +1,23 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-extern crate libc;
-extern crate yaml_rust;
 extern crate docopt;
+extern crate libc;
 extern crate rustc_serialize;
+extern crate yaml_rust;
 
-#[cfg(test)] extern crate rand;
+#[cfg(test)]
+extern crate rand;
 
-mod tmux;
 mod command;
 mod project;
+mod tmux;
 
+use command::Command;
+use docopt::Docopt;
 use project::parser;
 use project::processor;
-use tmux::config::Config;
-use command::Command;
-use std::{process, env};
 use std::process::exit;
-use docopt::Docopt;
+use std::{env, process};
+use tmux::config::Config;
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -87,20 +88,20 @@ struct Args {
 /// ```
 pub fn main() {
     // First see if we have a subcommand. If we do we want to
-    // skip decoding for docopt and passoff execution to the 
+    // skip decoding for docopt and passoff execution to the
     // subcommand bin.
     let mut input: std::env::Args = env::args();
 
     if let Some(x) = input.nth(1) {
-        match x.as_ref(){
+        match x.as_ref() {
             "new" => run_subcommand("muxednew", input),
-            _     => {}
+            _ => {}
         }
     }
 
     let args: Args = Docopt::new(USAGE)
-                        .and_then(|d| d.decode())
-                        .unwrap_or_else(|e| e.exit());
+        .and_then(|d| d.decode())
+        .unwrap_or_else(|e| e.exit());
 
     if args.flag_v {
         println!("Muxed {}", env!("CARGO_PKG_VERSION"));
@@ -109,17 +110,20 @@ pub fn main() {
 
     let muxed_dir = match args.flag_p {
         Some(ref x) => Some(x.as_str()),
-        None        => None
+        None => None,
     };
 
     let yaml = try_or_err!(project::read(&args.arg_project, &muxed_dir));
-    let project_name = &yaml[0]["name"].as_str().unwrap_or(&args.arg_project).to_string();
+    let project_name = &yaml[0]["name"]
+        .as_str()
+        .unwrap_or(&args.arg_project)
+        .to_string();
 
     let commands: Vec<Command>;
     match project::session_exists(project_name) {
         Some(c) => {
-            commands = vec!(c);
-        },
+            commands = vec![c];
+        }
         None => {
             let config = Config::from_string(tmux::get_config());
             commands = try_or_err!(parser::call(&yaml, project_name, args.flag_d, &config));
@@ -138,6 +142,8 @@ pub fn run_subcommand(subc: &str, input: std::env::Args) {
     // Lets add an error code they can call on for more details. Why
     // isn't muxed new installed?
     println!("{}", String::from_utf8_lossy(&result.stdout));
-    if let Some(c) = result.status.code() { exit(c); };
+    if let Some(c) = result.status.code() {
+        exit(c);
+    };
     exit(0);
 }

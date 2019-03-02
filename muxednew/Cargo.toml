@@ -1,0 +1,10 @@
+[package]
+name = "muxednew"
+version = "0.3.0"
+authors = ["Brian Pearce"]
+
+[dependencies]
+clap = { version = "2.5.1", default-features = false }
+
+[dev-dependencies]
+rand = "0.3"

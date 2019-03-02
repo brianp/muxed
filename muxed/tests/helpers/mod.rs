@@ -1,9 +1,9 @@
 //! The integration suite helpers.
 
 use regex::Regex;
-use std::process::Command;
-use std::path::{Path, PathBuf};
 use std::collections::HashMap;
+use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::str::FromStr;
 use std::thread::sleep;
 use std::time::Duration;
@@ -32,7 +32,7 @@ pub fn open_muxed(project: &str, project_root: &Path) -> () {
         .arg(format!("{}", project_root.display()))
         .arg(project)
         .output()
-        .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+        .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
 
     println!("status: {}", output.status);
     println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
@@ -45,7 +45,7 @@ pub fn kill_session(target: &str) -> () {
         .arg("-t")
         .arg(target)
         .output()
-        .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+        .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
 }
 
 pub fn send_keys(target: &str, exec: &str) -> () {
@@ -56,7 +56,7 @@ pub fn send_keys(target: &str, exec: &str) -> () {
         .arg(exec)
         .arg("KPEnter")
         .output()
-        .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+        .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
 }
 
 pub fn wait_on(file: &PathBuf) -> () {
@@ -77,14 +77,14 @@ impl SessionValue {
     pub fn as_str(&self) -> Option<&str> {
         match *self {
             SessionValue::String(ref s) => Some(s),
-            _ => None
+            _ => None,
         }
     }
 
     pub fn as_usize(&self) -> Option<usize> {
         match *self {
             SessionValue::Usize(s) => Some(s),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -103,11 +103,11 @@ pub struct WindowValues {
     pub pane_current_path: SessionValue,
 }
 
-static NAME_REGEX:              &'static str = r"\(Session: (.*)\)";
-static WINDOW_NAME_REGEX:       &'static str = r":\s(\w*)[$\*-]?\s+\(";
-static WINDOW_ACTIVE_REGEX:     &'static str = r"\s(.*)\*";
+static NAME_REGEX: &'static str = r"\(Session: (.*)\)";
+static WINDOW_NAME_REGEX: &'static str = r":\s(\w*)[$\*-]?\s+\(";
+static WINDOW_ACTIVE_REGEX: &'static str = r"\s(.*)\*";
 static PANE_CURRENT_PATH_REGEX: &'static str = r"\(Dir: (.*)\) ";
-static PANES_COUNT_REGEX:       &'static str = r"\((\d*) panes\)";
+static PANES_COUNT_REGEX: &'static str = r"\((\d*) panes\)";
 
 impl TmuxSession {
     pub fn from_string(results: &str) -> TmuxSession {
@@ -122,19 +122,22 @@ impl TmuxSession {
             let cap = window_name.captures(line).unwrap();
             let name = cap.get(1).unwrap().as_str();
 
-            let win_val = WindowValues{
+            let win_val = WindowValues {
                 panes: TmuxSession::count_panes(line),
-                pane_current_path: TmuxSession::retrieve_capture(line, PANE_CURRENT_PATH_REGEX).unwrap_or(SessionValue::Empty)
+                pane_current_path: TmuxSession::retrieve_capture(line, PANE_CURRENT_PATH_REGEX)
+                    .unwrap_or(SessionValue::Empty),
             };
 
             windows.insert(name.to_string(), win_val.clone());
         }
 
         TmuxSession {
-          num_of_windows: window_lines.len(),
-          windows: windows,
-          window_active: TmuxSession::retrieve_capture(window_lines[0], WINDOW_ACTIVE_REGEX).unwrap_or(SessionValue::Empty),
-          name: TmuxSession::retrieve_capture(window_lines[0], NAME_REGEX).unwrap_or(SessionValue::Empty)
+            num_of_windows: window_lines.len(),
+            windows: windows,
+            window_active: TmuxSession::retrieve_capture(window_lines[0], WINDOW_ACTIVE_REGEX)
+                .unwrap_or(SessionValue::Empty),
+            name: TmuxSession::retrieve_capture(window_lines[0], NAME_REGEX)
+                .unwrap_or(SessionValue::Empty),
         }
     }
 
@@ -143,8 +146,8 @@ impl TmuxSession {
 
         if let Some(caps) = reg.captures(line) {
             return match caps.get(1) {
-               Some(x) => Ok(SessionValue::String(x.as_str().to_string())),
-               None    => Err("No capture".to_string())
+                Some(x) => Ok(SessionValue::String(x.as_str().to_string())),
+                None => Err("No capture".to_string()),
             };
         };
 
@@ -158,7 +161,7 @@ impl TmuxSession {
         for cap in panes.captures_iter(line) {
             num = match cap.get(1) {
                 Some(x) => x.as_str(),
-                None    => "0"
+                None => "0",
             }
         }
 
