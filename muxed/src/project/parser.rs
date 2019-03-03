@@ -220,7 +220,7 @@ where
         let layout = window["layout"].as_str().expect(err.as_str()).to_string();
         commands.push(Command::Layout(Layout {
             target: target.to_string(),
-            layout: layout,
+            layout,
         }));
     };
 

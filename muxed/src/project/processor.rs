@@ -21,7 +21,7 @@ use tmux;
 /// ```
 ///
 /// commands: The stack of commands to process.
-pub fn main(commands: &[Command]) -> () {
+pub fn main(commands: &[Command]) {
     for c in commands {
         match *c {
             Command::Session(ref c) => tmux::new_session(&c.name, &c.window_name),
@@ -37,7 +37,7 @@ pub fn main(commands: &[Command]) -> () {
     }
 }
 
-fn system_calls(cmd_string: &str) -> () {
+fn system_calls(cmd_string: &str) {
     let cmd_array: Vec<&str> = cmd_string.split(' ').collect();
     let (program, args) = cmd_array
         .split_first()

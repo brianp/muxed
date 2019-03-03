@@ -42,7 +42,7 @@ fn call(args: &[&str]) -> Result<Output, io::Error> {
 /// tmux::attach(muxed);
 /// ```
 /// `session_name: The active tmux session name.
-pub fn attach(session_name: &str) -> () {
+pub fn attach(session_name: &str) {
     let line = format!(
         "{} attach -t '{}' {}",
         TMUX_NAME, session_name, ">/dev/null"
@@ -82,7 +82,7 @@ pub fn attach(session_name: &str) -> () {
 /// `session_name`: The active tmux session name.
 /// `tmp_name`: The name for the temp initial window that is created with a new
 /// session.
-pub fn new_session(session_name: &str, window_name: &str) -> () {
+pub fn new_session(session_name: &str, window_name: &str) {
     let _ = call(&["new", "-d", "-s", session_name, "-n", window_name]);
 }
 
@@ -100,7 +100,7 @@ pub fn new_session(session_name: &str, window_name: &str) -> () {
 /// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
 /// `root`: An `Option<String>` passed to the `-c` argument to change the current
 /// directory.
-pub fn split_window(target: &str) -> () {
+pub fn split_window(target: &str) {
     let _ = call(&["split-window", "-t", target]);
 }
 
@@ -117,7 +117,7 @@ pub fn split_window(target: &str) -> () {
 /// `window_name`: The desired window name for the new window.
 /// `root`: An `Option<String>` passed to the `-c` argument to change the current
 /// directory.
-pub fn new_window(session_name: &str, window_name: &str) -> () {
+pub fn new_window(session_name: &str, window_name: &str) {
     let _ = call(&["new-window", "-t", session_name, "-n", window_name]);
 }
 
@@ -135,7 +135,7 @@ pub fn new_window(session_name: &str, window_name: &str) -> () {
 ///
 /// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
 /// `layout`: The predefined tmux named layout.
-pub fn layout(target: &str, layout: &str) -> () {
+pub fn layout(target: &str, layout: &str) {
     let _ = call(&["select-layout", "-t", target, layout]);
 }
 
@@ -154,7 +154,7 @@ pub fn layout(target: &str, layout: &str) -> () {
 ///
 /// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
 /// `exec`: The system command to be executed in a particular pane.
-pub fn send_keys(target: &str, exec: &str) -> () {
+pub fn send_keys(target: &str, exec: &str) {
     let _ = call(&["send-keys", "-t", target, exec, "KPEnter"]);
 }
 
@@ -168,7 +168,7 @@ pub fn send_keys(target: &str, exec: &str) -> () {
 /// ```
 ///
 /// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
-pub fn select_window(target: &str) -> () {
+pub fn select_window(target: &str) {
     let _ = call(&["select-window", "-t", target]);
 }
 
@@ -182,7 +182,7 @@ pub fn select_window(target: &str) -> () {
 /// ```
 ///
 /// `target`: A string represented by the `{named_session}:{named_window}.{pane}`
-pub fn select_pane(target: &str) -> () {
+pub fn select_pane(target: &str) {
     let _ = call(&["select-pane", "-t", target]);
 }
 
