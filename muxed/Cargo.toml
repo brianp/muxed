@@ -8,6 +8,7 @@ libc            = "0.2.21"
 yaml-rust       = { version = "0.3.2", default-features = false }
 docopt          = "0.7"
 rustc-serialize = "0.3"
+dirs            = "1.0.5"
 
 [dev-dependencies]
 rand      = "0.3.15"

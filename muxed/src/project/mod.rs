@@ -1,9 +1,9 @@
 //! The project module takes care of muxed related initialization. Locating the
 use command::{Attach, Command};
+#[cfg(not(test))]
+use dirs::home_dir;
 #[cfg(test)]
 use rand::random;
-#[cfg(not(test))]
-use std::env::home_dir;
 #[cfg(test)]
 use std::fs;
 use std::fs::{create_dir, File};

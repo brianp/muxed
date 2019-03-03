@@ -1,5 +1,4 @@
-.PHONY : test build clippy fmt clean
-
+.PHONY : test build clippy fmt clean check
 .DEFAULT_GOAL := build
 
 VERSION_TAG := $(shell git describe --abbrev=0 --tags)
@@ -22,6 +21,9 @@ fmt:
 clean:
 	${docker_dev_cmd} cargo clean
 
+check:
+	${docker_dev_cmd} cargo check
+
 build:
 	docker build -t ${docker_image_name} -f test.dockerfile .
 
@@ -31,3 +33,4 @@ help:
 	@echo clippy: run the linter
 	@echo fmt: run the rust code formatter
 	@echo clean: clean the target directory
+	@echo check: run the rust compiler check

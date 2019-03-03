@@ -1,4 +1,5 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
+extern crate dirs;
 extern crate docopt;
 extern crate libc;
 extern crate rustc_serialize;

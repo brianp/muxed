@@ -1,5 +1,6 @@
 //! The integration suite for inspecting sessions.
 
+extern crate dirs;
 extern crate libc;
 extern crate rand;
 extern crate regex;
@@ -8,9 +9,9 @@ extern crate yaml_rust;
 mod helpers;
 
 mod open {
+    use dirs::home_dir;
     use helpers::*;
     use rand::random;
-    use std::env::home_dir;
     use std::fs;
     use std::fs::File;
     use std::io::prelude::*;
