@@ -1,11 +1,12 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
 #![feature(proc_macro)]
 extern crate clap;
+extern crate dirs;
 extern crate libc;
 extern crate regex;
-extern crate yaml_rust;
 extern crate serde;
 extern crate serde_yaml;
+extern crate yaml_rust;
 #[cfg(test)] extern crate rand;
 
 #[macro_use]
@@ -19,7 +20,7 @@ use std::process::exit;
 use std::path::{Path, PathBuf};
 use std::fs::{OpenOptions, create_dir};
 use std::io::Write;
-#[cfg(not(test))] use std::env::home_dir;
+#[cfg(not(test))] use dirs::home_dir;
 
 #[macro_export]
 macro_rules! try_or_err (

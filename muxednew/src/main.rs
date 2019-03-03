@@ -1,5 +1,6 @@
 //! Muxednew. A Muxed project Template Generator
 extern crate clap;
+extern crate dirs;
 #[cfg(test)] extern crate rand;
 
 use clap::{Arg, App};
@@ -11,7 +12,7 @@ use std::process::exit;
 #[cfg(test)] use std::fs;
 #[cfg(test)] use std::fs::File;
 #[cfg(test)] use std::io::Read;
-#[cfg(not(test))] use std::env::home_dir;
+#[cfg(not(test))] use dirs::home_dir;
 
 #[macro_export]
 macro_rules! try_or_err (
