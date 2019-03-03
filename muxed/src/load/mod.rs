@@ -1,9 +1,9 @@
 use args::Args;
 use command::Command;
-use project::{parser, processor};
 use project;
-use tmux::config::Config;
+use project::{parser, processor};
 use tmux;
+use tmux::config::Config;
 
 pub fn exec(args: Args) -> Result<(), String> {
     let muxed_dir = match args.flag_p {
@@ -24,7 +24,8 @@ pub fn exec(args: Args) -> Result<(), String> {
         }
         None => {
             let config = Config::from_string(tmux::get_config());
-            commands = parser::call(&yaml, project_name, args.flag_d, &config).expect("Couldn't parse commands");
+            commands = parser::call(&yaml, project_name, args.flag_d, &config)
+                .expect("Couldn't parse commands");
         }
     };
 

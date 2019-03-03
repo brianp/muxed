@@ -11,7 +11,7 @@ extern crate rand;
 mod args;
 mod command;
 mod load;
-//mod new;
+mod new;
 mod project;
 mod tmux;
 
@@ -91,10 +91,9 @@ pub fn main() {
 
     if let Some(x) = input.nth(1) {
         match x.as_ref() {
-            "new" => try_or_err!(Err("bye".to_string())),
-            // "new" => try_or_err!(new::exec(args)),
+            "new" => try_or_err!(new::exec(args)),
             // "snapshot" => try_or_err!(snapshot::exec(args)),
-            _ => try_or_err!(load::exec(args))
+            _ => try_or_err!(load::exec(args)),
         }
     }
 }
