@@ -8,17 +8,17 @@ extern crate yaml_rust;
 #[cfg(test)]
 extern crate rand;
 
+mod args;
 mod command;
+mod load;
+//mod new;
 mod project;
 mod tmux;
 
-use command::Command;
+use args::Args;
 use docopt::Docopt;
-use project::parser;
-use project::processor;
+use std::env;
 use std::process::exit;
-use std::{env, process};
-use tmux::config::Config;
 
 #[macro_export]
 macro_rules! try_or_err (
@@ -26,8 +26,7 @@ macro_rules! try_or_err (
         match $expr {
             Ok(val) => val,
             Err(e) => {
-                println!("Muxed ran in to a problem:");
-                println!("{}", e);
+                println!("Muxed ran in to a problem: {}", e);
                 exit(1);
             }
         }
@@ -53,17 +52,8 @@ Args:
     <project>           The name of your project to open
 
 Subcommands:
-    new                 The name of your project to create
+    new <project>       The name of your project to create
 ";
-
-#[derive(Debug, RustcDecodable)]
-struct Args {
-    flag_d: bool,
-    flag_v: bool,
-    flag_p: Option<String>,
-    arg_project: String,
-    cmd_new: bool,
-}
 
 /// The main execution method.
 /// Currently accepts a single option. The option represents a configuration
@@ -88,17 +78,7 @@ struct Args {
 /// $ ./muxed projectName
 /// ```
 pub fn main() {
-    // First see if we have a subcommand. If we do we want to
-    // skip decoding for docopt and passoff execution to the
-    // subcommand bin.
     let mut input: std::env::Args = env::args();
-
-    if let Some(x) = input.nth(1) {
-        match x.as_ref() {
-            "new" => run_subcommand("muxednew", input),
-            _ => {}
-        }
-    }
 
     let args: Args = Docopt::new(USAGE)
         .and_then(|d| d.decode())
@@ -109,42 +89,12 @@ pub fn main() {
         exit(0);
     };
 
-    let muxed_dir = match args.flag_p {
-        Some(ref x) => Some(x.as_str()),
-        None => None,
-    };
-
-    let yaml = try_or_err!(project::read(&args.arg_project, &muxed_dir));
-    let project_name = &yaml[0]["name"]
-        .as_str()
-        .unwrap_or(&args.arg_project)
-        .to_string();
-
-    let commands: Vec<Command>;
-    match project::session_exists(project_name) {
-        Some(c) => {
-            commands = vec![c];
+    if let Some(x) = input.nth(1) {
+        match x.as_ref() {
+            "new" => try_or_err!(Err("bye".to_string())),
+            // "new" => try_or_err!(new::exec(args)),
+            // "snapshot" => try_or_err!(snapshot::exec(args)),
+            _ => try_or_err!(load::exec(args))
         }
-        None => {
-            let config = Config::from_string(tmux::get_config());
-            commands = try_or_err!(parser::call(&yaml, project_name, args.flag_d, &config));
-        }
-    };
-
-    processor::main(&commands)
-}
-
-pub fn run_subcommand(subc: &str, input: std::env::Args) {
-    let mut cmd = process::Command::new(subc);
-    let trail: Vec<String> = input.collect();
-    cmd.args(trail.as_slice());
-
-    let result = try_or_err!(cmd.output().map_err(|e| format!("It looks like {} might not be installed or we don't have access to it.\nWe received this system error while trying to call the subcommand `{}`: `{}`", subc, subc, e)));
-    // Lets add an error code they can call on for more details. Why
-    // isn't muxed new installed?
-    println!("{}", String::from_utf8_lossy(&result.stdout));
-    if let Some(c) = result.status.code() {
-        exit(c);
-    };
-    exit(0);
+    }
 }
