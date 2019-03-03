@@ -1,0 +1,32 @@
+# {file}
+
+# The root option will perform a change directory system call on all panes and
+# windows opened. To set the default directory.
+root: "~/"
+
+# pre_window is a command or an array of commands that will be executed in all
+# windows and panes before window and pane specific commans.
+# ex:
+# pre_window: rbenv shell 2.1.2
+#
+# pre_window:
+#   - rvm 2.1.2
+#   - ls .
+
+# Windows is required and lets you define the windows you would like opened in
+# your tmux session. This can be made as a list of key value pairs, where the
+# key is the window name, and the value is a system command to execute.
+# ex: 
+# windows:
+#   - processes: "ls /proc"
+#   - logs: "tail -f /var/log/dmesg"
+#
+# You can also define windows as an array with no system commands to execute:
+# ex:
+# windows: ['first', 'second', 'last']
+windows:
+  - editor:
+      layout: "main-vertical"
+      panes: ["vi", "ls -alh"]
+  - processes: "ls /proc"
+  - logs: "tail -f /var/log/dmesg"
