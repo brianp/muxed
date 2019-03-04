@@ -1,6 +1,6 @@
 //! Processes the stack of Commands and matches them to the appropriate tmux
 /// call.
-use command::Command;
+use load::command::Command;
 use std::process;
 use tmux;
 

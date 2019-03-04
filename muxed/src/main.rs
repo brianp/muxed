@@ -9,7 +9,6 @@ extern crate yaml_rust;
 extern crate rand;
 
 mod args;
-mod command;
 mod load;
 mod new;
 mod project;
