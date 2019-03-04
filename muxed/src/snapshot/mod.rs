@@ -1,40 +1,13 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
-#![feature(proc_macro)]
-extern crate clap;
-extern crate dirs;
-extern crate libc;
-extern crate regex;
-extern crate serde;
-extern crate serde_yaml;
-extern crate yaml_rust;
-#[cfg(test)] extern crate rand;
+pub mod capture;
+pub mod tmux;
 
-#[macro_use]
-extern crate serde_derive;
-
-mod tmux;
-mod capture;
-
-use clap::{Arg, App, AppSettings};
-use std::process::exit;
-use std::path::{Path, PathBuf};
-use std::fs::{OpenOptions, create_dir};
+use args::Args;
+#[cfg(not(test))]
+use dirs::home_dir;
+use std::fs::{create_dir, OpenOptions};
 use std::io::Write;
-#[cfg(not(test))] use dirs::home_dir;
-
-#[macro_export]
-macro_rules! try_or_err (
-    ($expr: expr) => ({
-        match $expr {
-            Ok(val) => val,
-            Err(e) => {
-              println!("Muxedsnapshot ran in to a problem:");
-              println!("{}", e);
-              exit(1);
-            }
-        }
-    })
-);
+use std::path::{Path, PathBuf};
 
 static MUXED_FOLDER: &'static str = "muxed";
 
@@ -55,97 +28,80 @@ static MUXED_FOLDER: &'static str = "muxed";
 /// ```
 /// $ ./muxed snapshot -n jasper -t 1
 /// ```
-pub fn main() {
-    let matches = App::new("Muxedsnapshot")
-                      .version(env!("CARGO_PKG_VERSION"))
-                      .author("Brian Pearce")
-                      .about("A TMUX session codifier for Muxed")
-                      .setting(AppSettings::TrailingVarArg)
-                      .arg(Arg::with_name("NEW_PROJECT_NAME")
-                           .short("n")
-                           .help("The name of your new project file to create")
-                           .multiple(false)
-                           .required(true)
-                           .takes_value(true))
-                      .arg(Arg::with_name("SESSION")
-                           .short("t")
-                           .multiple(false)
-                           .required(true)
-                           .takes_value(true)
-                           .help("The name of the TMUX session to codify"))
-                      .arg(Arg::with_name("PROJECT_DIR")
-                           .short("p")
-                           .multiple(false)
-                           .value_name("PROJECT_DIR")
-                           .takes_value(true)
-                           .help("The directory your project config files should live in. Defaults to ~/.muxed/"))
-                      .arg(Arg::with_name("force")
-                           .short("f")
-                           .long("force")
-                           .multiple(false)
-                           .required(false)
-                           .takes_value(false)
-                           .help("Overwrite existing file if one exists"))
-                      .get_matches();
-
-    let home = try_or_err!(homedir().map_err(|e| e));
+pub fn exec(args: Args) -> Result<(), String> {
+    let home = homedir().expect("Can't find home dir");
     let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
-    let project_name = format!("{}.yml", matches.value_of("NEW_PROJECT_NAME").unwrap());
-    let session_name = matches.value_of("SESSION").unwrap();
-    let muxed_dir = matches.value_of("PROJECT_DIR").unwrap_or_else(|| default_dir.as_str());
+    let project_name = format!("{}.yml", &args.arg_project);
+    let session_name = &args.flag_t.expect("No TMUX session running");
+    let muxed_dir = match args.flag_p {
+        Some(ref x) => x.as_str(),
+        _ => default_dir.as_str(),
+    };
     let new_project_path = PathBuf::from(format!("{}/{}", muxed_dir, project_name));
 
     if !Path::new(muxed_dir).exists() {
-        try_or_err!(create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e)));
+        // create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e));
+        create_dir(muxed_dir).expect(&format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong", muxed_dir));
         println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir);
         println!("Creating that now \u{1F44C}\n")
     };
 
-    let session = try_or_err!(tmux::inspect(&session_name));
+    let session = tmux::inspect(&session_name).unwrap();
     let s = serde_yaml::to_string(&session).unwrap();
 
-    try_or_err!(write_config(s, &new_project_path, matches.is_present("force")));
-    println!("We made a snapshot of your session! \u{1F60A}")
+    write_config(s, &new_project_path, args.flag_f).unwrap();
+    println!("We made a snapshot of your session! \u{1F60A}");
+    Ok(())
 }
 
 /// Write the new file
 fn write_config<S>(template: S, path: &PathBuf, force: bool) -> Result<(), String>
-    where S: Into<String>
+where
+    S: Into<String>,
 {
     let path_str = path.to_str().unwrap();
     let mut file = try!(OpenOptions::new()
-                            .write(true)
-                            .truncate(force)
-                            .create(force)
-                            .create_new(!force)
-                            .open(path)
-                            .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e)));
-    try!(file.write_all(template.into().as_bytes()).map_err(|e| format!("Could not write contents of template to the file {}. Error {}", &path_str, e)));
-    try!(file.sync_all().map_err(|e| format!("Could not sync OS data post-write. Error: {}", e)));
+        .write(true)
+        .truncate(force)
+        .create(force)
+        .create_new(!force)
+        .open(path)
+        .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e)));
+    try!(file
+        .write_all(template.into().as_bytes())
+        .map_err(|e| format!(
+            "Could not write contents of template to the file {}. Error {}",
+            &path_str, e
+        )));
+    try!(file
+        .sync_all()
+        .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e)));
     Ok(())
 }
 
 /// Return the users homedir as a string.
-#[cfg(not(test))] fn homedir() -> Result<PathBuf, String>{
+#[cfg(not(test))]
+fn homedir() -> Result<PathBuf, String> {
     match home_dir() {
         Some(dir) => Ok(dir),
-        None      => Err(String::from("We couldn't find your home directory."))
+        None => Err(String::from("We couldn't find your home directory.")),
     }
 }
 
 /// Return the temp dir as the users home dir during testing.
-#[cfg(test)] fn homedir() -> Result<PathBuf, String> {
+#[cfg(test)]
+fn homedir() -> Result<PathBuf, String> {
     Ok(PathBuf::from("/tmp"))
 }
 
 #[cfg(test)]
 mod test {
     use super::write_config;
-    use std::path::PathBuf;
-    use std::io::{Read, Write};
+    use rand::random;
     use std::fs;
     use std::fs::File;
-    use rand::random;
+    use std::io::{Read, Write};
+    use std::path::PathBuf;
 
     #[test]
     fn expect_ok_result() {

@@ -1,16 +1,24 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
+#![feature(proc_macro)]
 extern crate dirs;
 extern crate docopt;
 extern crate libc;
+extern crate regex;
 extern crate rustc_serialize;
+extern crate serde;
+extern crate serde_yaml;
 extern crate yaml_rust;
 
 #[cfg(test)]
 extern crate rand;
 
+#[macro_use]
+extern crate serde_derive;
+
 mod args;
 mod load;
 mod new;
+mod snapshot;
 
 use args::Args;
 use docopt::Docopt;
@@ -34,22 +42,26 @@ static USAGE: &'static str = "
 Usage:
     muxed [options] <project>
     muxed new [options] <project>
+    muxed snapshot [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
 Flags:
     -d                  If you want to create a muxed session without connecting to it
+    -f                  Overwrite existing file if one exists
     -h, --help          Prints help information
     -v, --version       Prints version information
 
 Options:
     -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
+    -t <tmux_session>   The name of the running TMUX session to codify
 
 Args:
     <project>           The name of your project to open
 
 Subcommands:
-    new <project>       The name of your project to create
+    new <project>                  To create a new project file
+    snapshot -t session <project>  Capture a running session and create a config file for it
 ";
 
 /// The main execution method.
@@ -89,7 +101,7 @@ pub fn main() {
     if let Some(x) = input.nth(1) {
         match x.as_ref() {
             "new" => try_or_err!(new::exec(args)),
-            // "snapshot" => try_or_err!(snapshot::exec(args)),
+            "snapshot" => try_or_err!(snapshot::exec(args)),
             _ => try_or_err!(load::exec(args)),
         }
     }

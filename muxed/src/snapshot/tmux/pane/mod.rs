@@ -1,11 +1,11 @@
 //use std::path::PathBuf;
 //use tmux::window::Window;
-use std::process::{Command, Output};
+use serde::ser::Serialize;
+use serde::Serializer;
+use snapshot::capture::retrieve_capture;
 use std::io;
 use std::path::PathBuf;
-use capture::retrieve_capture;
-use serde::Serializer;
-use serde::ser::Serialize;
+use std::process::{Command, Output};
 
 pub mod pid;
 pub mod process;
@@ -19,7 +19,6 @@ static PID_REGEX: &'static str = r"\(PID: ([0-9]*)\)";
 
 // Example format: "1: [123x14] (Path: /muxed/muxedsnapshot) (PID: 22541) (active)"
 static LIST_FORMAT: &'static str = "'#{pane_index}: [#{pane_width}x#{pane_height}] (Path: #{pane_current_path}) (PID: #{pane_pid}) #{?pane_active,(active), } '";
-
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Pane {
@@ -40,22 +39,22 @@ impl Pane {
     pub fn from_line(line: &str) -> Option<Pane> {
         let active = match retrieve_capture(line, ACTIVE_REGEX) {
             Some(_) => true,
-            None    => false
+            None => false,
         };
 
         let path = match retrieve_capture(line, PATH_REGEX) {
             Some(x) => PathBuf::from(x),
-            None    => return None
+            None => return None,
         };
 
         let pid = match retrieve_capture(line, PID_REGEX) {
             Some(x) => Pid::new(x),
-            None    => return None
+            None => return None,
         };
 
         let process = match Process::process_string_from(pid) {
-            Ok(x)  => Some(Process::new(x)),
-            Err(_) => None
+            Ok(x) => Some(Process::new(x)),
+            Err(_) => None,
         };
 
         Some(Pane::new(active, path, process))
@@ -70,11 +69,12 @@ impl Pane {
 
 impl Serialize for Pane {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
         let process_str = match self.process.clone() {
             Some(process) => process.process,
-            None          => "".to_string()
+            None => "".to_string(),
         };
 
         serializer.serialize_str(process_str.as_str())

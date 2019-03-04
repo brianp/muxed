@@ -1,13 +1,13 @@
-use std::process::{Command,Output};
-use std::io;
-use tmux::pane::Pane;
-use capture::retrieve_capture;
-use serde::Serializer;
 use serde::ser::Serialize;
+use serde::Serializer;
+use snapshot::capture::retrieve_capture;
+use snapshot::tmux::pane::Pane;
+use std::io;
+use std::process::{Command, Output};
 
 // Come back and question the accuracy of windows without names
 // that have active, or previous window designations.
-static NAME_REGEX:   &'static str = r":\s(\w*)[$\*-]?\s+\(";
+static NAME_REGEX: &'static str = r":\s(\w*)[$\*-]?\s+\(";
 static ACTIVE_REGEX: &'static str = r"\s.*(\*)\s";
 static LAYOUT_REGEX: &'static str = r"\s\[layout\s(.*)\]";
 
@@ -31,7 +31,8 @@ pub struct WindowInner {
 
 impl Window {
     pub fn new<S>(active: bool, layout: S, name: S, panes: Option<Vec<Pane>>) -> Window
-        where S: Into<String>
+    where
+        S: Into<String>,
     {
         Window {
             active: active,
@@ -48,17 +49,17 @@ impl Window {
     pub fn from_line(line: &str) -> Option<Window> {
         let active = match retrieve_capture(line, ACTIVE_REGEX) {
             Some(_) => true,
-            None    => false
+            None => false,
         };
 
         let layout = match retrieve_capture(line, LAYOUT_REGEX) {
             Some(x) => x,
-            None    => return None
+            None => return None,
         };
 
         let name = match retrieve_capture(line, NAME_REGEX) {
             Some(x) => x,
-            None    => return None
+            None => return None,
         };
 
         Some(Window::new(active, layout, name, None))
@@ -73,9 +74,14 @@ impl Window {
 
 impl Serialize for Window {
     fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
-        where S: Serializer
+    where
+        S: Serializer,
     {
-        let window = WindowInner { active: self.active, layout: self.layout.clone(), panes: self.panes.clone()};
+        let window = WindowInner {
+            active: self.active,
+            layout: self.layout.clone(),
+            panes: self.panes.clone(),
+        };
 
         let mut state = try!(serializer.serialize_map(Some(1)));
         try!(serializer.serialize_map_key(&mut state, &self.name));
