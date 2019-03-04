@@ -9,24 +9,6 @@ Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature r
 **muxed**: Provides the functionality for opening and parsing your project configs to
 launch a TMUX session.
 
-**muxednew**: Provides a template generator to create new project files. See the `new`
-subcommand in [Usage](#usage-options).
-
-**muxedsnapshot**: This is a tool to generate project configuration files. The
-template will be generated off a currently running TMUX session. This will include:
-
- - Session name
- - Windows
-  - Names
-  - Layouts
-  - Active Window
-  - Panes
-    - Current paths
-    - Running processes
-    - Active Pane
-
-See the `snapshot` subcommand in [Usage](#usage-options).
-
 ## Installation
 
 ### Download:
@@ -130,4 +112,4 @@ Subcommands:
 This project has been inspired by the work done on the [tmuxinator](https://github.com/tmuxinator/tmuxinator) project. Check it out for a `ruby` based tmux session management solution.
 
 ## Copyright
-Copyright (c) 2014-2017 Brian Pearce. See [LICENSE](https://github.com/brianp/muxed/blob/master/LICENSE) for further details.
+Copyright (c) 2014-2019 Brian Pearce. See [LICENSE](https://github.com/brianp/muxed/blob/master/LICENSE) for further details.
