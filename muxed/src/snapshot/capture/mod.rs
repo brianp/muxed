@@ -4,10 +4,10 @@ pub fn retrieve_capture(line: &str, pattern: &str) -> Option<String> {
     let reg = Regex::new(pattern).unwrap();
 
     if let Some(caps) = reg.captures(line) {
-        return match caps.at(1) {
-            Some(x) => Some(String::from(x)),
-            None    => None
-        }
+        return match caps.get(1) {
+            Some(x) => Some(x.as_str().to_string()),
+            None => None,
+        };
     };
 
     None

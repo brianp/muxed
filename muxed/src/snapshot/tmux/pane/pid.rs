@@ -10,8 +10,9 @@ pub struct Pid {
 
 impl Pid {
     pub fn new<S>(pid: S) -> Pid
-        where S: Into<String> {
-
+    where
+        S: Into<String>,
+    {
         let pid_s = pid.into();
         let pid_i = i32::from_str(pid_s.as_str()).unwrap();
 

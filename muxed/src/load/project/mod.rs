@@ -43,7 +43,8 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
     let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
 
     if !Path::new(muxed_dir).exists() {
-        try!(create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e)));
+        create_dir(muxed_dir).unwrap();
+        // try!(create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e)));
         println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir);
         println!("Creating that now \u{1F44C}\n")
     };

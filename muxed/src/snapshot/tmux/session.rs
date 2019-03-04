@@ -1,4 +1,4 @@
-use tmux::window::Window;
+use snapshot::tmux::window::Window;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
@@ -8,10 +8,12 @@ pub struct Session {
 
 impl Session {
     pub fn new<S>(name: S, windows: Vec<Window>) -> Session
-        where S: Into<String> {
-            Session {
-                name: name.into(),
-                windows: windows
-            }
+    where
+        S: Into<String>,
+    {
+        Session {
+            name: name.into(),
+            windows: windows,
         }
+    }
 }

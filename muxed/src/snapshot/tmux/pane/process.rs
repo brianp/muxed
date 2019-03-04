@@ -1,6 +1,6 @@
-use std::process::Command;
+use snapshot::tmux::pane::pid::Pid;
 use std::fmt;
-use tmux::pane::pid::Pid;
+use std::process::Command;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Process {
@@ -9,10 +9,12 @@ pub struct Process {
 
 impl Process {
     pub fn new<S>(process: S) -> Process
-        where S: Into<String> {
-            Process {
-                process: process.into(),
-            }
+    where
+        S: Into<String>,
+    {
+        Process {
+            process: process.into(),
+        }
     }
 
     pub fn process_string_from(pid: Pid) -> Result<String, String> {
@@ -27,16 +29,21 @@ impl Process {
         let read = String::from_utf8_lossy(&output.stdout);
         let process_string = match read.lines().next() {
             Some(x) => Process::strip_pid(x),
-            None    => return Err(String::from("No process found"))
+            None => return Err(String::from("No process found")),
         };
 
         Ok(process_string)
     }
 
     fn strip_pid<T>(line: T) -> String
-        where T: Into<String> + Clone {
-          let temp = line.into().clone();
-          temp.split_whitespace().skip(1).collect::<Vec<&str>>().join(" ")
+    where
+        T: Into<String> + Clone,
+    {
+        let temp = line.into().clone();
+        temp.split_whitespace()
+            .skip(1)
+            .collect::<Vec<&str>>()
+            .join(" ")
     }
 }
 

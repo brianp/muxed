@@ -24,6 +24,9 @@ clean:
 check:
 	${docker_dev_cmd} cargo check
 
+release:
+	${docker_dev_cmd} cargo build --release
+
 build:
 	docker build -t ${docker_image_name} -f test.dockerfile .
 

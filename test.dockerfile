@@ -1,4 +1,4 @@
-FROM rust:1-stretch as builder
+FROM rustlang/rust:nightly as builder
 
 WORKDIR /usr/src/muxed
 RUN USER=root cargo init
@@ -15,7 +15,8 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en  
 ENV LC_ALL en_US.UTF-8 
 
-RUN rustup component add clippy rustfmt
+RUN rustup component add rustfmt
+RUN rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
 
 # This is a dummy build to get the dependencies cached
 RUN cargo build
