@@ -11,7 +11,6 @@ extern crate rand;
 mod args;
 mod load;
 mod new;
-mod project;
 
 use args::Args;
 use docopt::Docopt;

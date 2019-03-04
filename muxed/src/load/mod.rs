@@ -1,11 +1,11 @@
 pub mod command;
+pub mod project;
 pub mod tmux;
 
 use self::command::Command;
+use self::project::{parser, processor};
 use self::tmux::config::Config;
 use args::Args;
-use project;
-use project::{parser, processor};
 
 pub fn exec(args: Args) -> Result<(), String> {
     let muxed_dir = match args.flag_p {
