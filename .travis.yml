@@ -2,32 +2,23 @@ language: rust
 cache: cargo
 
 rust:
-  - stable
-  - beta
   - nightly
 
 matrix:
   allow_failures:
-    - rust: nightly
     - env: TMUX_VERSION=master
     - env: TMUX_VERSION=1.9a
   exclude:
-    - rust: nightly
-      env: TMUX_VERSION=master
-    - rust: nightly
-      env: TMUX_VERSION=2.2
-    - rust: nightly
-      env: TMUX_VERSION=2.1
-    - rust: nightly
-      env: TMUX_VERSION=2.0
-    - rust: nightly
-      env: TMUX_VERSION=1.9a
     - os: osx
-      rust: nightly
+      env: TMUX_VERSION=2.7
     - os: osx
-      rust: beta
+      env: TMUX_VERSION=2.6
     - os: osx
-      env: TMUX_VERSION=master
+      env: TMUX_VERSION=2.5
+    - os: osx
+      env: TMUX_VERSION=2.4
+    - os: osx
+      env: TMUX_VERSION=2.3
     - os: osx
       env: TMUX_VERSION=2.2
     - os: osx
@@ -41,6 +32,11 @@ matrix:
 
 env:
   - TMUX_VERSION=master
+  - TMUX_VERSION=2.8
+  - TMUX_VERSION=2.7
+  - TMUX_VERSION=2.6
+  - TMUX_VERSION=2.5
+  - TMUX_VERSION=2.4
   - TMUX_VERSION=2.3
   - TMUX_VERSION=2.2
   - TMUX_VERSION=2.1
@@ -54,7 +50,7 @@ os:
 
 before_script:
   - if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-        sudo apt-get remove tmux;
+        sudo apt-get remove tmux && sudo apt-get install libevent-dev;
     fi
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then
         brew update;
