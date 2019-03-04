@@ -1,5 +1,7 @@
+pub mod command;
+
 use args::Args;
-use command::Command;
+use self::command::Command;
 use project;
 use project::{parser, processor};
 use tmux;

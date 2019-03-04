@@ -1,5 +1,5 @@
 //! The project module takes care of muxed related initialization. Locating the
-use command::{Attach, Command};
+use load::command::{Attach, Command};
 #[cfg(not(test))]
 use dirs::home_dir;
 #[cfg(test)]
