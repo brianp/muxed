@@ -1,6 +1,6 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
 use load::command::*;
-use tmux::config::Config;
+use load::tmux::config::Config;
 /// processed later.
 use yaml_rust::Yaml;
 

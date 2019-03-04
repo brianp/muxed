@@ -3,10 +3,10 @@
 extern crate rand;
 
 mod new {
-    use rand::{random};
-    use std::process::Command;
+    use rand::random;
     use std::fs;
     use std::path::PathBuf;
+    use std::process::Command;
 
     pub fn muxednew(project: &String, project_root: &PathBuf) -> () {
         Command::new("./target/debug/muxed")
@@ -15,7 +15,7 @@ mod new {
             .arg(format!("{}", project_root.display()))
             .arg(project)
             .output()
-            .unwrap_or_else(|e| { panic!("failed to execute process: {}", e) });
+            .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
     }
 
     fn setup(project_name: &String) -> (PathBuf, PathBuf) {

@@ -1,7 +1,8 @@
 //! The project module takes care of muxed related initialization. Locating the
-use load::command::{Attach, Command};
 #[cfg(not(test))]
 use dirs::home_dir;
+use load::command::{Attach, Command};
+use load::tmux::has_session;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]
@@ -11,7 +12,6 @@ use std::io::prelude::*;
 /// users home directory. Finding the desired config files, and reading the
 /// configs in.
 use std::path::{Path, PathBuf};
-use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
 
 pub mod parser;

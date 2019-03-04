@@ -1,8 +1,8 @@
 //! Processes the stack of Commands and matches them to the appropriate tmux
 /// call.
 use load::command::Command;
+use load::tmux;
 use std::process;
-use tmux;
 
 /// Processing of the commands. A simple match occurs to handle the tmux calls
 /// needed based off the command provided. The commands are processed first in,

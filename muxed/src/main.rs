@@ -12,7 +12,6 @@ mod args;
 mod load;
 mod new;
 mod project;
-mod tmux;
 
 use args::Args;
 use docopt::Docopt;
