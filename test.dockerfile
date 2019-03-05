@@ -1,8 +1,8 @@
 FROM rustlang/rust:nightly as builder
 
-WORKDIR /usr/src/muxed
+WORKDIR /usr/src
 RUN USER=root cargo init
-COPY /muxed/Cargo.toml .
+COPY Cargo.toml .
 
 RUN apt-get update && \
       apt install -y tmux && \

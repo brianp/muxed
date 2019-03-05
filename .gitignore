@@ -3,3 +3,4 @@ doc/*
 **/build/*
 .vagrant/*
 .ds_store
+MacOSX*.sdk.tar.xz
