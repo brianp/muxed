@@ -1,8 +1,8 @@
-FROM rust:1-stretch as builder
+FROM rustlang/rust:nightly as builder
 
-WORKDIR /usr/src/muxed
+WORKDIR /usr/src/
 RUN USER=root cargo init
-COPY /muxed/Cargo.toml .
+COPY Cargo.toml .
 
 # This is a dummy build to get the dependencies cached
 RUN cargo build --release

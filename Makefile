@@ -1,4 +1,4 @@
-.PHONY : test build clippy fmt clean check
+.PHONY : test build clippy fmt clean check release osxbuild
 .DEFAULT_GOAL := build
 
 VERSION_TAG := $(shell git describe --abbrev=0 --tags)
@@ -6,6 +6,8 @@ VERSION_TAG := $(shell git describe --abbrev=0 --tags)
 local_path := $(shell pwd)
 
 docker_image_name := brianp/muxed:dev
+
+osx_image_name := brianp/muxed:osx
 
 docker_dev_cmd := docker run -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --rm ${docker_image_name}
 
@@ -27,8 +29,14 @@ check:
 release:
 	${docker_dev_cmd} cargo build --release
 
-build:
+osxrelease:
+	docker run -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --rm ${osx_image_name} cargo build --target x86_64-apple-darwin
+
+dockerbuild:
 	docker build -t ${docker_image_name} -f test.dockerfile .
+
+osxdockerbuild:
+	docker build -t ${osx_image_name} -f osx.dockerfile .
 
 help:
 	@echo test: run the tests
