@@ -4,6 +4,7 @@ extern crate dirs;
 extern crate rand;
 
 use args::Args;
+use first_run::check_first_run;
 
 #[cfg(not(test))]
 use dirs::home_dir;
@@ -13,11 +14,11 @@ use rand::random;
 use std::fs;
 #[cfg(test)]
 use std::fs::File;
-use std::fs::{create_dir, OpenOptions};
+use std::fs::OpenOptions;
 #[cfg(test)]
 use std::io::Read;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 static TEMPLATE: &'static str = include_str!("template.yml");
 static MUXED_FOLDER: &'static str = "muxed";
@@ -48,11 +49,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         _ => default_dir.as_str(),
     };
 
-    if !Path::new(muxed_dir).exists() {
-        create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e));
-        println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir);
-        println!("Creating that now \u{1F44C}\n")
-    };
+    check_first_run(&muxed_dir);
 
     let file = PathBuf::from(muxed_dir).join(&project_name);
     let template = modified_template(TEMPLATE, &file);
