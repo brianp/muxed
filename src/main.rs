@@ -1,5 +1,4 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-#![feature(proc_macro)]
 extern crate dirs;
 extern crate docopt;
 extern crate libc;
