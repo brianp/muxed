@@ -19,6 +19,7 @@ mod args;
 mod load;
 mod new;
 mod snapshot;
+mod first_run;
 
 use args::Args;
 use docopt::Docopt;

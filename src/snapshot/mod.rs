@@ -2,12 +2,13 @@
 pub mod capture;
 pub mod tmux;
 
+use first_run::check_first_run;
 use args::Args;
 #[cfg(not(test))]
 use dirs::home_dir;
-use std::fs::{create_dir, OpenOptions};
+use std::fs::OpenOptions;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 static MUXED_FOLDER: &'static str = "muxed";
 
@@ -39,12 +40,7 @@ pub fn exec(args: Args) -> Result<(), String> {
     };
     let new_project_path = PathBuf::from(format!("{}/{}", muxed_dir, project_name));
 
-    if !Path::new(muxed_dir).exists() {
-        // create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e));
-        create_dir(muxed_dir).expect(&format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong", muxed_dir));
-        println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir);
-        println!("Creating that now \u{1F44C}\n")
-    };
+    check_first_run(&muxed_dir);
 
     let session = tmux::inspect(&session_name).unwrap();
     let s = serde_yaml::to_string(&session).unwrap();

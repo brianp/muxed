@@ -7,7 +7,7 @@ use load::tmux::has_session;
 use rand::random;
 #[cfg(test)]
 use std::fs;
-use std::fs::{create_dir, File};
+use std::fs::File;
 use std::io::prelude::*;
 /// users home directory. Finding the desired config files, and reading the
 /// configs in.
@@ -16,6 +16,8 @@ use yaml_rust::{Yaml, YamlLoader};
 
 pub mod parser;
 pub mod processor;
+
+use first_run::check_first_run;
 
 /// The muxed project folder name. Should be located in the users home dir as a
 /// hidden directory.
@@ -42,12 +44,7 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
     let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
     let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
 
-    if !Path::new(muxed_dir).exists() {
-        create_dir(muxed_dir).unwrap();
-        // try!(create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir, e)));
-        println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir);
-        println!("Creating that now \u{1F44C}\n")
-    };
+    check_first_run(&muxed_dir);
 
     let config = format!("{}/{}.yml", muxed_dir, project_name);
     let path = Path::new(&config);
