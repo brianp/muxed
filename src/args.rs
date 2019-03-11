@@ -1,5 +1,7 @@
 //! The struct managing cli args
 
+/// The args struct for taking arguments passed in from the command line
+/// and making it easier to pass around.
 #[derive(Debug, RustcDecodable)]
 pub struct Args {
     pub flag_d: bool,

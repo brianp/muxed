@@ -1,6 +1,7 @@
 pub mod command;
 pub mod project;
 pub mod tmux;
+pub mod v2;
 
 use self::command::Command;
 use self::project::{parser, processor};
