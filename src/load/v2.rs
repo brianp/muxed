@@ -1,9 +1,15 @@
+//! The structures used to manage commands sent over to tmux.
+
 use std::path::Path;
 
 pub trait Command {
     fn call<S>(&self) -> Vec<&str>;
 }
 
+/// The Session command is used to fire up a new daemonized session in tmux.
+/// `name`: The Name of a named tmux session.
+/// `window_name`: The Name of the first window.
+/// `root_path`: The root directory for the tmux session.
 pub struct Session {
     pub name: String,
     pub window_name: String,
@@ -16,6 +22,12 @@ impl Command for Session {
     }
 }
 
+/// The Window command is used to identify every new window opened in the tmux
+/// session.
+/// `session_name`: The name of the session.
+/// `name`: The named window to be opened.
+/// `path`: An `Option<String>` containing a possible root directory passed to the
+/// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Window {
     pub session_name: String,
@@ -29,6 +41,9 @@ impl Command for Window {
     }
 }
 
+/// The Split is used to call split-window on a particular window in the
+/// session.
+/// `target`: The target window. In the format `{session}:{window}.{paneIndex}`.
 #[derive(Debug, Clone)]
 pub struct Split {
     pub target: String,
