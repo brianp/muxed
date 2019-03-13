@@ -54,3 +54,76 @@ impl Command for Split {
         vec!("split-window", "-t", &self.target)
     }
 }
+
+/// The Layout command calls select-layout with a specific pre-defined tmux
+/// layout option see `tmux select-layout --help` for more options.
+/// `target`: The target window. In the format `{session}:{window}.{paneIndex}`.
+/// `layout`: The type of layout. ex `main-horizontal`.
+#[derive(Debug, Clone)]
+pub struct Layout {
+    pub target: String,
+    pub layout: String,
+}
+
+impl Command for Layout {
+    fn call<S>(&self) -> Vec<&str> {
+        vec!("select-layout", "-t", &self.target, &self.layout)
+    }
+}
+
+/// A generic `SendKeys` command used to send "typed" commands to tmux. This is
+/// used to initialize processes or tasks in specific window. Such as starting log
+/// tails or running servers.
+/// target: The target window. In the format `{session}:{window}.{paneIndex}`.
+/// exec: The cli command to be run. ex. `tail -f logs/development.log`.
+#[derive(Debug, Clone)]
+pub struct SendKeys {
+    pub target: String,
+    pub exec: String,
+}
+
+impl Command for SendKeys {
+    fn call<S>(&self) -> Vec<&str> {
+        vec!("send-keys", "-t", &self.target, &self.exec, "KPEnter")
+    }
+}
+
+/// Used to attach to the daemonized session.
+/// name: The named session to attach too.
+#[derive(Debug, Clone)]
+pub struct Attach {
+    pub name: String,
+}
+
+impl Command for Attach {
+    fn call<S>(&self) -> Vec<&str> {
+        // vec!("send-keys", "-t", &self.target, &self.exec, "KPEnter"]);
+        vec!()
+    }
+}
+
+/// Used to move focus back to the first window.
+/// target: The target window. In the format `{session}:{window}`.
+#[derive(Debug, Clone)]
+pub struct SelectWindow {
+    pub target: String,
+}
+
+impl Command for SelectWindow {
+    fn call<S>(&self) -> Vec<&str> {
+        vec!("select-window", "-t", &self.target)
+    }
+}
+
+/// Used to move focus back to the top pane.
+/// target: The target pane. In the format `{session}:{window}.{pane-target}`.
+#[derive(Debug, Clone)]
+pub struct SelectPane {
+    pub target: String,
+}
+
+impl Command for SelectPane {
+    fn call<S>(&self) -> Vec<&str> {
+        vec!("select-pane", "-t", &self.target)
+    }
+}
