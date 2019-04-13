@@ -1,6 +1,7 @@
 //! The structures used to manage commands sent over to tmux.
 
-use std::path::Path;
+use std::path::{PathBuf, Path};
+use std::str;
 
 pub trait Command {
     fn call<S>(&self) -> Vec<&str>;
@@ -10,15 +11,17 @@ pub trait Command {
 /// `name`: The Name of a named tmux session.
 /// `window_name`: The Name of the first window.
 /// `root_path`: The root directory for the tmux session.
+#[derive(Debug, Clone)]
 pub struct Session {
     pub name: String,
     pub window_name: String,
-    pub root_path: Path
+    pub root_path: Option<PathBuf>
 }
 
 impl Command for Session {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("new", "-d", "-s", &self.name, "-n", &self.window_name, "-c", &self.root_path.to_str().unwrap())
+        let path: &str  = self.root_path.as_ref().unwrap().to_str().unwrap();
+        vec!("new", "-d", "-s", &self.name, "-n", &self.window_name, "-c", path)
     }
 }
 
@@ -97,7 +100,7 @@ pub struct Attach {
 
 impl Command for Attach {
     fn call<S>(&self) -> Vec<&str> {
-        // vec!("send-keys", "-t", &self.target, &self.exec, "KPEnter"]);
+        // No-op!
         vec!()
     }
 }
@@ -126,4 +129,36 @@ impl Command for SelectPane {
     fn call<S>(&self) -> Vec<&str> {
         vec!("select-pane", "-t", &self.target)
     }
+}
+
+/// Used for executing the `pre` option to execute commands before building the
+/// tmux session.
+/// exec: The command to execute
+#[derive(Debug, Clone)]
+pub struct Pre {
+    pub exec: String,
+}
+
+impl Command for Pre {
+    fn call<S>(&self) -> Vec<&str> {
+        // No-op!
+        vec!()
+    }
+}
+
+/// The Command enum. Commands represent the series of commands sent to the
+/// running tmux process to build a users env. This is an enum to support
+/// containing all the commands that require running in a single Vec. This
+/// allows a simple process of first in, first out command execution.
+#[derive(Debug, Clone)]
+pub enum Commands {
+    Attach(Attach),
+    Layout(Layout),
+    Pre(Pre),
+    SelectPane(SelectPane),
+    SelectWindow(SelectWindow),
+    SendKeys(SendKeys),
+    Session(Session),
+    Split(Split),
+    Window(Window)
 }
