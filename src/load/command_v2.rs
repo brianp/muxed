@@ -15,13 +15,18 @@ pub trait Command {
 pub struct Session {
     pub name: String,
     pub window_name: String,
-    pub root_path: Option<PathBuf>
+    pub root_path: Option<PathBuf>,
 }
 
+// TODO: Real logic exists here. Test it!
 impl Command for Session {
     fn call<S>(&self) -> Vec<&str> {
-        let path: &str  = self.root_path.as_ref().unwrap().to_str().unwrap();
-        vec!("new", "-d", "-s", &self.name, "-n", &self.window_name, "-c", path)
+        let command: Vec<&str> = vec!["new", "-d", "-s", &self.name, "-n", &self.window_name];
+
+        match self.root_path.as_ref() {
+            Some(path) => [&command[..], &["-c", path.to_str().unwrap()]].concat(),
+            None => command,
+        }
     }
 }
 
@@ -29,18 +34,23 @@ impl Command for Session {
 /// session.
 /// `session_name`: The name of the session.
 /// `name`: The named window to be opened.
-/// `path`: An `Option<String>` containing a possible root directory passed to the
+/// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Window {
     pub session_name: String,
     pub name: String,
-    // pub path: Path
+    pub path: Option<PathBuf>,
 }
 
 impl Command for Window {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("new-window", "-t", &self.session_name, "-n", &self.name)
+        let command: Vec<&str> = vec!["new-window", "-t", &self.session_name, "-n", &self.name];
+
+        match self.path.as_ref() {
+            Some(path) => [&command[..], &["-c", path.to_str().unwrap()]].concat(),
+            None => command,
+        }
     }
 }
 
