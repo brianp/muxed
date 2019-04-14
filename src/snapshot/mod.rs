@@ -2,10 +2,10 @@
 pub mod capture;
 pub mod tmux;
 
-use first_run::check_first_run;
 use args::Args;
 #[cfg(not(test))]
 use dirs::home_dir;
+use first_run::check_first_run;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;

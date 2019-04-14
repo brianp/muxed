@@ -1,6 +1,6 @@
 //! Muxednew. A Muxed project Template Generator
-use std::fs::{create_dir};
-use std::path::{Path};
+use std::fs::create_dir;
+use std::path::Path;
 
 /// Used just to check for the existence of the default path. Prints out
 /// useful messages as to what's happening.

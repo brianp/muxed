@@ -1,6 +1,6 @@
 //! The structures used to manage commands sent over to tmux.
 
-use std::path::{PathBuf, Path};
+use std::path::PathBuf;
 use std::str;
 
 pub trait Command {
@@ -54,7 +54,7 @@ pub struct Split {
 
 impl Command for Split {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("split-window", "-t", &self.target)
+        vec!["split-window", "-t", &self.target]
     }
 }
 
@@ -70,7 +70,7 @@ pub struct Layout {
 
 impl Command for Layout {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("select-layout", "-t", &self.target, &self.layout)
+        vec!["select-layout", "-t", &self.target, &self.layout]
     }
 }
 
@@ -87,7 +87,7 @@ pub struct SendKeys {
 
 impl Command for SendKeys {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("send-keys", "-t", &self.target, &self.exec, "KPEnter")
+        vec!["send-keys", "-t", &self.target, &self.exec, "KPEnter"]
     }
 }
 
@@ -101,7 +101,7 @@ pub struct Attach {
 impl Command for Attach {
     fn call<S>(&self) -> Vec<&str> {
         // No-op!
-        vec!()
+        vec![]
     }
 }
 
@@ -114,7 +114,7 @@ pub struct SelectWindow {
 
 impl Command for SelectWindow {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("select-window", "-t", &self.target)
+        vec!["select-window", "-t", &self.target]
     }
 }
 
@@ -127,7 +127,7 @@ pub struct SelectPane {
 
 impl Command for SelectPane {
     fn call<S>(&self) -> Vec<&str> {
-        vec!("select-pane", "-t", &self.target)
+        vec!["select-pane", "-t", &self.target]
     }
 }
 
@@ -142,7 +142,7 @@ pub struct Pre {
 impl Command for Pre {
     fn call<S>(&self) -> Vec<&str> {
         // No-op!
-        vec!()
+        vec![]
     }
 }
 
@@ -160,5 +160,5 @@ pub enum Commands {
     SendKeys(SendKeys),
     Session(Session),
     Split(Split),
-    Window(Window)
+    Window(Window),
 }

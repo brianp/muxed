@@ -18,7 +18,7 @@ test:
 	${docker_dev_cmd} cargo test
 
 fmt:
-	${docker_dev_cmd} cargo fmt
+	${docker_dev_cmd} cargo fmt --all
 
 clean:
 	${docker_dev_cmd} cargo clean
