@@ -1,6 +1,6 @@
 //! Processes the stack of Commands and matches them to the appropriate tmux
 /// call.
-use load::command::Command;
+use load::command_v2::Commands;
 use load::tmux;
 use std::process;
 
@@ -12,27 +12,27 @@ use std::process;
 /// # Example
 ///
 /// ```
-/// let commands: Vec<Command> = vec!(
-///   Command::Session(Session{...}),
-///   Command::Attach(Attach{...})
+/// let commands: Vec<Commands> = vec!(
+///   Commands::Session(Session{...}),
+///   Commands::Attach(Attach{...})
 /// );
 ///
 /// main(&commands);
 /// ```
 ///
 /// commands: The stack of commands to process.
-pub fn main(commands: &[Command]) {
+pub fn main(commands: &[Commands]) {
     for c in commands {
         match *c {
-            Command::Session(ref c) => tmux::new_session(&c.name, &c.window_name),
-            Command::Window(ref c) => tmux::new_window(&c.session_name, &c.name),
-            Command::Split(ref c) => tmux::split_window(&c.target),
-            Command::Layout(ref c) => tmux::layout(&c.target, &c.layout),
-            Command::SendKeys(ref c) => tmux::send_keys(&c.target, &c.exec),
-            Command::Attach(ref c) => tmux::attach(&c.name),
-            Command::SelectWindow(ref c) => tmux::select_window(&c.target),
-            Command::SelectPane(ref c) => tmux::select_pane(&c.target),
-            Command::Pre(ref c) => system_calls(&c.exec),
+            Commands::Session(ref c) => tmux::new_session(&c.name, &c.window_name),
+            Commands::Window(ref c) => tmux::new_window(&c.session_name, &c.name),
+            Commands::Split(ref c) => tmux::split_window(&c.target),
+            Commands::Layout(ref c) => tmux::layout(&c.target, &c.layout),
+            Commands::SendKeys(ref c) => tmux::send_keys(&c.target, &c.exec),
+            Commands::Attach(ref c) => tmux::attach(&c.name),
+            Commands::SelectWindow(ref c) => tmux::select_window(&c.target),
+            Commands::SelectPane(ref c) => tmux::select_pane(&c.target),
+            Commands::Pre(ref c) => system_calls(&c.exec),
         }
     }
 }

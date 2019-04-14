@@ -1,7 +1,7 @@
 //! The project module takes care of muxed related initialization. Locating the
 #[cfg(not(test))]
 use dirs::home_dir;
-use load::command::{Attach, Command};
+use load::command_v2::{Attach, Commands};
 use load::tmux::has_session;
 #[cfg(test)]
 use rand::random;
@@ -75,11 +75,11 @@ fn homedir() -> Result<PathBuf, String> {
 }
 
 /// Find out if a tmux session is already active with this name. If it is active
-/// return `Some<Command::Attach>` with a command to attach to the session. If a
+/// return `Some<Commands::Attach>` with a command to attach to the session. If a
 /// session is not active return None and let the app carry on.
-pub fn session_exists(project_name: &str) -> Option<Command> {
+pub fn session_exists(project_name: &str) -> Option<Commands> {
     if has_session(project_name).success() {
-        Some(Command::Attach(Attach {
+        Some(Commands::Attach(Attach {
             name: project_name.to_string(),
         }))
     } else {

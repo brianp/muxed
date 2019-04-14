@@ -3,7 +3,7 @@ pub mod command_v2;
 pub mod project;
 pub mod tmux;
 
-use self::command::Command;
+use self::command_v2::Commands;
 use self::project::{parser, processor};
 use self::tmux::config::Config;
 use args::Args;
@@ -20,7 +20,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         .unwrap_or(&args.arg_project)
         .to_string();
 
-    let commands: Vec<Command>;
+    let commands: Vec<Commands>;
     match project::session_exists(project_name) {
         Some(c) => {
             commands = vec![c];
