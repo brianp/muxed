@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::str;
 
 pub trait Command {
-    fn call<S>(&self) -> Vec<&str>;
+    fn call(&self) -> Vec<&str>;
 }
 
 /// The Session command is used to fire up a new daemonized session in tmux.
@@ -20,7 +20,7 @@ pub struct Session {
 
 // TODO: Real logic exists here. Test it!
 impl Command for Session {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         let command: Vec<&str> = vec!["new", "-d", "-s", &self.name, "-n", &self.window_name];
 
         match self.root_path.as_ref() {
@@ -44,7 +44,7 @@ pub struct Window {
 }
 
 impl Command for Window {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         let command: Vec<&str> = vec!["new-window", "-t", &self.session_name, "-n", &self.name];
 
         match self.path.as_ref() {
@@ -63,7 +63,7 @@ pub struct Split {
 }
 
 impl Command for Split {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         vec!["split-window", "-t", &self.target]
     }
 }
@@ -79,7 +79,7 @@ pub struct Layout {
 }
 
 impl Command for Layout {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         vec!["select-layout", "-t", &self.target, &self.layout]
     }
 }
@@ -96,7 +96,7 @@ pub struct SendKeys {
 }
 
 impl Command for SendKeys {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         vec!["send-keys", "-t", &self.target, &self.exec, "KPEnter"]
     }
 }
@@ -109,7 +109,7 @@ pub struct Attach {
 }
 
 impl Command for Attach {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         // No-op!
         vec![]
     }
@@ -123,7 +123,7 @@ pub struct SelectWindow {
 }
 
 impl Command for SelectWindow {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         vec!["select-window", "-t", &self.target]
     }
 }
@@ -136,7 +136,7 @@ pub struct SelectPane {
 }
 
 impl Command for SelectPane {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         vec!["select-pane", "-t", &self.target]
     }
 }
@@ -150,7 +150,7 @@ pub struct Pre {
 }
 
 impl Command for Pre {
-    fn call<S>(&self) -> Vec<&str> {
+    fn call(&self) -> Vec<&str> {
         // No-op!
         vec![]
     }
