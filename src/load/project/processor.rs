@@ -3,6 +3,13 @@
 use load::command_v2::Commands;
 use load::tmux;
 use std::process;
+use libc::system;
+use std::ffi::CString;
+use std::io;
+use std::process::Output;
+
+/// The program to call commands on.
+static TMUX_NAME: &'static str = "tmux";
 
 /// Processing of the commands. A simple match occurs to handle the tmux calls
 /// needed based off the command provided. The commands are processed first in,
@@ -13,28 +20,45 @@ use std::process;
 ///
 /// ```
 /// let commands: Vec<Commands> = vec!(
-///   Commands::Session(Session{...}),
-///   Commands::Attach(Attach{...})
+///     Commands::Session(Session{...}),
+///     Commands::Attach(Attach{...})
 /// );
 ///
 /// main(&commands);
 /// ```
 ///
 /// commands: The stack of commands to process.
-pub fn main(commands: &[Commands]) {
+pub fn main(commands: &Vec<Commands>) {
     for c in commands {
         match *c {
-            Commands::Session(ref c) => tmux::new_session(&c.name, &c.window_name),
-            Commands::Window(ref c) => tmux::new_window(&c.session_name, &c.name),
-            Commands::Split(ref c) => tmux::split_window(&c.target),
-            Commands::Layout(ref c) => tmux::layout(&c.target, &c.layout),
-            Commands::SendKeys(ref c) => tmux::send_keys(&c.target, &c.exec),
-            Commands::Attach(ref c) => tmux::attach(&c.name),
-            Commands::SelectWindow(ref c) => tmux::select_window(&c.target),
-            Commands::SelectPane(ref c) => tmux::select_pane(&c.target),
             Commands::Pre(ref c) => system_calls(&c.exec),
+            Commands::Attach(ref c) => tmux::attach(&c.name),
+            Commands::Layout(ref c) => call(&c.call()),
+            Commands::SelectPane(ref c) => call(&c.call()),
+            Commands::SelectWindow(ref c) => call(&c.call()),
+            Commands::SendKeys(ref c) => call(&c.call()),
+            Commands::Session(ref c) => call(&c.call()),
+            Commands::Split(ref c) => call(&c.call()),
+            Commands::Window(ref c) => call(&c.call()),
         }
     }
+}
+
+/// The gateway to calling any functions on tmux. Most public functions in this
+/// module will be fed through this `call` function. This safely creates a new
+/// thread to execute the command on. We say "Most" public functions will use
+/// this as `attach` specificaly does not use it.
+///
+/// args: The command we will send to tmux on the host system for execution.
+///
+/// # Examples
+///
+/// ```
+/// let _ = call(&["new-window", "-t", "muxed", "-c", "~/Projects/muxed/"]);
+/// ```
+fn call(args: &[&str]) -> () { //Result<Output, io::Error> {
+    //println!("{:?}", &args);
+    process::Command::new(TMUX_NAME).args(args).output();
 }
 
 fn system_calls(cmd_string: &str) {
@@ -47,4 +71,27 @@ fn system_calls(cmd_string: &str) {
         .args(args)
         .output()
         .expect("Didn't execute the process for the pre option.");
+}
+
+/// Attach is called as the last function in a set of commands. After the tmux
+/// env has been setup by all previous commands this attaches the user to their
+/// daemonized tmux session.
+///
+/// # Examples
+///
+/// ```
+/// let session_name = "muxed".to_string();
+/// tmux::attach(muxed);
+/// ```
+/// `session_name: The active tmux session name.
+pub fn attach(session_name: &str) {
+    let line = format!(
+        "{} attach -t '{}' {}",
+        TMUX_NAME, session_name, ">/dev/null"
+    );
+    let system_call = CString::new(line.clone()).unwrap();
+    //println!("{}", line.clone());
+    unsafe {
+        system(system_call.as_ptr());
+    };
 }
