@@ -1,12 +1,9 @@
 //! Processes the stack of Commands and matches them to the appropriate tmux
-/// call.
-use load::command_v2::Commands;
-use load::tmux;
-use std::process;
 use libc::system;
+/// call.
+use load::command::{Command, Commands};
 use std::ffi::CString;
-use std::io;
-use std::process::Output;
+use std::process;
 
 /// The program to call commands on.
 static TMUX_NAME: &'static str = "tmux";
@@ -32,7 +29,7 @@ pub fn main(commands: &Vec<Commands>) {
     for c in commands {
         match *c {
             Commands::Pre(ref c) => system_calls(&c.exec),
-            Commands::Attach(ref c) => tmux::attach(&c.name),
+            Commands::Attach(ref c) => attach(&c.name),
             Commands::Layout(ref c) => call(&c.call()),
             Commands::SelectPane(ref c) => call(&c.call()),
             Commands::SelectWindow(ref c) => call(&c.call()),

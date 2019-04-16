@@ -1,9 +1,8 @@
 pub mod command;
-pub mod command_v2;
 pub mod project;
 pub mod tmux;
 
-use self::command_v2::Commands;
+use self::command::Commands;
 use self::project::{parser, processor};
 use self::tmux::config::Config;
 use args::Args;

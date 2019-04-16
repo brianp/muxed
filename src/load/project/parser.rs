@@ -1,9 +1,10 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
-use load::command_v2::*;
-use load::tmux::config::Config;
 /// processed later.
-use yaml_rust::Yaml;
+
+use load::command::*;
+use load::tmux::config::Config;
 use std::path::PathBuf;
+use yaml_rust::Yaml;
 
 #[cfg(test)]
 use yaml_rust::YamlLoader;
