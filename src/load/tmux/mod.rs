@@ -6,7 +6,10 @@
 /// system calls and can all be easily logged there.
 pub mod config;
 
+use libc::system;
+use std::ffi::CString;
 use std::io;
+use std::os::unix::process::ExitStatusExt;
 use std::process::{Command, ExitStatus, Output};
 
 /// The program to call commands on.
@@ -24,7 +27,7 @@ static TMUX_NAME: &'static str = "tmux";
 /// ```
 /// let _ = call(&["new-window", "-t", "muxed", "-c", "~/Projects/muxed/"]);
 /// ```
-fn call(args: &[&str]) -> Result<Output, io::Error> {
+pub fn call(args: &[&str]) -> Result<Output, io::Error> {
     //println!("{:?}", &args);
     Command::new(TMUX_NAME).args(args).output()
 }
@@ -58,4 +61,33 @@ pub fn get_config() -> String {
     let output = call(&["start-server", ";", "show-options", "-g", ";", "show-options", "-g", "-w"])
       .expect("couldn't get tmux options");
     String::from_utf8_lossy(&output.stdout).to_string()
+}
+
+/// Attach is called as the last function in a set of commands. After the tmux
+/// env has been setup by all previous commands this attaches the user to their
+/// daemonized tmux session.
+///
+/// # Examples
+///
+/// ```
+/// let session_name = "muxed".to_string();
+/// tmux::attach(muxed);
+/// ```
+/// `session_name: The active tmux session name.
+pub fn attach(session_name: &str) -> Result<Output, io::Error> {
+    let line = format!(
+        "{} attach -t '{}' {}",
+        TMUX_NAME, session_name, ">/dev/null"
+    );
+    let system_call = CString::new(line.clone()).unwrap();
+    //println!("{}", line.clone());
+    unsafe {
+        let output = system(system_call.as_ptr());
+
+        return Ok(Output {
+            status: ExitStatus::from_raw(output),
+            stdout: vec![],
+            stderr: vec![],
+        })
+    };
 }

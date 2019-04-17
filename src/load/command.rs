@@ -1,10 +1,14 @@
 //! The structures used to manage commands sent over to tmux.
 
+use load::tmux;
+use std::io;
 use std::path::PathBuf;
+use std::process::Output;
 use std::str;
 
 pub trait Command {
-    fn call(&self) -> Vec<&str>;
+    fn call(&self) -> Result<Output, io::Error>;
+    fn command(&self) -> Vec<&str>;
 }
 
 /// The Session command is used to fire up a new daemonized session in tmux.
@@ -20,13 +24,17 @@ pub struct Session {
 
 // TODO: Real logic exists here. Test it!
 impl Command for Session {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         let command: Vec<&str> = vec!["new", "-d", "-s", &self.name, "-n", &self.window_name];
 
         match self.root_path.as_ref() {
             Some(path) => [&command[..], &["-c", path.to_str().unwrap()]].concat(),
             None => command,
         }
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -44,13 +52,17 @@ pub struct Window {
 }
 
 impl Command for Window {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         let command: Vec<&str> = vec!["new-window", "-t", &self.session_name, "-n", &self.name];
 
         match self.path.as_ref() {
             Some(path) => [&command[..], &["-c", path.to_str().unwrap()]].concat(),
             None => command,
         }
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -63,8 +75,12 @@ pub struct Split {
 }
 
 impl Command for Split {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         vec!["split-window", "-t", &self.target]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -79,8 +95,12 @@ pub struct Layout {
 }
 
 impl Command for Layout {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         vec!["select-layout", "-t", &self.target, &self.layout]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -96,8 +116,12 @@ pub struct SendKeys {
 }
 
 impl Command for SendKeys {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         vec!["send-keys", "-t", &self.target, &self.exec, "KPEnter"]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -109,9 +133,13 @@ pub struct Attach {
 }
 
 impl Command for Attach {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         // No-op!
         vec![]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::attach(&self.name)
     }
 }
 
@@ -123,8 +151,12 @@ pub struct SelectWindow {
 }
 
 impl Command for SelectWindow {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         vec!["select-window", "-t", &self.target]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -136,8 +168,12 @@ pub struct SelectPane {
 }
 
 impl Command for SelectPane {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         vec!["select-pane", "-t", &self.target]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
@@ -150,9 +186,13 @@ pub struct Pre {
 }
 
 impl Command for Pre {
-    fn call(&self) -> Vec<&str> {
+    fn command(&self) -> Vec<&str> {
         // No-op!
         vec![]
+    }
+
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.command())
     }
 }
 
