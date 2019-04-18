@@ -16,7 +16,6 @@ use std::path::{Path, PathBuf};
 use yaml_rust::{Yaml, YamlLoader};
 
 pub mod parser;
-pub mod processor;
 
 use first_run::check_first_run;
 

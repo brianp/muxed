@@ -4,6 +4,7 @@ use load::tmux;
 use std::io;
 use std::path::PathBuf;
 use std::process::Output;
+use std::process;
 use std::str;
 
 pub trait Command {
@@ -192,7 +193,14 @@ impl Command for Pre {
     }
 
     fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.command())
+        let cmd_array: Vec<&str> = self.exec.split(' ').collect();
+        let (program, args) = cmd_array
+            .split_first()
+            .expect("Couldn't find args for pre option");
+
+        process::Command::new(program)
+            .args(args)
+            .output()
     }
 }
 
@@ -211,4 +219,20 @@ pub enum Commands {
     Session(Session),
     Split(Split),
     Window(Window),
+}
+
+impl Commands {
+    pub fn as_trait(&self) -> &Command {
+        match *self {
+            Commands::Pre(ref c) => c,
+            Commands::Attach(ref c) => c,
+            Commands::Layout(ref c) => c,
+            Commands::SelectPane(ref c) => c,
+            Commands::SelectWindow(ref c) => c,
+            Commands::SendKeys(ref c) => c,
+            Commands::Session(ref c) => c,
+            Commands::Split(ref c) => c,
+            Commands::Window(ref c) => c,
+        }
+    }
 }
