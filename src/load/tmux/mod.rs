@@ -32,7 +32,6 @@ pub fn call(args: &[&str]) -> Result<Output, io::Error> {
     Command::new(TMUX_NAME).args(args).output()
 }
 
-
 /// Has session is used firgure out if a named session is already running.
 ///
 /// # Examples
@@ -88,6 +87,6 @@ pub fn attach(session_name: &str) -> Result<Output, io::Error> {
             status: ExitStatus::from_raw(output),
             stdout: vec![],
             stderr: vec![],
-        })
+        });
     };
 }

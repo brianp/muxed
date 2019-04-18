@@ -2,7 +2,7 @@ pub mod command;
 pub mod project;
 pub mod tmux;
 
-use self::command::{Command, Commands};
+use self::command::Commands;
 use self::project::parser;
 use self::tmux::config::Config;
 use args::Args;
@@ -32,8 +32,8 @@ pub fn exec(args: Args) -> Result<(), String> {
     };
 
     for command in &commands {
-      command.as_trait().call();
-    };
+        command.as_trait().call();
+    }
 
     Ok(())
 }

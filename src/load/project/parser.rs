@@ -1,6 +1,5 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
 /// processed later.
-
 use load::command::*;
 use load::tmux::config::Config;
 use std::path::PathBuf;

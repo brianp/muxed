@@ -3,8 +3,8 @@
 use load::tmux;
 use std::io;
 use std::path::PathBuf;
-use std::process::Output;
 use std::process;
+use std::process::Output;
 use std::str;
 
 pub trait Command {
@@ -198,9 +198,7 @@ impl Command for Pre {
             .split_first()
             .expect("Couldn't find args for pre option");
 
-        process::Command::new(program)
-            .args(args)
-            .output()
+        process::Command::new(program).args(args).output()
     }
 }
 
@@ -224,9 +222,9 @@ pub enum Commands {
 impl Commands {
     pub fn as_trait(&self) -> &Command {
         match *self {
-            Commands::Pre(ref c) => c,
             Commands::Attach(ref c) => c,
             Commands::Layout(ref c) => c,
+            Commands::Pre(ref c) => c,
             Commands::SelectPane(ref c) => c,
             Commands::SelectWindow(ref c) => c,
             Commands::SendKeys(ref c) => c,
