@@ -187,7 +187,7 @@ windows:
             .pane_current_path
             .as_str()
             .unwrap();
-        assert_eq!(pane_current_path, home_dir().unwrap().to_str().unwrap());
+        assert_eq!(Some(PathBuf::from(pane_current_path)), home_dir());
     }
 
     #[test]
@@ -202,7 +202,7 @@ windows:
             .pane_current_path
             .as_str()
             .unwrap();
-        assert_eq!(pane_current_path, home_dir().unwrap().to_str().unwrap());
+        assert_eq!(Some(PathBuf::from(pane_current_path)), home_dir());
     }
 
     #[test]
