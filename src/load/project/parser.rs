@@ -63,10 +63,15 @@ pub fn call(
             Yaml::Hash(ref h) => {
                 for (k, v) in h {
                     if v.as_hash().is_some() {
+                        let path = match &v["path"].as_str() {
+                            Some(x) => Some(PathBuf::from(x.to_string())),
+                            None => None,
+                        };
+
                         commands.push(Commands::Window(Window {
                             session_name: project_name.to_string(),
                             name: k.as_str().unwrap().to_string(),
-                            path: root.clone(),
+                            path: path.clone(),
                         }));
 
                         let target = format!("{}:{}", project_name, k.as_str().unwrap());
@@ -83,7 +88,7 @@ pub fn call(
                                 .as_str()
                                 .ok_or_else(|| "Windows require being named in your config.")
                                 .map(|x| x.to_string())),
-                            path: root.clone(),
+                            path: None,
                         }));
 
                         let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
@@ -106,7 +111,7 @@ pub fn call(
                 commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.clone(),
-                    path: root.clone(),
+                    path: None,
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -116,7 +121,7 @@ pub fn call(
                 commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.to_string(),
-                    path: root.clone(),
+                    path: None,
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -130,12 +135,17 @@ pub fn call(
     let mut remains = commands.to_vec();
 
     if let Commands::Window(ref w) = *first {
+        let path = match &w.path {
+            Some(_) => w.path.clone(),
+            None    => root
+        };
+
         remains.insert(
             0,
             Commands::Session(Session {
                 name: project_name.to_string(),
                 window_name: w.name.clone(),
-                root_path: root.clone(),
+                root_path: path,
             }),
         );
 
