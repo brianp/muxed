@@ -15,10 +15,10 @@ extern crate rand;
 extern crate serde_derive;
 
 mod args;
+mod first_run;
 mod load;
 mod new;
 mod snapshot;
-mod first_run;
 
 use args::Args;
 use docopt::Docopt;

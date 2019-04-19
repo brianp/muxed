@@ -53,7 +53,7 @@ pub fn exec(args: Args) -> Result<(), String> {
 
     let file = PathBuf::from(muxed_dir).join(&project_name);
     let template = modified_template(TEMPLATE, &file);
-    write_template(&template, &file);
+    write_template(&template, &file).unwrap();
     println!(
         "\u{270C} The template file {} has been written to {}\nHappy tmuxing!",
         project_name, muxed_dir

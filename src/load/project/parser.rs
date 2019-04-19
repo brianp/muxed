@@ -1,7 +1,8 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
+/// processed later.
 use load::command::*;
 use load::tmux::config::Config;
-/// processed later.
+use std::path::PathBuf;
 use yaml_rust::Yaml;
 
 #[cfg(test)]
@@ -18,8 +19,8 @@ pub fn call(
     project_name: &str,
     daemonize: bool,
     tmux_config: &Config,
-) -> Result<Vec<Command>, String> {
-    let mut commands: Vec<Command> = vec![];
+) -> Result<Vec<Commands>, String> {
+    let mut commands: Vec<Commands> = vec![];
 
     // There should only be one doc but it's a vec so take the first.
     let doc = &yaml_string[0];
@@ -29,18 +30,23 @@ pub fn call(
         None => None,
     };
 
+    let path_root = match doc["root"].as_str() {
+        Some(x) => Some(PathBuf::from(x.to_string().replace(" ", "\\ "))),
+        None => None,
+    };
+
     let pre_window = pre_matcher(&doc["pre_window"]);
 
     // A clojure used to capture the current local root and pre Options.
     // This way we can call the clojure to create common SendKeys command
     // like changing the directory or executing a system command from the
     // `pre_window` option.
-    let common_commands = |target: String| -> Vec<Command> {
+    let common_commands = |target: String| -> Vec<Commands> {
         let mut commands2 = vec![];
 
         // SendKeys to change to the `root` directory
         if let Some(r) = root.clone() {
-            commands2.push(Command::SendKeys(SendKeys {
+            commands2.push(Commands::SendKeys(SendKeys {
                 target: target.clone(),
                 exec: format!("cd {}", r),
             }));
@@ -50,7 +56,7 @@ pub fn call(
         if let Some(p) = pre_window.clone() {
             for v in &p {
                 if let Some(ref r) = *v {
-                    commands2.push(Command::SendKeys(SendKeys {
+                    commands2.push(Commands::SendKeys(SendKeys {
                         target: target.clone(),
                         exec: r.clone(),
                     }));
@@ -70,9 +76,10 @@ pub fn call(
             Yaml::Hash(ref h) => {
                 for (k, v) in h {
                     if v.as_hash().is_some() {
-                        commands.push(Command::Window(Window {
+                        commands.push(Commands::Window(Window {
                             session_name: project_name.to_string(),
                             name: k.as_str().unwrap().to_string(),
+                            path: path_root.clone(),
                         }));
 
                         let target = format!("{}:{}", project_name, k.as_str().unwrap());
@@ -83,12 +90,13 @@ pub fn call(
                             &tmux_config
                         )));
                     } else {
-                        commands.push(Command::Window(Window {
+                        commands.push(Commands::Window(Window {
                             session_name: project_name.to_string(),
                             name: try!(k
                                 .as_str()
                                 .ok_or_else(|| "Windows require being named in your config.")
                                 .map(|x| x.to_string())),
+                            path: path_root.clone(),
                         }));
 
                         let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
@@ -97,7 +105,7 @@ pub fn call(
                         // SendKeys for the exec command
                         if let Some(ex) = v.as_str() {
                             if !ex.is_empty() {
-                                commands.push(Command::SendKeys(SendKeys {
+                                commands.push(Commands::SendKeys(SendKeys {
                                     target: format!("{}:{}", project_name, k.as_str().unwrap())
                                         .to_string(),
                                     exec: v.as_str().unwrap().to_string(),
@@ -108,18 +116,20 @@ pub fn call(
                 }
             }
             Yaml::String(ref s) => {
-                commands.push(Command::Window(Window {
+                commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.clone(),
+                    path: path_root.clone(),
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
                 commands.append(&mut common_commands(t.to_string()));
             }
             Yaml::Integer(ref s) => {
-                commands.push(Command::Window(Window {
+                commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.to_string(),
+                    path: path_root.clone(),
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -132,19 +142,20 @@ pub fn call(
     let (first, commands) = commands.split_first().unwrap();
     let mut remains = commands.to_vec();
 
-    if let Command::Window(ref w) = *first {
+    if let Commands::Window(ref w) = *first {
         remains.insert(
             0,
-            Command::Session(Session {
+            Commands::Session(Session {
                 name: project_name.to_string(),
                 window_name: w.name.clone(),
+                root_path: path_root.clone(),
             }),
         );
 
-        remains.push(Command::SelectWindow(SelectWindow {
+        remains.push(Commands::SelectWindow(SelectWindow {
             target: format!("{}:{}", &project_name, &w.name),
         }));
-        remains.push(Command::SelectPane(SelectPane {
+        remains.push(Commands::SelectPane(SelectPane {
             target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index),
         }));
     };
@@ -155,13 +166,13 @@ pub fn call(
     if let Some(ref p) = pre {
         for v in p.iter() {
             if let Some(ref r) = *v {
-                remains.insert(0, Command::Pre(Pre { exec: r.clone() }));
+                remains.insert(0, Commands::Pre(Pre { exec: r.clone() }));
             };
         }
     };
 
     if !daemonize {
-        remains.push(Command::Attach(Attach {
+        remains.push(Commands::Attach(Attach {
             name: project_name.to_string(),
         }))
     };
@@ -176,9 +187,9 @@ fn pane_matcher<T>(
     target: &str,
     common_commands: T,
     tmux_config: &Config,
-) -> Result<Vec<Command>, String>
+) -> Result<Vec<Commands>, String>
 where
-    T: Fn(String) -> Vec<Command>,
+    T: Fn(String) -> Vec<Commands>,
 {
     let mut commands = vec![];
     let panes = window["panes"]
@@ -190,7 +201,7 @@ where
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len() - 1) {
-            commands.push(Command::Split(Split {
+            commands.push(Commands::Split(Split {
                 target: t.to_string(),
             }));
         };
@@ -203,7 +214,7 @@ where
         // complete.
         if let Some(p) = pane.as_str() {
             if !p.is_empty() {
-                commands.push(Command::SendKeys(SendKeys {
+                commands.push(Commands::SendKeys(SendKeys {
                     target: t.to_string(),
                     exec: p.to_string(),
                 }));
@@ -218,7 +229,7 @@ where
             target
         );
         let layout = window["layout"].as_str().expect(err.as_str()).to_string();
-        commands.push(Command::Layout(Layout {
+        commands.push(Commands::Layout(Layout {
             target: target.to_string(),
             layout,
         }));
@@ -250,7 +261,7 @@ pub fn expect_1_session() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -262,7 +273,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Session(_) => true,
+        &Commands::Session(_) => true,
         _ => false,
     })
     .collect();
@@ -276,7 +287,7 @@ pub fn expect_2_windows_from_array() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -288,7 +299,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Window(_) => true,
+        &Commands::Window(_) => true,
         _ => false,
     })
     .collect();
@@ -302,7 +313,7 @@ pub fn expect_1_attach() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -314,7 +325,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Attach(_) => true,
+        &Commands::Attach(_) => true,
         _ => false,
     })
     .collect();
@@ -328,7 +339,7 @@ pub fn expect_2_windows_with_mixed_type_names() {
 windows: [1, 'vim', 3]
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -340,7 +351,7 @@ windows: [1, 'vim', 3]
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Window(_) => true,
+        &Commands::Window(_) => true,
         _ => false,
     })
     .collect();
@@ -356,7 +367,7 @@ windows:
   - git: ''
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -368,7 +379,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Window(_) => true,
+        &Commands::Window(_) => true,
         _ => false,
     })
     .collect();
@@ -402,7 +413,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -414,7 +425,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -473,7 +484,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -485,7 +496,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -503,7 +514,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -515,7 +526,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Split(_) => true,
+        &Commands::Split(_) => true,
         _ => false,
     })
     .collect();
@@ -533,7 +544,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -545,7 +556,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Layout(_) => true,
+        &Commands::Layout(_) => true,
         _ => false,
     })
     .collect();
@@ -563,7 +574,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -575,7 +586,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Session(_) => true,
+        &Commands::Session(_) => true,
         _ => false,
     })
     .collect();
@@ -592,7 +603,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -604,7 +615,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::Layout(_) => true,
+        &Commands::Layout(_) => true,
         _ => false,
     })
     .collect();
@@ -625,7 +636,7 @@ windows:
   - logs:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -637,7 +648,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -655,7 +666,7 @@ windows:
   - editor:
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -667,7 +678,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -684,7 +695,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -696,7 +707,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -712,7 +723,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -724,7 +735,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -741,7 +752,7 @@ windows:
 ";
 
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Command = call(
+    let remains: Commands = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -753,13 +764,13 @@ windows:
     .unwrap()
     .into_iter()
     .find(|x| match x {
-        &Command::SendKeys(_) => true,
+        &Commands::SendKeys(_) => true,
         _ => false,
     })
     .unwrap();
 
     let root = match remains {
-        Command::SendKeys(ref k) => k,
+        Commands::SendKeys(ref k) => k,
         _ => panic!("nope"),
     };
 
@@ -775,7 +786,7 @@ pub fn expect_1_select_window() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -787,7 +798,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SelectWindow(_) => true,
+        &Commands::SelectWindow(_) => true,
         _ => false,
     })
     .collect();
@@ -801,7 +812,7 @@ pub fn expect_1_select_pane() {
 windows: ['cargo', 'vim', 'git']
 ";
     let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Command> = call(
+    let remains: Vec<Commands> = call(
         &yaml,
         &"muxed".to_string(),
         false,
@@ -813,7 +824,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Command::SelectPane(_) => true,
+        &Commands::SelectPane(_) => true,
         _ => false,
     })
     .collect();

@@ -2,8 +2,8 @@ pub mod command;
 pub mod project;
 pub mod tmux;
 
-use self::command::Command;
-use self::project::{parser, processor};
+use self::command::Commands;
+use self::project::parser;
 use self::tmux::config::Config;
 use args::Args;
 
@@ -19,7 +19,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         .unwrap_or(&args.arg_project)
         .to_string();
 
-    let commands: Vec<Command>;
+    let commands: Vec<Commands>;
     match project::session_exists(project_name) {
         Some(c) => {
             commands = vec![c];
@@ -31,6 +31,9 @@ pub fn exec(args: Args) -> Result<(), String> {
         }
     };
 
-    processor::main(&commands);
+    for command in &commands {
+        command.as_trait().call().map_err(|e| format!("Had a problem running commands for tmux {}", e)).unwrap();
+    }
+
     Ok(())
 }
