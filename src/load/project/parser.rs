@@ -25,7 +25,10 @@ pub fn call(
     // There should only be one doc but it's a vec so take the first.
     let doc = &yaml_string[0];
 
-    let root = expand_root_path(&doc["root"]);
+    let root = match &doc["root"].as_str() {
+        Some(x) => Some(PathBuf::from(x.to_string())),
+        None => None,
+    };
 
     let pre_window = pre_matcher(&doc["pre_window"]);
 
@@ -162,16 +165,6 @@ pub fn call(
     };
 
     Ok(remains)
-}
-
-fn expand_root_path(root_attr: &Yaml) -> Option<PathBuf> {
-    match root_attr.as_str() {
-        Some(x) => {
-          //let string_path = ShellExpand::new(x.to_string());
-          Some(PathBuf::from(x.to_string()))
-        },
-        None => None,
-    }
 }
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
