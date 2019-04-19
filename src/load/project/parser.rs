@@ -25,15 +25,7 @@ pub fn call(
     // There should only be one doc but it's a vec so take the first.
     let doc = &yaml_string[0];
 
-    let root = match doc["root"].as_str() {
-        Some(x) => Some(x.to_string().replace(" ", "\\ ")),
-        None => None,
-    };
-
-    let path_root = match doc["root"].as_str() {
-        Some(x) => Some(PathBuf::from(x.to_string().replace(" ", "\\ "))),
-        None => None,
-    };
+    let root = expand_root_path(&doc["root"]);
 
     let pre_window = pre_matcher(&doc["pre_window"]);
 
@@ -43,14 +35,6 @@ pub fn call(
     // `pre_window` option.
     let common_commands = |target: String| -> Vec<Commands> {
         let mut commands2 = vec![];
-
-        // SendKeys to change to the `root` directory
-        if let Some(r) = root.clone() {
-            commands2.push(Commands::SendKeys(SendKeys {
-                target: target.clone(),
-                exec: format!("cd {}", r),
-            }));
-        };
 
         // SendKeys for the Pre option
         if let Some(p) = pre_window.clone() {
@@ -79,7 +63,7 @@ pub fn call(
                         commands.push(Commands::Window(Window {
                             session_name: project_name.to_string(),
                             name: k.as_str().unwrap().to_string(),
-                            path: path_root.clone(),
+                            path: root.clone(),
                         }));
 
                         let target = format!("{}:{}", project_name, k.as_str().unwrap());
@@ -96,7 +80,7 @@ pub fn call(
                                 .as_str()
                                 .ok_or_else(|| "Windows require being named in your config.")
                                 .map(|x| x.to_string())),
-                            path: path_root.clone(),
+                            path: root.clone(),
                         }));
 
                         let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
@@ -119,7 +103,7 @@ pub fn call(
                 commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.clone(),
-                    path: path_root.clone(),
+                    path: root.clone(),
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -129,7 +113,7 @@ pub fn call(
                 commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.to_string(),
-                    path: path_root.clone(),
+                    path: root.clone(),
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -148,7 +132,7 @@ pub fn call(
             Commands::Session(Session {
                 name: project_name.to_string(),
                 window_name: w.name.clone(),
-                root_path: path_root.clone(),
+                root_path: root.clone(),
             }),
         );
 
@@ -178,6 +162,16 @@ pub fn call(
     };
 
     Ok(remains)
+}
+
+fn expand_root_path(root_attr: &Yaml) -> Option<PathBuf> {
+    match root_attr.as_str() {
+        Some(x) => {
+          //let string_path = ShellExpand::new(x.to_string());
+          Some(PathBuf::from(x.to_string()))
+        },
+        None => None,
+    }
 }
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
@@ -764,19 +758,19 @@ windows:
     .unwrap()
     .into_iter()
     .find(|x| match x {
-        &Commands::SendKeys(_) => true,
+        &Commands::Session(_) => true,
         _ => false,
     })
     .unwrap();
 
     let root = match remains {
-        Commands::SendKeys(ref k) => k,
+        Commands::Session(ref k) => k,
         _ => panic!("nope"),
     };
 
     assert_eq!(
-        root.exec,
-        "cd ~/JustPlainSimple\\ Technologies\\ Inc./financials/ledgers"
+        root.root_path,
+        Some(PathBuf::from("~/JustPlainSimple Technologies Inc./financials/ledgers"))
     )
 }
 
