@@ -8,7 +8,7 @@ extern crate yaml_rust;
 
 mod helpers;
 
-mod open {
+mod load {
     use dirs::home_dir;
     use helpers::*;
     use rand::random;
