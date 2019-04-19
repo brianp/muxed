@@ -770,7 +770,9 @@ windows:
 
     assert_eq!(
         root.root_path,
-        Some(PathBuf::from("~/JustPlainSimple Technologies Inc./financials/ledgers"))
+        Some(PathBuf::from(
+            "~/JustPlainSimple Technologies Inc./financials/ledgers"
+        ))
     )
 }
 
