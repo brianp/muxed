@@ -4,6 +4,7 @@ use load::command::*;
 use load::tmux::config::Config;
 use std::path::PathBuf;
 use yaml_rust::Yaml;
+use dirs::home_dir;
 
 #[cfg(test)]
 use yaml_rust::YamlLoader;
@@ -26,7 +27,10 @@ pub fn call(
     let doc = &yaml_string[0];
 
     let root = match &doc["root"].as_str() {
-        Some(x) => Some(PathBuf::from(x.to_string())),
+        Some(x) => {
+          let path = x.to_string().replace("~", home_dir().unwrap().to_str().unwrap());
+          Some(PathBuf::from(path))
+        },
         None => None,
     };
 
@@ -64,8 +68,11 @@ pub fn call(
                 for (k, v) in h {
                     if v.as_hash().is_some() {
                         let path = match &v["path"].as_str() {
-                            Some(x) => Some(PathBuf::from(x.to_string())),
-                            None => None,
+                            Some(x) => {
+                              let path = x.to_string().replace("~", home_dir().unwrap().to_str().unwrap());
+                              Some(PathBuf::from(path))
+                            },
+                            None => root.clone(),
                         };
 
                         commands.push(Commands::Window(Window {
@@ -79,7 +86,8 @@ pub fn call(
                             v,
                             &target,
                             &common_commands,
-                            &tmux_config
+                            &tmux_config,
+                            path.clone(),
                         )));
                     } else {
                         commands.push(Commands::Window(Window {
@@ -88,7 +96,7 @@ pub fn call(
                                 .as_str()
                                 .ok_or_else(|| "Windows require being named in your config.")
                                 .map(|x| x.to_string())),
-                            path: None,
+                            path: root.clone(),
                         }));
 
                         let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
@@ -111,7 +119,7 @@ pub fn call(
                 commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.clone(),
-                    path: None,
+                    path: root.clone(),
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -121,7 +129,7 @@ pub fn call(
                 commands.push(Commands::Window(Window {
                     session_name: project_name.to_string(),
                     name: s.to_string(),
-                    path: None,
+                    path: root.clone(),
                 }));
 
                 let t = format!("{}:{}", &project_name, &s);
@@ -137,7 +145,7 @@ pub fn call(
     if let Commands::Window(ref w) = *first {
         let path = match &w.path {
             Some(_) => w.path.clone(),
-            None    => root
+            None    => root.clone(),
         };
 
         remains.insert(
@@ -171,6 +179,7 @@ pub fn call(
     if !daemonize {
         remains.push(Commands::Attach(Attach {
             name: project_name.to_string(),
+            root_path: root.clone(),
         }))
     };
 
@@ -184,6 +193,7 @@ fn pane_matcher<T>(
     target: &str,
     common_commands: T,
     tmux_config: &Config,
+    inherited_path: Option<PathBuf>,
 ) -> Result<Vec<Commands>, String>
 where
     T: Fn(String) -> Vec<Commands>,
@@ -193,6 +203,14 @@ where
         .as_vec()
         .expect("Something is wrong with panes.");
 
+    let path = match window["path"].as_str() {
+        Some(x) => {
+          let path = x.to_string().replace("~", home_dir().unwrap().to_str().unwrap());
+          Some(PathBuf::from(path))
+        },
+        None => inherited_path,
+    };
+
     for (i, pane) in panes.iter().enumerate() {
         let t = format!("{}.{}", target, i + tmux_config.pane_base_index);
         // For every pane, we need one less split.
@@ -200,6 +218,7 @@ where
         if i < (panes.len() - 1) {
             commands.push(Commands::Split(Split {
                 target: t.to_string(),
+                path: path.clone()
             }));
         };
 
@@ -771,11 +790,12 @@ windows:
         _ => panic!("nope"),
     };
 
+    let home = dirs::home_dir().unwrap();
+    let path = PathBuf::from("JustPlainSimple Technologies Inc./financials/ledgers");
+
     assert_eq!(
         root.root_path,
-        Some(PathBuf::from(
-            "~/JustPlainSimple Technologies Inc./financials/ledgers"
-        ))
+        Some(home.join(path)),
     )
 }
 
