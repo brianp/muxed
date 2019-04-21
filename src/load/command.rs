@@ -70,14 +70,22 @@ impl Command for Window {
 /// The Split is used to call split-window on a particular window in the
 /// session.
 /// `target`: The target window. In the format `{session}:{window}.{paneIndex}`.
+/// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
+/// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Split {
     pub target: String,
+    pub path: Option<PathBuf>,
 }
 
 impl Command for Split {
     fn args(&self) -> Vec<&str> {
-        vec!["split-window", "-t", &self.target]
+        let args: Vec<&str> = vec!["split-window", "-t", &self.target];
+
+        match self.path.as_ref() {
+            Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
+            None => args,
+        }
     }
 
     fn call(&self) -> Result<Output, io::Error> {
@@ -128,19 +136,23 @@ impl Command for SendKeys {
 
 /// Used to attach to the daemonized session.
 /// name: The named session to attach too.
+/// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
+/// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Attach {
     pub name: String,
+    pub root_path: Option<PathBuf>,
 }
 
 impl Command for Attach {
     fn args(&self) -> Vec<&str> {
-        // No-op!
-        vec![]
+        let args: Vec<&str> = vec!["attach", "-t", &self.name];
+
+        [&args[..], &[">/dev/null"]].concat()
     }
 
     fn call(&self) -> Result<Output, io::Error> {
-        tmux::attach(&self.name)
+        tmux::attach(&self.root_path, &self.args())
     }
 }
 

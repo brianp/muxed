@@ -249,6 +249,39 @@ windows:
     }
 
     #[test]
+    fn first_window_path_shouldnt_be_default_path() {
+        let contents = b"---
+root: ~/
+windows:
+  - editor:
+      panes:
+        - vi
+      path: /var/log
+  - other: pwd
+";
+        let session = test_with_contents(contents);
+        let editor_current_path = session.windows["editor"]
+            .pane_current_path
+            .as_str()
+            .unwrap();
+
+        assert_eq!(
+            PathBuf::from("/var/log"),
+            PathBuf::from(editor_current_path)
+        );
+
+        let other_current_path = session.windows["other"]
+            .pane_current_path
+            .as_str()
+            .unwrap();
+
+        assert_eq!(
+            home_dir(),
+            Some(PathBuf::from(other_current_path))
+        );
+    }
+
+    #[test]
     fn expect_focus_on_the_first_window() {
         let contents = b"---
 windows: ['ssh', 'git']
