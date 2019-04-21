@@ -2,7 +2,7 @@
 /// processed later.
 use load::command::*;
 use load::tmux::config::Config;
-use std::path::PathBuf;
+use std::path::{PathBuf, Path};
 use yaml_rust::Yaml;
 use dirs::home_dir;
 
@@ -26,14 +26,7 @@ pub fn call(
     // There should only be one doc but it's a vec so take the first.
     let doc = &yaml_string[0];
 
-    let root = match &doc["root"].as_str() {
-        Some(x) => {
-          let path = x.to_string().replace("~", home_dir().unwrap().to_str().unwrap());
-          Some(PathBuf::from(path))
-        },
-        None => None,
-    };
-
+    let root = expand_path(&doc["root"]);
     let pre_window = pre_matcher(&doc["pre_window"]);
 
     // A clojure used to capture the current local root and pre Options.
@@ -67,11 +60,8 @@ pub fn call(
             Yaml::Hash(ref h) => {
                 for (k, v) in h {
                     if v.as_hash().is_some() {
-                        let path = match &v["path"].as_str() {
-                            Some(x) => {
-                              let path = x.to_string().replace("~", home_dir().unwrap().to_str().unwrap());
-                              Some(PathBuf::from(path))
-                            },
+                        let path = match expand_path(&v["path"]) {
+                            Some(x) => Some(x),
                             None => root.clone(),
                         };
 
@@ -203,11 +193,8 @@ where
         .as_vec()
         .expect("Something is wrong with panes.");
 
-    let path = match window["path"].as_str() {
-        Some(x) => {
-          let path = x.to_string().replace("~", home_dir().unwrap().to_str().unwrap());
-          Some(PathBuf::from(path))
-        },
+    let path = match expand_path(&window["path"]) {
+        Some(x) => Some(x),
         None => inherited_path,
     };
 
@@ -268,6 +255,21 @@ fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
                 .collect(),
         ),
         _ => None,
+    }
+}
+
+fn expand_path(node: &Yaml) -> Option<PathBuf> {
+    match node.as_str() {
+        Some(string) => {
+            if string.contains("~/") == true {
+                let home = home_dir().expect("Home dir could not be expanded");
+                let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
+                Some(path)
+            } else {
+                Some(PathBuf::from(string))
+            }
+        },
+        None => None,
     }
 }
 
