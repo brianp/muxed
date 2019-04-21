@@ -133,19 +133,24 @@ pub fn call(
     let mut remains = commands.to_vec();
 
     if let Commands::Window(ref w) = *first {
-        let path = match &w.path {
-            Some(_) => w.path.clone(),
-            None    => root.clone(),
-        };
-
         remains.insert(
             0,
             Commands::Session(Session {
                 name: project_name.to_string(),
                 window_name: w.name.clone(),
-                root_path: path,
+                root_path: root.clone(),
             }),
         );
+
+        if let Some(path) = &w.path {
+            remains.insert(
+                1,
+                Commands::SendKeys(SendKeys {
+                    target: format!("{}:{}", project_name, &w.name),
+                    exec: format!("cd {}", path.display()),
+                }),
+            );
+        }
 
         remains.push(Commands::SelectWindow(SelectWindow {
             target: format!("{}:{}", &project_name, &w.name),

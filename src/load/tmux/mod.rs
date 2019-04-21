@@ -7,11 +7,9 @@
 pub mod config;
 
 use libc::system;
-use std::env;
 use std::ffi::CString;
 use std::io;
 use std::os::unix::process::ExitStatusExt;
-use std::path::PathBuf;
 use std::process::{Command, ExitStatus, Output};
 
 /// The program to call commands on.
@@ -75,14 +73,10 @@ pub fn get_config() -> String {
 /// tmux::attach(muxed);
 /// ```
 /// `session_name: The active tmux session name.
-pub fn attach(path: &Option<PathBuf>, args: &Vec<&str>) -> Result<Output, io::Error> {
-    if let Some(path) = path {
-        env::set_current_dir(&path).is_ok();
-    };
-
+pub fn attach(args: &Vec<&str>) -> Result<Output, io::Error> {
     let arg_string = [&[TMUX_NAME], &args[..]].concat().join(" ");
     let system_call = CString::new(arg_string).unwrap();
-    //println!("{}", line.clone());
+    // println!("{:?}", arg_string.clone());
     unsafe {
         let output = system(system_call.as_ptr());
 

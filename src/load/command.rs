@@ -148,11 +148,16 @@ impl Command for Attach {
     fn args(&self) -> Vec<&str> {
         let args: Vec<&str> = vec!["attach", "-t", &self.name];
 
+        let args = match self.root_path.as_ref() {
+            Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
+            None => args,
+        };
+
         [&args[..], &[">/dev/null"]].concat()
     }
 
     fn call(&self) -> Result<Output, io::Error> {
-        tmux::attach(&self.root_path, &self.args())
+        tmux::attach(&self.args())
     }
 }
 
