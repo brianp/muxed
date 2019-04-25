@@ -81,7 +81,7 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
     if has_session(project_name).success() {
         Some(Commands::Attach(Attach {
             name: project_name.to_string(),
-            root_path: None
+            root_path: None,
         }))
     } else {
         None

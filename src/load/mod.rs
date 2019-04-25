@@ -42,7 +42,11 @@ pub fn exec(args: Args) -> Result<(), String> {
 
     for command in &commands {
         println!("{:?}", command);
-        command.as_trait().call().map_err(|e| format!("Had a problem running commands for tmux {}", e)).unwrap();
+        command
+            .as_trait()
+            .call()
+            .map_err(|e| format!("Had a problem running commands for tmux {}", e))
+            .unwrap();
     }
 
     Ok(())

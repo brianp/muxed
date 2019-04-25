@@ -1,10 +1,11 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
-/// processed later.
+//! processed later.
+
+use dirs::home_dir;
 use load::command::*;
 use load::tmux::config::Config;
-use std::path::{PathBuf, Path};
+use std::path::{Path, PathBuf};
 use yaml_rust::Yaml;
-use dirs::home_dir;
 
 #[cfg(test)]
 use yaml_rust::YamlLoader;
@@ -82,10 +83,10 @@ pub fn call(
                     } else {
                         commands.push(Commands::Window(Window {
                             session_name: project_name.to_string(),
-                            name: try!(k
-                                .as_str()
-                                .ok_or_else(|| "Windows require being named in your config.")
-                                .map(|x| x.to_string())),
+                            name: try!(k.as_str().ok_or_else(|| {
+                                "Windows require being named in your config.".to_string()
+                            }))
+                            .to_string(),
                             path: root.clone(),
                         }));
 
@@ -209,7 +210,7 @@ where
         if i < (panes.len() - 1) {
             commands.push(Commands::Split(Split {
                 target: t.to_string(),
-                path: path.clone()
+                path: path.clone(),
             }));
         };
 
@@ -235,10 +236,10 @@ where
             "A problem with the specified layout for the window: {}",
             target
         );
-        let layout = window["layout"].as_str().expect(err.as_str()).to_string();
+        let layout = window["layout"].as_str().expect(&err);
         commands.push(Commands::Layout(Layout {
             target: target.to_string(),
-            layout,
+            layout: layout.to_string(),
         }));
     };
 
@@ -265,14 +266,14 @@ fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
 fn expand_path(node: &Yaml) -> Option<PathBuf> {
     match node.as_str() {
         Some(string) => {
-            if string.contains("~/") == true {
+            if string.contains("~/") {
                 let home = home_dir().expect("Home dir could not be expanded");
                 let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
                 Some(path)
             } else {
                 Some(PathBuf::from(string))
             }
-        },
+        }
         None => None,
     }
 }
@@ -799,10 +800,7 @@ windows:
     let home = dirs::home_dir().unwrap();
     let path = PathBuf::from("JustPlainSimple Technologies Inc./financials/ledgers");
 
-    assert_eq!(
-        root.root_path,
-        Some(home.join(path)),
-    )
+    assert_eq!(root.root_path, Some(home.join(path)),)
 }
 
 #[test]

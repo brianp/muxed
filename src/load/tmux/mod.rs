@@ -73,7 +73,7 @@ pub fn get_config() -> String {
 /// tmux::attach(muxed);
 /// ```
 /// `session_name: The active tmux session name.
-pub fn attach(args: &Vec<&str>) -> Result<Output, io::Error> {
+pub fn attach(args: &[&str]) -> Result<Output, io::Error> {
     let arg_string = [&[TMUX_NAME], &args[..]].concat().join(" ");
     let system_call = CString::new(arg_string).unwrap();
     // println!("{:?}", arg_string.clone());

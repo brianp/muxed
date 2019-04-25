@@ -13,7 +13,7 @@ impl Session {
     {
         Session {
             name: name.into(),
-            windows: windows,
+            windows,
         }
     }
 }

@@ -35,10 +35,10 @@ impl Window {
         S: Into<String>,
     {
         Window {
-            active: active,
+            active,
             layout: layout.into(),
             name: name.into(),
-            panes: panes,
+            panes,
         }
     }
 
@@ -47,10 +47,7 @@ impl Window {
     }
 
     pub fn from_line(line: &str) -> Option<Window> {
-        let active = match retrieve_capture(line, ACTIVE_REGEX) {
-            Some(_) => true,
-            None => false,
-        };
+        let active = retrieve_capture(line, ACTIVE_REGEX).is_some();
 
         let layout = match retrieve_capture(line, LAYOUT_REGEX) {
             Some(x) => x,

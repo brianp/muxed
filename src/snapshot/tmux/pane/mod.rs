@@ -30,17 +30,14 @@ pub struct Pane {
 impl Pane {
     pub fn new(active: bool, path: PathBuf, process: Option<Process>) -> Pane {
         Pane {
-            active: active,
-            path: path,
-            process: process,
+            active,
+            path,
+            process,
         }
     }
 
     pub fn from_line(line: &str) -> Option<Pane> {
-        let active = match retrieve_capture(line, ACTIVE_REGEX) {
-            Some(_) => true,
-            None => false,
-        };
+        let active = retrieve_capture(line, ACTIVE_REGEX).is_some();
 
         let path = match retrieve_capture(line, PATH_REGEX) {
             Some(x) => PathBuf::from(x),
