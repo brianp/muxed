@@ -12,12 +12,12 @@ pub fn inspect(name: &str) -> Result<Session, String> {
         Err(e) => return Err(e),
     };
 
-    let windows1 = windows
+    let windows = windows
         .into_iter()
         .map(|w| Window::from_window(panes_for(name, &w).unwrap(), w))
         .collect();
 
-    Ok(Session::new(name, windows1))
+    Ok(Session::new(name, windows))
 }
 
 fn windows_for(target: &str) -> Result<Vec<Window>, String> {

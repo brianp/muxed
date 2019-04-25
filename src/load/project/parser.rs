@@ -89,15 +89,14 @@ pub fn call(
                             path: root.clone(),
                         }));
 
-                        let t = format!("{}:{}", project_name, k.as_str().unwrap()).to_string();
+                        let t = format!("{}:{}", project_name, k.as_str().unwrap());
                         commands.append(&mut common_commands(t.to_string()));
 
                         // SendKeys for the exec command
                         if let Some(ex) = v.as_str() {
                             if !ex.is_empty() {
                                 commands.push(Commands::SendKeys(SendKeys {
-                                    target: format!("{}:{}", project_name, k.as_str().unwrap())
-                                        .to_string(),
+                                    target: format!("{}:{}", project_name, k.as_str().unwrap()),
                                     exec: v.as_str().unwrap().to_string(),
                                 }));
                             };
