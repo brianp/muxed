@@ -90,22 +90,26 @@ $ muxed my_project
 Usage:
     muxed [options] <project>
     muxed new [options] <project>
+    muxed snapshot [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
 Flags:
     -d                  If you want to create a muxed session without connecting to it
+    -f                  Overwrite existing file if one exists
     -h, --help          Prints help information
     -v, --version       Prints version information
 
 Options:
     -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
+    -t <tmux_session>   The name of the running TMUX session to codify
 
 Args:
     <project>           The name of your project to open
 
 Subcommands:
-    new                 The name of your project to create
+    new <project>                         To create a new project file
+    snapshot -t <tmux_session> <project>  Capture a running session and create a config file for it
 ```
 
 ## Inspiration
