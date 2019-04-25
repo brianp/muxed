@@ -2,6 +2,15 @@
 
 /// The args struct for taking arguments passed in from the command line
 /// and making it easier to pass around.
+/// `flag_d` is whether the session should be daemonzied
+/// `flag_v` to print the version
+/// `flag_f` to force overwrite of a file
+/// `flag_p` the project directory to read or write to
+/// `flag_t` the session to read from
+/// `arg_project` the project file to read
+/// `cmd_new` literally nothing
+/// `cmd_snapshot` not sure why I have these
+///
 #[derive(Debug, RustcDecodable)]
 pub struct Args {
     pub flag_d: bool,
