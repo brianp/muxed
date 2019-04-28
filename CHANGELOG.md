@@ -1,3 +1,31 @@
+<a name="0.7.0"></a>
+## 0.7.0 (2019-04-28)
+
+#### Improvements
+
+* **Command:**
+  *  Fix root directory for new sessions ([d52cba96](d52cba96))
+  *  Begin trait based Command system ([65223007](65223007))
+  *  Add Window and Split to Commands ([94a46b75](94a46b75))
+* **Paths:**  Assign proper paths when possible ([8262d695](8262d695))
+* **Root paths:**  New window path reliability ([c9c979ea](c9c979ea))
+* **Default path:**  Set default path on the session ([4460f026](4460f026))
+
+#### Documentation
+
+*   Fixup minor errors ([2a035b27](2a035b27))
+*   Move root docs back to project root ([8f78742a](8f78742a))
+* **Commands:**  Add docs to new commands ([669b18dd](669b18dd))
+* **Readme:**  Update the usage ([07b9618f](07b9618f))
+
+#### Features
+
+* **Window Paths:**  Add support for window paths ([f52438fc](f52438fc))
+
+#### Bug Fixes
+
+* **pane-index:**  Use pane-base-index properly ([4b9ee44a](4b9ee44a))
+
 <a name="0.6.0"></a>
 ## 0.6.0 (2017-03-08)
 
@@ -9,7 +37,7 @@
   *  Docs around muxednew ([05ee2222](05ee2222))
 * **changelog:**  Add perf and imp to the changelog ([f5aca741](f5aca741))
 * **clog.toml:**  Make changelogs easier ([682a53b6](682a53b6))
-* **tmux/mod.rs#call1:**  Update the docs for call1 ([68164956](68164956))
+* **tmux/mod.rs#call:**  Update the docs for call ([68164956](68164956))
 
 #### Features
 
