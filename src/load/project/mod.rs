@@ -6,6 +6,7 @@
 use dirs::home_dir;
 use load::command::{Attach, Commands};
 use load::tmux::has_session;
+use load::tmux::target::*;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]
@@ -80,7 +81,7 @@ fn homedir() -> Result<PathBuf, String> {
 pub fn session_exists(project_name: &str) -> Option<Commands> {
     if has_session(project_name).success() {
         Some(Commands::Attach(Attach {
-            name: project_name.to_string(),
+            name: SessionTarget::new(&project_name),
             root_path: None,
         }))
     } else {
