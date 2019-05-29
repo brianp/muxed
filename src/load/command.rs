@@ -8,7 +8,10 @@ use std::{process, str};
 use std::process::Output;
 
 pub trait Command {
-    fn call(&self) -> Result<Output, io::Error>;
+    fn call(&self) -> Result<Output, io::Error> {
+        tmux::call(&self.args())
+    }
+
     fn args(&self) -> Vec<&str>;
 }
 
@@ -32,10 +35,6 @@ impl Command for Session {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
             None => args,
         }
-    }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
     }
 }
 
@@ -61,10 +60,6 @@ impl Command for Window {
             None => args,
         }
     }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
-    }
 }
 
 /// The Split is used to call split-window on a particular window in the
@@ -87,10 +82,6 @@ impl Command for Split {
             None => args,
         }
     }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
-    }
 }
 
 /// The Layout command calls select-layout with a specific pre-defined tmux
@@ -106,10 +97,6 @@ pub struct Layout {
 impl Command for Layout {
     fn args(&self) -> Vec<&str> {
         vec!["select-layout", "-t", &self.target, &self.layout]
-    }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
     }
 }
 
@@ -127,10 +114,6 @@ pub struct SendKeys {
 impl Command for SendKeys {
     fn args(&self) -> Vec<&str> {
         vec!["send-keys", "-t", &self.target.arg_string(), &self.exec, "KPEnter"]
-    }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
     }
 }
 
@@ -172,10 +155,6 @@ impl Command for SelectWindow {
     fn args(&self) -> Vec<&str> {
         vec!["select-window", "-t", &self.target]
     }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
-    }
 }
 
 /// Used to move focus back to the top pane.
@@ -188,10 +167,6 @@ pub struct SelectPane {
 impl Command for SelectPane {
     fn args(&self) -> Vec<&str> {
         vec!["select-pane", "-t", &self.target]
-    }
-
-    fn call(&self) -> Result<Output, io::Error> {
-        tmux::call(&self.args())
     }
 }
 
