@@ -3,6 +3,7 @@
 
 use dirs::home_dir;
 use load::command::*;
+use load::tmux::target::*;
 use load::tmux::config::Config;
 use std::path::{Path, PathBuf};
 use yaml_rust::Yaml;
@@ -34,7 +35,7 @@ pub fn call(
     // This way we can call the clojure to create common SendKeys command
     // like changing the directory or executing a system command from the
     // `pre_window` option.
-    let common_commands = |target: String| -> Vec<Commands> {
+    let common_commands = |target: Target| -> Vec<Commands> {
         let mut commands2 = vec![];
 
         // SendKeys for the Pre option
@@ -72,7 +73,7 @@ pub fn call(
                             path: path.clone(),
                         }));
 
-                        let target = format!("{}:{}", project_name, k.as_str().unwrap());
+                        let target = WindowTarget::new(project_name, k.as_str().unwrap());
                         commands.append(&mut try!(pane_matcher(
                             v,
                             &target,
@@ -90,14 +91,14 @@ pub fn call(
                             path: root.clone(),
                         }));
 
-                        let t = format!("{}:{}", project_name, k.as_str().unwrap());
-                        commands.append(&mut common_commands(t.to_string()));
+                        let target = WindowTarget::new(project_name, k.as_str().unwrap());
+                        commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
 
                         // SendKeys for the exec command
                         if let Some(ex) = v.as_str() {
                             if !ex.is_empty() {
                                 commands.push(Commands::SendKeys(SendKeys {
-                                    target: format!("{}:{}", project_name, k.as_str().unwrap()),
+                                    target: Target::WindowTarget(target.clone()),
                                     exec: v.as_str().unwrap().to_string(),
                                 }));
                             };
@@ -112,8 +113,8 @@ pub fn call(
                     path: root.clone(),
                 }));
 
-                let t = format!("{}:{}", &project_name, &s);
-                commands.append(&mut common_commands(t.to_string()));
+                let target = WindowTarget::new(&project_name, &s);
+                commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             Yaml::Integer(ref s) => {
                 commands.push(Commands::Window(Window {
@@ -122,8 +123,8 @@ pub fn call(
                     path: root.clone(),
                 }));
 
-                let t = format!("{}:{}", &project_name, &s);
-                commands.append(&mut common_commands(t.to_string()));
+                let target = WindowTarget::new(&project_name, &s.to_string());
+                commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             _ => panic!("Muxed config file formatting isn't recognized."),
         };
@@ -146,7 +147,7 @@ pub fn call(
             remains.insert(
                 1,
                 Commands::SendKeys(SendKeys {
-                    target: format!("{}:{}", project_name, &w.name),
+                    target: Target::WindowTarget(WindowTarget::new(&project_name, &w.name)),
                     exec: format!("cd {}", path.display()),
                 }),
             );
@@ -173,7 +174,7 @@ pub fn call(
 
     if !daemonize {
         remains.push(Commands::Attach(Attach {
-            name: project_name.to_string(),
+            name: SessionTarget::new(&project_name),
             root_path: root.clone(),
         }))
     };
@@ -185,13 +186,13 @@ pub fn call(
 /// and executing commands as needed.
 fn pane_matcher<T>(
     window: &Yaml,
-    target: &str,
+    target: &WindowTarget,
     common_commands: T,
     tmux_config: &Config,
     inherited_path: Option<PathBuf>,
 ) -> Result<Vec<Commands>, String>
 where
-    T: Fn(String) -> Vec<Commands>,
+    T: Fn(Target) -> Vec<Commands>,
 {
     let mut commands = vec![];
     let panes = window["panes"]
@@ -204,26 +205,26 @@ where
     };
 
     for (i, pane) in panes.iter().enumerate() {
-        let t = format!("{}.{}", target, i + tmux_config.pane_base_index);
+        let pt = PaneTarget::new(&target.session, &target.window, i + tmux_config.pane_base_index);
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len() - 1) {
             commands.push(Commands::Split(Split {
-                target: t.to_string(),
+                target: pt.clone(),
                 path: path.clone(),
             }));
         };
 
         // Call the common_commands clojure to execute `cd` and `pre_window` options in
         // pane splits.
-        commands.append(&mut common_commands(t.to_string()));
+        commands.append(&mut common_commands(Target::PaneTarget(pt.clone())));
 
         // Execute given commands in each new pane after all splits are
         // complete.
         if let Some(p) = pane.as_str() {
             if !p.is_empty() {
                 commands.push(Commands::SendKeys(SendKeys {
-                    target: t.to_string(),
+                    target: Target::PaneTarget(pt.clone()),
                     exec: p.to_string(),
                 }));
             };

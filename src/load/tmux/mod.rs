@@ -5,6 +5,7 @@
 /// call. All functions go through this `call` function as a common gateway to
 /// system calls and can all be easily logged there.
 pub mod config;
+pub mod target;
 
 use libc::system;
 use std::ffi::CString;

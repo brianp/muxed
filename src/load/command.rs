@@ -1,11 +1,11 @@
 //! The structures used to manage commands sent over to tmux.
 
 use load::tmux;
+use load::tmux::target::*;
 use std::io;
 use std::path::PathBuf;
-use std::process;
+use std::{process, str};
 use std::process::Output;
-use std::str;
 
 pub trait Command {
     fn call(&self) -> Result<Output, io::Error>;
@@ -74,13 +74,13 @@ impl Command for Window {
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Split {
-    pub target: String,
+    pub target: PaneTarget,
     pub path: Option<PathBuf>,
 }
 
 impl Command for Split {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["split-window", "-t", &self.target];
+        let args: Vec<&str> = vec!["split-window", "-t", &self.target.arg_string];
 
         match self.path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
@@ -120,13 +120,13 @@ impl Command for Layout {
 /// exec: The cli command to be run. ex. `tail -f logs/development.log`.
 #[derive(Debug, Clone)]
 pub struct SendKeys {
-    pub target: String,
+    pub target: Target,
     pub exec: String,
 }
 
 impl Command for SendKeys {
     fn args(&self) -> Vec<&str> {
-        vec!["send-keys", "-t", &self.target, &self.exec, "KPEnter"]
+        vec!["send-keys", "-t", &self.target.arg_string(), &self.exec, "KPEnter"]
     }
 
     fn call(&self) -> Result<Output, io::Error> {
@@ -140,13 +140,13 @@ impl Command for SendKeys {
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Attach {
-    pub name: String,
+    pub name: SessionTarget,
     pub root_path: Option<PathBuf>,
 }
 
 impl Command for Attach {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["attach", "-t", &self.name];
+        let args: Vec<&str> = vec!["attach", "-t", &self.name.arg_string];
 
         let args = match self.root_path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
