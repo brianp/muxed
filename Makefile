@@ -1,4 +1,4 @@
-.PHONY : test build clippy fmt clean check release osxbuild
+.PHONY : build dockerup dockerdown cargo explain osxrelease dockerbuild osxdockerbuild
 .DEFAULT_GOAL := build
 
 VERSION_TAG := $(shell git describe --abbrev=0 --tags)
@@ -7,41 +7,42 @@ local_path := $(shell pwd)
 
 docker_image_name := brianp/muxed:dev
 
+docker_instance_name := muxed.dev
+
 osx_image_name := brianp/muxed:osx
 
-docker_dev_cmd := docker run -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --rm ${docker_image_name}
+docker_dev_cmd := docker exec ${docker_instance_name}
 
-clippy:
-	${docker_dev_cmd} cargo clippy
+build:
+	${docker_dev_cmd} cargo build
 
-test:
-	${docker_dev_cmd} cargo test
+dockerup:
+	docker run -d -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --name ${docker_instance_name} --rm ${docker_image_name}
 
-fmt:
-	${docker_dev_cmd} cargo fmt --all
+dockerdown:
+	docker stop ${docker_instance_name}
 
-clean:
-	${docker_dev_cmd} cargo clean
+cargo:
+	${docker_dev_cmd} cargo $(filter-out $@,$(MAKECMDGOALS))
 
-check:
-	${docker_dev_cmd} cargo check
-
-release:
-	${docker_dev_cmd} cargo build --release
+explain:
+	${docker_dev_cmd} rustc --explain $(filter-out $@,$(MAKECMDGOALS))
 
 osxrelease:
 	docker run -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --rm ${osx_image_name} cargo build --target x86_64-apple-darwin
 
 dockerbuild:
-	docker build -t ${docker_image_name} -f test.dockerfile .
+	docker build -t ${docker_image_name} -f dev.dockerfile .
 
 osxdockerbuild:
 	docker build -t ${osx_image_name} -f osx.dockerfile .
 
 help:
-	@echo test: run the tests
-	@echo build: build the docker image
-	@echo clippy: run the linter
-	@echo fmt: run the rust code formatter
-	@echo clean: clean the target directory
-	@echo check: run the rust compiler check
+	@echo build: build muxed debug binary
+	@echo dockerup: run the docker development instance
+	@echo dockerdown: stop the running development instance
+	@echo cargo: run cargo commands inside development instance
+	@echo explain: use the rustc --explain command
+	@echo osxrelease: build the release binary for osx
+	@echo dockerbuild: build the development environment
+	@echo osxdockerbuild: build the osx release environment
