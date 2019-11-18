@@ -7,13 +7,15 @@ rust:
 matrix:
   allow_failures:
     - env: TMUX_VERSION=master
+    - env: TMUX_VERSION=2.8
     - env: TMUX_VERSION=2.7
   exclude:
     - os: osx
-      env: TMUX_VERSION=2.7
+      env: TMUX_VERSION=2.8
 
 env:
   - TMUX_VERSION=master
+  - TMUX_VERSION=2.9a
   - TMUX_VERSION=2.8
   - TMUX_VERSION=2.7
 
