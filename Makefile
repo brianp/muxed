@@ -1,48 +1,44 @@
-.PHONY : build dockerup dockerdown cargo explain osxrelease dockerbuild osxdockerbuild
-.DEFAULT_GOAL := build
-
-VERSION_TAG := $(shell git describe --abbrev=0 --tags)
+.PHONY : build cargo explain run start stop
+.DEFAULT_GOAL := start
 
 local_path := $(shell pwd)
 
-docker_image_name := brianp/muxed:dev
+project_name := muxed
 
-docker_instance_name := muxed.dev
+repo_name := brianp/${project_name}:${MUXED_ENV}
 
-osx_image_name := brianp/muxed:osx
+docker_instance_name := ${project_name}.${MUXED_ENV}.container
 
-docker_dev_cmd := docker exec ${docker_instance_name}
+docker_exec := docker exec ${docker_instance_name}
+
+ifeq (${MUXED_ENV}, osx)
+	target := x86_64-apple-darwin
+else
+	target := x86_64-unknown-linux-gnu
+endif
 
 build:
-	${docker_dev_cmd} cargo build
-
-dockerup:
-	docker run -d -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --name ${docker_instance_name} --rm ${docker_image_name}
-
-dockerdown:
-	docker stop ${docker_instance_name}
+	docker build -t ${repo_name} -f ${MUXED_ENV}.dockerfile .
 
 cargo:
-	${docker_dev_cmd} cargo $(filter-out $@,$(MAKECMDGOALS))
+	${docker_exec} cargo ${cmd} --target ${target}
 
 explain:
-	${docker_dev_cmd} rustc --explain $(filter-out $@,$(MAKECMDGOALS))
+	${docker_exec} rustc --explain ${cmd}
 
-osxrelease:
-	docker run -it -v "${local_path}:/usr/src/" -w "/usr/src/muxed" --rm ${osx_image_name} cargo build --target x86_64-apple-darwin
+run:
+	${docker_exec} ${cmd}
 
-dockerbuild:
-	docker build -t ${docker_image_name} -f dev.dockerfile .
+start:
+	docker run -d -it -v "${local_path}:/usr/src/" -w "/usr/src/${project_name}" --name ${docker_instance_name} --rm ${repo_name}
 
-osxdockerbuild:
-	docker build -t ${osx_image_name} -f osx.dockerfile .
+stop:
+	docker stop ${docker_instance_name}
 
 help:
-	@echo build: build muxed debug binary
-	@echo dockerup: run the docker development instance
-	@echo dockerdown: stop the running development instance
-	@echo cargo: run cargo commands inside development instance
+	@echo build: build docker image
+	@echo cargo: run cargo commands inside development container
 	@echo explain: use the rustc --explain command
-	@echo osxrelease: build the release binary for osx
-	@echo dockerbuild: build the development environment
-	@echo osxdockerbuild: build the osx release environment
+	@echo run: run any command inside the development container
+	@echo start: run the docker development container
+	@echo stop: stop the running development container

@@ -1,14 +1,11 @@
-FROM rustlang/rust:nightly as builder
+FROM rustlang/rust:nightly
 
 WORKDIR /usr/src
 RUN USER=root cargo init
 COPY Cargo.toml .
 COPY Cargo.lock .
 
-# This is a dummy build to get the dependencies cached
-RUN cargo build
-COPY . .
-RUN cargo build
+RUN cargo fetch
 
 RUN apt-get update && \
       apt install -y tmux && \
