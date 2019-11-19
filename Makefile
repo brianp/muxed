@@ -24,7 +24,7 @@ cargo:
 	${docker_exec} cargo ${cmd} --target ${target}
 
 explain:
-	${docker_exec} rustc --explain ${cmd}
+	${docker_exec} rustc --explain ${err}
 
 run:
 	${docker_exec} ${cmd}
