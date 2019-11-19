@@ -5,7 +5,9 @@ use dirs::home_dir;
 use load::command::*;
 use load::tmux::target::*;
 use load::tmux::config::Config;
+use load::tmux::target::*;
 use std::path::{Path, PathBuf};
+use std::rc::Rc;
 use yaml_rust::Yaml;
 
 #[cfg(test)]
@@ -17,12 +19,12 @@ use yaml_rust::YamlLoader;
 ///
 /// `yaml_string`: The parsed yaml from the config file.
 /// `project_name`: The name of the project.
-pub fn call(
-    yaml_string: &[Yaml],
-    project_name: &str,
+pub fn call<'a>(
+    yaml_string: &'a [Yaml],
+    project_name: &'a str,
     daemonize: bool,
     tmux_config: &Config,
-) -> Result<Vec<Commands>, String> {
+) -> Result<Vec<Commands<'a>>, String> {
     let mut commands: Vec<Commands> = vec![];
 
     // There should only be one doc but it's a vec so take the first.
@@ -67,11 +69,11 @@ pub fn call(
                             None => root.clone(),
                         };
 
-                        commands.push(Commands::Window(Window {
-                            session_name: project_name.to_string(),
-                            name: k.as_str().unwrap().to_string(),
-                            path: path.clone(),
-                        }));
+                        commands.push(Commands::Window(Window::new(
+                            &project_name,
+                            Rc::new(k.as_str().unwrap().to_string()),
+                            path.clone()
+                        )));
 
                         let target = WindowTarget::new(project_name, k.as_str().unwrap());
                         commands.append(&mut try!(pane_matcher(
@@ -82,14 +84,11 @@ pub fn call(
                             path.clone(),
                         )));
                     } else {
-                        commands.push(Commands::Window(Window {
-                            session_name: project_name.to_string(),
-                            name: try!(k.as_str().ok_or_else(|| {
-                                "Windows require being named in your config.".to_string()
-                            }))
-                            .to_string(),
-                            path: root.clone(),
-                        }));
+                        commands.push(Commands::Window(Window::new(
+                            &project_name,
+                            Rc::new(k.as_str().unwrap().to_string()),
+                            root.clone()
+                        )));
 
                         let target = WindowTarget::new(project_name, k.as_str().unwrap());
                         commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
@@ -107,21 +106,21 @@ pub fn call(
                 }
             }
             Yaml::String(ref s) => {
-                commands.push(Commands::Window(Window {
-                    session_name: project_name.to_string(),
-                    name: s.clone(),
-                    path: root.clone(),
-                }));
+                commands.push(Commands::Window(Window::new(
+                    &project_name,
+                    Rc::new(s.to_string()),
+                    root.clone()
+                )));
 
                 let target = WindowTarget::new(&project_name, &s);
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             Yaml::Integer(ref s) => {
-                commands.push(Commands::Window(Window {
-                    session_name: project_name.to_string(),
-                    name: s.to_string(),
-                    path: root.clone(),
-                }));
+                commands.push(Commands::Window(Window::new(
+                    &project_name,
+                    Rc::new(format!("{}", s)),
+                    root.clone()
+                )));
 
                 let target = WindowTarget::new(&project_name, &s.to_string());
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
@@ -130,14 +129,14 @@ pub fn call(
         };
     }
 
-    let (first, commands) = commands.split_first().unwrap();
-    let mut remains = commands.to_vec();
+    let (first, commands1) = commands.split_first().unwrap();
+    let mut remains = commands1.to_vec();
 
-    if let Commands::Window(ref w) = *first {
+    if let Commands::Window(ref w) = &first {
         remains.insert(
             0,
             Commands::Session(Session {
-                name: project_name.to_string(),
+                name: &project_name,
                 window_name: w.name.clone(),
                 root_path: root.clone(),
             }),
@@ -173,10 +172,11 @@ pub fn call(
     };
 
     if !daemonize {
-        remains.push(Commands::Attach(Attach {
-            name: SessionTarget::new(&project_name),
-            root_path: root.clone(),
-        }))
+        remains.push(
+            Commands::Attach(
+                Attach::new(&project_name, root.clone())
+            )
+        );
     };
 
     Ok(remains)
@@ -184,15 +184,15 @@ pub fn call(
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher<T>(
-    window: &Yaml,
+fn pane_matcher<'a, T>(
+    window: &'a Yaml,
     target: &WindowTarget,
     common_commands: T,
     tmux_config: &Config,
     inherited_path: Option<PathBuf>,
-) -> Result<Vec<Commands>, String>
+) -> Result<Vec<Commands<'a>>, String>
 where
-    T: Fn(Target) -> Vec<Commands>,
+    T: Fn(Target) -> Vec<Commands<'a>>,
 {
     let mut commands = vec![];
     let panes = window["panes"]

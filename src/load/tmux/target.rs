@@ -55,21 +55,21 @@ impl fmt::Display for WindowTarget {
 
 /// A targeted session for tmux
 #[derive(Debug, Clone)]
-pub struct SessionTarget {
-    pub session: String,
-    pub arg_string: String,
+pub struct SessionTarget<'a> {
+    pub session: &'a str,
+    pub arg_string: &'a str,
 }
 
-impl SessionTarget {
-    pub fn new(session: &str) -> SessionTarget {
+impl<'a> SessionTarget<'a> {
+    pub fn new(session: &'a str) -> SessionTarget<'a> {
         SessionTarget {
-            session: session.to_string(),
-            arg_string: session.to_string(),
+            session: session,
+            arg_string: session,
         }
     }
 }
 
-impl fmt::Display for SessionTarget {
+impl<'a> fmt::Display for SessionTarget<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.session)
     }
