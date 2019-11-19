@@ -1,11 +1,12 @@
 //! The structures used to manage commands sent over to tmux.
 
-use load::tmux;
 use load::tmux::target::*;
+use load::tmux;
 use std::io;
 use std::path::PathBuf;
-use std::{process, str};
 use std::process::Output;
+use std::rc::Rc;
+use std::{process, str};
 
 pub trait Command {
     fn call(&self) -> Result<Output, io::Error> {
@@ -20,14 +21,24 @@ pub trait Command {
 /// `window_name`: The Name of the first window.
 /// `root_path`: The root directory for the tmux session.
 #[derive(Debug, Clone)]
-pub struct Session {
-    pub name: String,
-    pub window_name: String,
+pub struct Session<'a> {
+    pub name: &'a str,
+    pub window_name: Rc<String>,
     pub root_path: Option<PathBuf>,
 }
 
+impl<'a> Session<'a> {
+    fn new(name: &'a str, window_name: Rc<String>, root_path: Option<PathBuf>) -> Session<'a> {
+        Session {
+            name,
+            window_name,
+            root_path,
+        }
+    }
+}
+
 // TODO: Real logic exists here. Test it!
-impl Command for Session {
+impl<'a> Command for Session<'a> {
     fn args(&self) -> Vec<&str> {
         let args: Vec<&str> = vec!["new", "-d", "-s", &self.name, "-n", &self.window_name];
 
@@ -45,15 +56,30 @@ impl Command for Session {
 /// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
 /// `-c` arguement.
 #[derive(Debug, Clone)]
-pub struct Window {
-    pub session_name: String,
-    pub name: String,
+pub struct Window<'a> {
+    pub session_name: &'a str,
+    pub name: Rc<String>,
     pub path: Option<PathBuf>,
+    pub session_name_arg: String
 }
 
-impl Command for Window {
+impl<'a> Window<'a> {
+    pub fn new(session_name: &'a str, name: Rc<String>, path: Option<PathBuf>) -> Window<'a> {
+        let mut name_arg: String = String::from(session_name);
+        name_arg.push(':');
+
+        Window {
+            session_name,
+            name,
+            path,
+            session_name_arg: name_arg
+        }
+    }
+}
+
+impl<'a> Command for Window<'a> {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["new-window", "-t", &self.session_name, "-n", &self.name];
+        let args: Vec<&str> = vec!["new-window", "-t", &self.session_name_arg, "-n", &self.name];
 
         match self.path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
@@ -111,6 +137,15 @@ pub struct SendKeys {
     pub exec: String,
 }
 
+impl SendKeys {
+    fn new(target: Target, exec: String) -> SendKeys {
+        SendKeys {
+            target,
+            exec
+        }
+    }
+}
+
 impl Command for SendKeys {
     fn args(&self) -> Vec<&str> {
         vec!["send-keys", "-t", &self.target.arg_string(), &self.exec, "KPEnter"]
@@ -122,12 +157,21 @@ impl Command for SendKeys {
 /// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
 /// `-c` arguement.
 #[derive(Debug, Clone)]
-pub struct Attach {
-    pub name: SessionTarget,
+pub struct Attach<'a> {
+    pub name: SessionTarget<'a>,
     pub root_path: Option<PathBuf>,
 }
 
-impl Command for Attach {
+impl<'a> Attach<'a> {
+    pub fn new(name: &'a str, root_path: Option<PathBuf>) -> Attach<'a> {
+        Attach {
+            name: SessionTarget::new(name),
+            root_path,
+        }
+    }
+}
+
+impl<'a> Command for Attach<'a> {
     fn args(&self) -> Vec<&str> {
         let args: Vec<&str> = vec!["attach", "-t", &self.name.arg_string];
 
@@ -199,19 +243,19 @@ impl Command for Pre {
 /// containing all the commands that require running in a single Vec. This
 /// allows a simple process of first in, first out command execution.
 #[derive(Debug, Clone)]
-pub enum Commands {
-    Attach(Attach),
+pub enum Commands<'a> {
+    Attach(Attach<'a>),
     Layout(Layout),
     Pre(Pre),
     SelectPane(SelectPane),
     SelectWindow(SelectWindow),
     SendKeys(SendKeys),
-    Session(Session),
+    Session(Session<'a>),
     Split(Split),
-    Window(Window),
+    Window(Window<'a>),
 }
 
-impl Commands {
+impl<'a> Commands<'a> {
     pub fn as_trait(&self) -> &Command {
         match *self {
             Commands::Attach(ref c) => c,
