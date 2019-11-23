@@ -24,7 +24,7 @@ pub fn list_windows(target: &str) -> String {
     String::from_utf8_lossy(&output.stdout).into_owned()
 }
 
-pub fn open_muxed(project: &str, project_root: &Path) -> () {
+pub fn open_muxed(project: &str, project_root: &Path)  {
     println!("root: {}", project_root.display());
     let output = Command::new("./target/debug/muxed")
         .arg("-d")
@@ -39,7 +39,7 @@ pub fn open_muxed(project: &str, project_root: &Path) -> () {
     println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
 }
 
-pub fn kill_session(target: &str) -> () {
+pub fn kill_session(target: &str)  {
     Command::new("tmux")
         .arg("kill-session")
         .arg("-t")
@@ -48,7 +48,7 @@ pub fn kill_session(target: &str) -> () {
         .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
 }
 
-pub fn send_keys(target: &str, exec: &str) -> () {
+pub fn send_keys(target: &str, exec: &str)  {
     Command::new("tmux")
         .arg("send-keys")
         .arg("-t")
@@ -59,7 +59,7 @@ pub fn send_keys(target: &str, exec: &str) -> () {
         .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
 }
 
-pub fn wait_on(file: &PathBuf) -> () {
+pub fn wait_on(file: &PathBuf)  {
     while !file.exists() {
         // Wait increased from 10 to 750 due to the pre_window tests.
         sleep(Duration::from_millis(750));
@@ -103,11 +103,11 @@ pub struct WindowValues {
     pub pane_current_path: SessionValue,
 }
 
-static NAME_REGEX: &'static str = r"\(Session: (.*)\)";
-static WINDOW_NAME_REGEX: &'static str = r":\s(\w*)[$\*-]?\s+\(";
-static WINDOW_ACTIVE_REGEX: &'static str = r"\s(.*)\*";
-static PANE_CURRENT_PATH_REGEX: &'static str = r"\(Dir: (.*)\) ";
-static PANES_COUNT_REGEX: &'static str = r"\((\d*) panes\)";
+static NAME_REGEX: &str = r"\(Session: (.*)\)";
+static WINDOW_NAME_REGEX: &str = r":\s(\w*)[$\*-]?\s+\(";
+static WINDOW_ACTIVE_REGEX: &str = r"\s(.*)\*";
+static PANE_CURRENT_PATH_REGEX: &str = r"\(Dir: (.*)\) ";
+static PANES_COUNT_REGEX: &str = r"\((\d*) panes\)";
 
 impl TmuxSession {
     pub fn from_string(results: &str) -> TmuxSession {
@@ -133,7 +133,7 @@ impl TmuxSession {
 
         TmuxSession {
             num_of_windows: window_lines.len(),
-            windows: windows,
+            windows,
             window_active: TmuxSession::retrieve_capture(window_lines[0], WINDOW_ACTIVE_REGEX)
                 .unwrap_or(SessionValue::Empty),
             name: TmuxSession::retrieve_capture(window_lines[0], NAME_REGEX)

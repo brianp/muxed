@@ -8,7 +8,7 @@ mod new {
     use std::path::PathBuf;
     use std::process::Command;
 
-    pub fn muxednew(project: &String, project_root: &PathBuf) -> () {
+    pub fn muxednew(project: &String, project_root: &PathBuf)  {
         Command::new("./target/debug/muxed")
             .arg("new")
             .arg("-p")
@@ -27,7 +27,7 @@ mod new {
         (m, muxed_path.to_path_buf())
     }
 
-    fn cleanup(config_path: &PathBuf) -> () {
+    fn cleanup(config_path: &PathBuf)  {
         let _ = fs::remove_file(config_path);
         let _ = fs::remove_dir(config_path.parent().unwrap());
     }
