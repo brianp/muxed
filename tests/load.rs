@@ -45,7 +45,7 @@ mod load {
         (project_name, project_path.clone())
     }
 
-    fn cleanup(project_name: &str, config_path: &PathBuf) -> () {
+    fn cleanup(project_name: &str, config_path: &PathBuf)  {
         let _ = fs::remove_file(config_path);
         let _ = fs::remove_dir(config_path.parent().unwrap());
         kill_session(project_name);
