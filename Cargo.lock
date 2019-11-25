@@ -178,7 +178,7 @@ dependencies = [
 
 [[package]]
 name = "muxed"
-version = "0.6.0"
+version = "0.7.0-development"
 dependencies = [
  "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "docopt 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
