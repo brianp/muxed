@@ -270,3 +270,57 @@ impl<'a> Commands<'a> {
         }
     }
 }
+
+impl<'a> From<Attach<'a>> for Commands<'a> {
+    fn from(command: Attach<'a>) -> Self {
+        Commands::Attach(command)
+    }
+}
+
+impl<'a> From<Layout> for Commands<'a> {
+    fn from(command: Layout) -> Self {
+        Commands::Layout(command)
+    }
+}
+
+impl<'a> From<Pre> for Commands<'a> {
+    fn from(command: Pre) -> Self {
+        Commands::Pre(command)
+    }
+}
+
+impl<'a> From<SelectPane> for Commands<'a> {
+    fn from(command: SelectPane) -> Self {
+        Commands::SelectPane(command)
+    }
+}
+
+impl<'a> From<SelectWindow> for Commands<'a> {
+    fn from(command: SelectWindow) -> Self {
+        Commands::SelectWindow(command)
+    }
+}
+
+impl<'a> From<SendKeys> for Commands<'a> {
+    fn from(command: SendKeys) -> Self {
+        Commands::SendKeys(command)
+    }
+}
+
+impl<'a> From<Session<'a>> for Commands<'a> {
+    fn from(command: Session<'a>) -> Self {
+        Commands::Session(command)
+    }
+}
+
+impl<'a> From<Split> for Commands<'a> {
+    fn from(command: Split) -> Self {
+        Commands::Split(command)
+    }
+}
+
+impl<'a> From<Window<'a>> for Commands<'a> {
+    fn from(command: Window<'a>) -> Self {
+        Commands::Window(command)
+    }
+}
