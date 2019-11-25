@@ -19,12 +19,12 @@ impl Process {
 
     pub fn process_string_from(pid: Pid) -> Result<String, String> {
         // we could cat /proc/pid/cmdline instead of calling pgrep
-        let output = try!(Command::new("pgrep")
+        let output = Command::new("pgrep")
             .arg("-lf")
             .arg("-P")
             .arg(pid)
             .output()
-            .map_err(|e| format!("We couldn't find the process for that pane: {}", e)));
+            .map_err(|e| format!("We couldn't find the process for that pane: {}", e))?;
 
         let read = String::from_utf8_lossy(&output.stdout);
         let process_string = match read.lines().next() {

@@ -56,22 +56,23 @@ where
     S: Into<String>,
 {
     let path_str = path.to_str().unwrap();
-    let mut file = try!(OpenOptions::new()
+    let mut file = OpenOptions::new()
         .write(true)
         .truncate(force)
         .create(force)
         .create_new(!force)
         .open(path)
-        .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e)));
-    try!(file
-        .write_all(template.into().as_bytes())
+        .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e))?;
+
+    file.write_all(template.into().as_bytes())
         .map_err(|e| format!(
             "Could not write contents of template to the file {}. Error {}",
             &path_str, e
-        )));
-    try!(file
-        .sync_all()
-        .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e)));
+        ))?;
+
+    file.sync_all()
+        .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;
+
     Ok(())
 }
 

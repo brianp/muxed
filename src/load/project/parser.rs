@@ -3,7 +3,6 @@
 
 use dirs::home_dir;
 use load::command::*;
-use load::tmux::target::*;
 use load::tmux::config::Config;
 use load::tmux::target::*;
 use std::path::{Path, PathBuf};
@@ -76,13 +75,13 @@ pub fn call<'a>(
                         ).into());
 
                         let target = WindowTarget::new(project_name, k.as_str().unwrap());
-                        commands.append(&mut try!(pane_matcher(
+                        commands.append(&mut pane_matcher(
                             v,
                             &target,
                             &common_commands,
                             &tmux_config,
                             path.clone(),
-                        )));
+                        )?);
                     } else {
                         commands.push(Window::new(
                             &project_name,

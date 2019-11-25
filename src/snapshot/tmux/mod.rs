@@ -22,7 +22,7 @@ pub fn inspect(name: &str) -> Result<Session, String> {
 
 fn windows_for(target: &str) -> Result<Vec<Window>, String> {
     let err = format!("\u{1F613} The session {} was not found.", target);
-    let output = try!(Window::window_list(target).map_err(|e| format!("{} - {}", err, e)));
+    let output = Window::window_list(target).map_err(|e| format!("{} - {}", err, e))?;
 
     let windows = String::from_utf8_lossy(&output.stdout)
         .lines()
@@ -38,8 +38,8 @@ fn windows_for(target: &str) -> Result<Vec<Window>, String> {
 
 fn panes_for(session_name: &str, w: &Window) -> Result<Vec<Pane>, String> {
     let target = format!("{}:{}", &session_name, &w.name);
-    let output = try!(Pane::pane_list(&target)
-        .map_err(|e| format!("We couldn't find panes for the {} window - {}", &target, e)));
+    let output = Pane::pane_list(&target)
+        .map_err(|e| format!("We couldn't find panes for the {} window - {}", &target, e))?;
 
     let panes = String::from_utf8_lossy(&output.stdout)
         .lines()

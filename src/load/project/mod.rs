@@ -41,7 +41,7 @@ static MUXED_FOLDER: &'static str = "muxed";
 /// `project_name`: The name of the project, corresponding to the project config
 /// file.
 pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>, String> {
-    let home = try!(homedir().map_err(|e| e));
+    let home = homedir().map_err(|e| e)?;
     let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
     let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
 
@@ -50,13 +50,14 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
     let config = format!("{}/{}.yml", muxed_dir, project_name);
     let path = Path::new(&config);
 
-    let mut file = try!(File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, muxed_dir, e.to_string())));
+    let mut file = File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, muxed_dir, e.to_string()))?;
     let mut contents = String::new();
-    try!(file
-        .read_to_string(&mut contents)
-        .map_err(|e| e.to_string()));
 
-    let parsed_yaml = try!(YamlLoader::load_from_str(&contents).map_err(|e| e.to_string()));
+    file.read_to_string(&mut contents)
+        .map_err(|e| e.to_string())?;
+
+    let parsed_yaml = YamlLoader::load_from_str(&contents).map_err(|e| e.to_string())?;
+
     Ok(parsed_yaml)
 }
 

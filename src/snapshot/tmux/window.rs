@@ -80,9 +80,9 @@ impl Serialize for Window {
             panes: self.panes.clone(),
         };
 
-        let mut state = try!(serializer.serialize_map(Some(1)));
-        try!(serializer.serialize_map_key(&mut state, &self.name));
-        try!(serializer.serialize_map_value(&mut state, window));
+        let mut state = serializer.serialize_map(Some(1))?;
+        serializer.serialize_map_key(&mut state, &self.name)?;
+        serializer.serialize_map_value(&mut state, window)?;
         serializer.serialize_map_end(state)
     }
 }
