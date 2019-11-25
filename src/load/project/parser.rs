@@ -44,10 +44,10 @@ pub fn call<'a>(
         if let Some(p) = pre_window.clone() {
             for v in &p {
                 if let Some(ref r) = *v {
-                    commands2.push(SendKeys {
-                        target: target.clone(),
-                        exec: r.clone(),
-                    }.into());
+                    commands2.push(SendKeys::new(
+                        target.clone(),
+                        r.clone()
+                    ).into());
                 };
             }
         };
@@ -69,11 +69,11 @@ pub fn call<'a>(
                             None => root.clone(),
                         };
 
-                        commands.push(Commands::Window(Window::new(
+                        commands.push(Window::new(
                             &project_name,
                             Rc::new(k.as_str().unwrap().to_string()),
                             path.clone()
-                        )));
+                        ).into());
 
                         let target = WindowTarget::new(project_name, k.as_str().unwrap());
                         commands.append(&mut try!(pane_matcher(
@@ -84,11 +84,11 @@ pub fn call<'a>(
                             path.clone(),
                         )));
                     } else {
-                        commands.push(Commands::Window(Window::new(
+                        commands.push(Window::new(
                             &project_name,
                             Rc::new(k.as_str().unwrap().to_string()),
                             root.clone()
-                        )));
+                        ).into());
 
                         let target = WindowTarget::new(project_name, k.as_str().unwrap());
                         commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
@@ -96,31 +96,31 @@ pub fn call<'a>(
                         // SendKeys for the exec command
                         if let Some(ex) = v.as_str() {
                             if !ex.is_empty() {
-                                commands.push(Commands::SendKeys(SendKeys {
-                                    target: Target::WindowTarget(target.clone()),
-                                    exec: v.as_str().unwrap().to_string(),
-                                }));
+                                commands.push(SendKeys::new(
+                                    Target::WindowTarget(target.clone()),
+                                    v.as_str().unwrap().to_string()
+                                ).into());
                             };
                         }
                     }
                 }
             }
             Yaml::String(ref s) => {
-                commands.push(Commands::Window(Window::new(
+                commands.push(Window::new(
                     &project_name,
                     Rc::new(s.to_string()),
                     root.clone()
-                )));
+                ).into());
 
                 let target = WindowTarget::new(&project_name, &s);
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             Yaml::Integer(ref s) => {
-                commands.push(Commands::Window(Window::new(
+                commands.push(Window::new(
                     &project_name,
                     Rc::new(format!("{}", s)),
                     root.clone()
-                )));
+                ).into());
 
                 let target = WindowTarget::new(&project_name, &s.to_string());
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
@@ -135,25 +135,21 @@ pub fn call<'a>(
     if let Commands::Window(ref w) = &first {
         remains.insert(
             0,
-            Commands::Session(Session {
-                name: &project_name,
-                window_name: w.name.clone(),
-                root_path: root.clone(),
-            }),
+            Session::new(&project_name, w.name.clone(), root.clone()).into(),
         );
 
         if let Some(path) = &w.path {
             remains.insert(
                 1,
-                Commands::SendKeys(SendKeys {
-                    target: Target::WindowTarget(WindowTarget::new(&project_name, &w.name)),
-                    exec: format!("cd {}", path.display()),
-                }),
+                SendKeys::new(
+                    Target::WindowTarget(WindowTarget::new(&project_name, &w.name)),
+                    format!("cd {}", path.display())
+                ).into()
             );
         }
 
-        remains.push(SelectWindow { target: format!("{}:{}", &project_name, &w.name), }.into());
-        remains.push(SelectPane { target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index) }.into());
+        remains.push(SelectWindow::new(format!("{}:{}", &project_name, &w.name)).into());
+        remains.push(SelectPane::new(format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index)).into());
     };
 
     // FIXME: Due to inserting the Pre commands into the 0 position in the stack,
@@ -162,7 +158,7 @@ pub fn call<'a>(
     if let Some(ref p) = pre {
         for v in p.iter() {
             if let Some(ref r) = *v {
-                remains.insert(0, Pre { exec: r.clone() }.into());
+                remains.insert(0, Pre::new(r.clone()).into());
             };
         }
     };
@@ -201,10 +197,10 @@ where
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len() - 1) {
-            commands.push(Split {
-                target: pt.clone(),
-                path: path.clone(),
-            }.into());
+            commands.push(Split::new(
+                pt.clone(),
+                path.clone()
+            ).into());
         };
 
         // Call the common_commands clojure to execute `cd` and `pre_window` options in
@@ -215,10 +211,10 @@ where
         // complete.
         if let Some(p) = pane.as_str() {
             if !p.is_empty() {
-                commands.push(SendKeys {
-                    target: Target::PaneTarget(pt.clone()),
-                    exec: p.to_string(),
-                }.into());
+                commands.push(SendKeys::new(
+                    Target::PaneTarget(pt.clone()),
+                    p.to_string()
+                ).into());
             };
         };
     }
@@ -230,10 +226,10 @@ where
             target
         );
         let layout = window["layout"].as_str().expect(&err);
-        commands.push(Layout {
-            target: target.to_string(),
-            layout: layout.to_string(),
-        }.into());
+        commands.push(Layout::new(
+            target.to_string(),
+            layout.to_string()
+        ).into());
     };
 
     Ok(commands)
