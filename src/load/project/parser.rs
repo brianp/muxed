@@ -70,11 +70,13 @@ pub fn call<'a>(
 
                         commands.push(Window::new(
                             &project_name,
-                            Rc::new(k.as_str().unwrap().to_string()),
+                            Rc::new(k.as_str().expect("window should have a name").to_string()),
                             path.clone()
                         ).into());
 
-                        let target = WindowTarget::new(project_name, k.as_str().unwrap());
+                        let target = WindowTarget::new(project_name, k.as_str().ok_or_else(||
+                            { "no target specified" }
+                        )?);
                         commands.append(&mut pane_matcher(
                             v,
                             &target,
@@ -85,7 +87,10 @@ pub fn call<'a>(
                     } else {
                         commands.push(Window::new(
                             &project_name,
-                            Rc::new(k.as_str().unwrap().to_string()),
+                            Rc::new(k.as_str().ok_or_else(|| {
+                                "Windows require being named in your config."
+                            })?
+                            .to_string()),
                             root.clone()
                         ).into());
 
@@ -274,7 +279,7 @@ windows: ['cargo', 'vim', 'git']
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -300,7 +305,7 @@ windows: ['cargo', 'vim', 'git']
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -326,7 +331,7 @@ windows: ['cargo', 'vim', 'git']
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -352,7 +357,7 @@ windows: [1, 'vim', 3]
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -380,7 +385,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -406,7 +411,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let result = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -426,7 +431,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -453,7 +458,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let result = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -475,7 +480,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let result = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -497,7 +502,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -527,7 +532,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -557,7 +562,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -587,7 +592,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -616,7 +621,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -649,7 +654,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -679,7 +684,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -708,7 +713,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -736,7 +741,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -765,7 +770,7 @@ windows:
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Commands = call(
         &yaml,
-        &"muxed".to_string(),
+        "financials",
         false,
         &Config {
             base_index: 0,
@@ -799,7 +804,7 @@ windows: ['cargo', 'vim', 'git']
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
@@ -825,7 +830,7 @@ windows: ['cargo', 'vim', 'git']
     let yaml = YamlLoader::load_from_str(s).unwrap();
     let remains: Vec<Commands> = call(
         &yaml,
-        &"muxed".to_string(),
+        "muxed",
         false,
         &Config {
             base_index: 0,
