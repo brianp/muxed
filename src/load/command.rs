@@ -28,7 +28,7 @@ pub struct Session<'a> {
 }
 
 impl<'a> Session<'a> {
-    fn new(name: &'a str, window_name: Rc<String>, root_path: Option<PathBuf>) -> Session<'a> {
+    pub fn new(name: &'a str, window_name: Rc<String>, root_path: Option<PathBuf>) -> Session<'a> {
         Session {
             name,
             window_name,
@@ -99,6 +99,15 @@ pub struct Split {
     pub path: Option<PathBuf>,
 }
 
+impl Split {
+    pub fn new(target: PaneTarget, path: Option<PathBuf>) -> Split {
+        Split {
+            target,
+            path,
+        }
+    }
+}
+
 impl Command for Split {
     fn args(&self) -> Vec<&str> {
         let args: Vec<&str> = vec!["split-window", "-t", &self.target.arg_string];
@@ -120,6 +129,15 @@ pub struct Layout {
     pub layout: String,
 }
 
+impl Layout {
+    pub fn new(target: String, layout: String) -> Layout {
+        Layout {
+            target,
+            layout,
+        }
+    }
+}
+
 impl Command for Layout {
     fn args(&self) -> Vec<&str> {
         vec!["select-layout", "-t", &self.target, &self.layout]
@@ -138,7 +156,7 @@ pub struct SendKeys {
 }
 
 impl SendKeys {
-    fn new(target: Target, exec: String) -> SendKeys {
+    pub fn new(target: Target, exec: String) -> SendKeys {
         SendKeys {
             target,
             exec
@@ -195,6 +213,14 @@ pub struct SelectWindow {
     pub target: String,
 }
 
+impl SelectWindow {
+    pub fn new(target: String) -> SelectWindow {
+        SelectWindow {
+            target,
+        }
+    }
+}
+
 impl Command for SelectWindow {
     fn args(&self) -> Vec<&str> {
         vec!["select-window", "-t", &self.target]
@@ -206,6 +232,14 @@ impl Command for SelectWindow {
 #[derive(Debug, Clone)]
 pub struct SelectPane {
     pub target: String,
+}
+
+impl SelectPane {
+    pub fn new(target: String) -> SelectPane {
+        SelectPane {
+            target,
+        }
+    }
 }
 
 impl Command for SelectPane {
@@ -220,6 +254,14 @@ impl Command for SelectPane {
 #[derive(Debug, Clone)]
 pub struct Pre {
     pub exec: String,
+}
+
+impl Pre {
+    pub fn new(exec: String) -> Pre {
+        Pre {
+            exec,
+        }
+    }
 }
 
 impl Command for Pre {
