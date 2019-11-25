@@ -298,17 +298,17 @@ pub enum Commands<'a> {
 }
 
 impl<'a> Commands<'a> {
-    pub fn as_trait(&self) -> &Command {
-        match *self {
-            Commands::Attach(ref c) => c,
-            Commands::Layout(ref c) => c,
-            Commands::Pre(ref c) => c,
-            Commands::SelectPane(ref c) => c,
-            Commands::SelectWindow(ref c) => c,
-            Commands::SendKeys(ref c) => c,
-            Commands::Session(ref c) => c,
-            Commands::Split(ref c) => c,
-            Commands::Window(ref c) => c,
+    pub fn as_trait(&self) -> &dyn Command {
+        match self {
+            Commands::Attach(c) => c,
+            Commands::Layout(c) => c,
+            Commands::Pre(c) => c,
+            Commands::SelectPane(c) => c,
+            Commands::SelectWindow(c) => c,
+            Commands::SendKeys(c) => c,
+            Commands::Session(c) => c,
+            Commands::Split(c) => c,
+            Commands::Window(c) => c,
         }
     }
 }
