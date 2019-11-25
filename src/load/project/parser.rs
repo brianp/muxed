@@ -44,10 +44,10 @@ pub fn call<'a>(
         if let Some(p) = pre_window.clone() {
             for v in &p {
                 if let Some(ref r) = *v {
-                    commands2.push(Commands::SendKeys(SendKeys {
+                    commands2.push(SendKeys {
                         target: target.clone(),
                         exec: r.clone(),
-                    }));
+                    }.into());
                 };
             }
         };
@@ -152,12 +152,8 @@ pub fn call<'a>(
             );
         }
 
-        remains.push(Commands::SelectWindow(SelectWindow {
-            target: format!("{}:{}", &project_name, &w.name),
-        }));
-        remains.push(Commands::SelectPane(SelectPane {
-            target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index),
-        }));
+        remains.push(SelectWindow { target: format!("{}:{}", &project_name, &w.name), }.into());
+        remains.push(SelectPane { target: format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index) }.into());
     };
 
     // FIXME: Due to inserting the Pre commands into the 0 position in the stack,
@@ -166,17 +162,13 @@ pub fn call<'a>(
     if let Some(ref p) = pre {
         for v in p.iter() {
             if let Some(ref r) = *v {
-                remains.insert(0, Commands::Pre(Pre { exec: r.clone() }));
+                remains.insert(0, Pre { exec: r.clone() }.into());
             };
         }
     };
 
     if !daemonize {
-        remains.push(
-            Commands::Attach(
-                Attach::new(&project_name, root.clone())
-            )
-        );
+        remains.push(Attach::new(&project_name, root.clone()).into());
     };
 
     Ok(remains)
@@ -209,10 +201,10 @@ where
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len() - 1) {
-            commands.push(Commands::Split(Split {
+            commands.push(Split {
                 target: pt.clone(),
                 path: path.clone(),
-            }));
+            }.into());
         };
 
         // Call the common_commands clojure to execute `cd` and `pre_window` options in
@@ -223,10 +215,10 @@ where
         // complete.
         if let Some(p) = pane.as_str() {
             if !p.is_empty() {
-                commands.push(Commands::SendKeys(SendKeys {
+                commands.push(SendKeys {
                     target: Target::PaneTarget(pt.clone()),
                     exec: p.to_string(),
-                }));
+                }.into());
             };
         };
     }
@@ -238,10 +230,10 @@ where
             target
         );
         let layout = window["layout"].as_str().expect(&err);
-        commands.push(Commands::Layout(Layout {
+        commands.push(Layout {
             target: target.to_string(),
             layout: layout.to_string(),
-        }));
+        }.into());
     };
 
     Ok(commands)
