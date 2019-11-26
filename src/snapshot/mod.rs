@@ -55,7 +55,7 @@ fn write_config<S>(template: S, path: &PathBuf, force: bool) -> Result<(), Strin
 where
     S: Into<String>,
 {
-    let path_str = path.to_str().unwrap();
+    let path_str = path.to_str().expect("Path could not be opened");
     let mut file = OpenOptions::new()
         .write(true)
         .truncate(force)
