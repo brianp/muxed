@@ -30,7 +30,7 @@ run:
 	${docker_exec} ${cmd}
 
 start:
-	docker run -d -it -v "${local_path}:/usr/src/" -w "/usr/src/${project_name}" --name ${docker_instance_name} --rm ${repo_name}
+	docker run -d -it -v "${local_path}:/usr/src/" --name ${docker_instance_name} --rm ${repo_name}
 
 stop:
 	docker stop ${docker_instance_name}

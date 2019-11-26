@@ -29,6 +29,9 @@ ENV PATH /osxcross/target/bin:$PATH
 
 RUN rustup target add x86_64-apple-darwin
 
+RUN rustup component add rustfmt
+RUN rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
+
 RUN rustup --version \
     && rustc --version \
     && cargo --version
