@@ -22,7 +22,7 @@ pub trait Command {
 /// `root_path`: The root directory for the tmux session.
 #[derive(Debug, Clone)]
 pub struct Session<'a> {
-    pub name: &'a str,
+    pub target: SessionTarget<'a>,
     pub window_name: Rc<String>,
     pub root_path: Option<PathBuf>,
 }
@@ -30,7 +30,7 @@ pub struct Session<'a> {
 impl<'a> Session<'a> {
     pub fn new(name: &'a str, window_name: Rc<String>, root_path: Option<PathBuf>) -> Session<'a> {
         Session {
-            name,
+            target: SessionTarget::new(name),
             window_name,
             root_path,
         }
@@ -40,7 +40,7 @@ impl<'a> Session<'a> {
 // TODO: Real logic exists here. Test it!
 impl<'a> Command for Session<'a> {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["new", "-d", "-s", &self.name, "-n", &self.window_name];
+        let args: Vec<&str> = vec!["new", "-d", "-s", &self.target.arg_string, "-n", &self.window_name];
 
         match self.root_path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
@@ -125,12 +125,12 @@ impl Command for Split {
 /// `layout`: The type of layout. ex `main-horizontal`.
 #[derive(Debug, Clone)]
 pub struct Layout {
-    pub target: String,
+    pub target: WindowTarget,
     pub layout: String,
 }
 
 impl Layout {
-    pub fn new(target: String, layout: String) -> Layout {
+    pub fn new(target: WindowTarget, layout: String) -> Layout {
         Layout {
             target,
             layout,
@@ -140,7 +140,7 @@ impl Layout {
 
 impl Command for Layout {
     fn args(&self) -> Vec<&str> {
-        vec!["select-layout", "-t", &self.target, &self.layout]
+        vec!["select-layout", "-t", &self.target.arg_string, &self.layout]
     }
 }
 
@@ -210,11 +210,11 @@ impl<'a> Command for Attach<'a> {
 /// target: The target window. In the format `{session}:{window}`.
 #[derive(Debug, Clone)]
 pub struct SelectWindow {
-    pub target: String,
+    pub target: WindowTarget,
 }
 
 impl SelectWindow {
-    pub fn new(target: String) -> SelectWindow {
+    pub fn new(target: WindowTarget) -> SelectWindow {
         SelectWindow {
             target,
         }
@@ -223,7 +223,7 @@ impl SelectWindow {
 
 impl Command for SelectWindow {
     fn args(&self) -> Vec<&str> {
-        vec!["select-window", "-t", &self.target]
+        vec!["select-window", "-t", &self.target.arg_string]
     }
 }
 
@@ -231,11 +231,11 @@ impl Command for SelectWindow {
 /// target: The target pane. In the format `{session}:{window}.{pane-target}`.
 #[derive(Debug, Clone)]
 pub struct SelectPane {
-    pub target: String,
+    pub target: PaneTarget,
 }
 
 impl SelectPane {
-    pub fn new(target: String) -> SelectPane {
+    pub fn new(target: PaneTarget) -> SelectPane {
         SelectPane {
             target,
         }
@@ -244,7 +244,7 @@ impl SelectPane {
 
 impl Command for SelectPane {
     fn args(&self) -> Vec<&str> {
-        vec!["select-pane", "-t", &self.target]
+        vec!["select-pane", "-t", &self.target.arg_string]
     }
 }
 

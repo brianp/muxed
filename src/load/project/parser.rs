@@ -152,8 +152,8 @@ pub fn call<'a>(
             );
         }
 
-        remains.push(SelectWindow::new(format!("{}:{}", &project_name, &w.name)).into());
-        remains.push(SelectPane::new(format!("{}:{}.{}", &project_name, &w.name, &tmux_config.base_index)).into());
+        remains.push(SelectWindow::new(WindowTarget::new(&project_name, &w.name)).into());
+        remains.push(SelectPane::new(PaneTarget::new(&project_name, &w.name, tmux_config.base_index)).into());
     };
 
     // FIXME: Due to inserting the Pre commands into the 0 position in the stack,
@@ -231,7 +231,7 @@ where
         );
         let layout = window["layout"].as_str().expect(&err);
         commands.push(Layout::new(
-            target.to_string(),
+            target.clone(),
             layout.to_string()
         ).into());
     };
