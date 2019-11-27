@@ -14,7 +14,7 @@ use std::os::unix::process::ExitStatusExt;
 use std::process::{Command, ExitStatus, Output};
 
 /// The program to call commands on.
-static TMUX_NAME: &'static str = "tmux";
+static TMUX_NAME: &str = "tmux";
 
 /// The gateway to calling any functions on tmux. Most public functions in this
 /// module will be fed through this `call` function. This safely creates a new
@@ -81,10 +81,10 @@ pub fn attach(args: &[&str]) -> Result<Output, io::Error> {
     unsafe {
         let output = system(system_call.as_ptr());
 
-        return Ok(Output {
+        Ok(Output {
             status: ExitStatus::from_raw(output),
             stdout: vec![],
             stderr: vec![],
-        });
-    };
+        })
+    }
 }

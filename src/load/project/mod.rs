@@ -21,7 +21,7 @@ use first_run::check_first_run;
 
 /// The muxed project folder name. Should be located in the users home dir as a
 /// hidden directory.
-static MUXED_FOLDER: &'static str = "muxed";
+static MUXED_FOLDER: &str = "muxed";
 
 /// Using the provided project name, locate the path to that project file. It
 /// should be something similar to: `~/.muxed/my_project.yml`

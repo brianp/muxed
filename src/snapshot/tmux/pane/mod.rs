@@ -13,12 +13,12 @@ pub mod process;
 use self::pid::Pid;
 use self::process::Process;
 
-static ACTIVE_REGEX: &'static str = r"\s(\(active\))";
-static PATH_REGEX: &'static str = r"\(Path: (.*)\) \(PID";
-static PID_REGEX: &'static str = r"\(PID: ([0-9]*)\)";
+static ACTIVE_REGEX: &str = r"\s(\(active\))";
+static PATH_REGEX: &str = r"\(Path: (.*)\) \(PID";
+static PID_REGEX: &str = r"\(PID: ([0-9]*)\)";
 
 // Example format: "1: [123x14] (Path: /muxed/muxedsnapshot) (PID: 22541) (active)"
-static LIST_FORMAT: &'static str = "'#{pane_index}: [#{pane_width}x#{pane_height}] (Path: #{pane_current_path}) (PID: #{pane_pid}) #{?pane_active,(active), } '";
+static LIST_FORMAT: &str = "'#{pane_index}: [#{pane_width}x#{pane_height}] (Path: #{pane_current_path}) (PID: #{pane_pid}) #{?pane_active,(active), } '";
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Pane {

@@ -39,7 +39,7 @@ impl Process {
     where
         T: Into<String> + Clone,
     {
-        let temp = line.into().clone();
+        let temp = line.into();
         temp.split_whitespace()
             .skip(1)
             .collect::<Vec<&str>>()

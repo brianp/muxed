@@ -63,7 +63,7 @@ pub struct SessionTarget<'a> {
 impl<'a> SessionTarget<'a> {
     pub fn new(session: &'a str) -> SessionTarget<'a> {
         SessionTarget {
-            session: session,
+            session,
             arg_string: session,
         }
     }

@@ -168,7 +168,7 @@ pub fn call<'a>(
     };
 
     if !daemonize {
-        remains.push(Attach::new(&project_name, root.clone()).into());
+        remains.push(Attach::new(&project_name, root).into());
     };
 
     Ok(remains)
@@ -193,7 +193,7 @@ where
 
     let path = match expand_path(&window["path"]) {
         Some(x) => Some(x),
-        None => inherited_path.clone(),
+        None => inherited_path,
     };
 
     for (i, pane) in panes.iter().enumerate() {

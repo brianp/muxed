@@ -11,7 +11,7 @@ use args::Args;
 use dirs::home_dir;
 use std::path::PathBuf;
 
-static MUXED_FOLDER: &'static str = "muxed";
+static MUXED_FOLDER: &str = "muxed";
 
 pub fn exec(args: Args) -> Result<(), String> {
     // FIXME: If -p flag isn't set there's no default?

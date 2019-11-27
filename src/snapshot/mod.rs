@@ -10,7 +10,7 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
 
-static MUXED_FOLDER: &'static str = "muxed";
+static MUXED_FOLDER: &str = "muxed";
 
 /// The main execution method.
 /// Accepts two arguments. -n for the name of the project file and -t to target

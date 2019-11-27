@@ -7,12 +7,12 @@ use std::process::{Command, Output};
 
 // Come back and question the accuracy of windows without names
 // that have active, or previous window designations.
-static NAME_REGEX: &'static str = r":\s(\w*)[$\*-]?\s+\(";
-static ACTIVE_REGEX: &'static str = r"\s.*(\*)\s";
-static LAYOUT_REGEX: &'static str = r"\s\[layout\s(.*)\]";
+static NAME_REGEX: &str = r":\s(\w*)[$\*-]?\s+\(";
+static ACTIVE_REGEX: &str = r"\s.*(\*)\s";
+static LAYOUT_REGEX: &str = r"\s\[layout\s(.*)\]";
 
 // Example format: "2: vim* (1 panes) [layout b5be,173x42,0,0,1]"
-static LIST_FORMAT: &'static str = "'#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) [layout #{window_layout}]'";
+static LIST_FORMAT: &str = "'#{window_index}: #{window_name}#{?window_active,*, } (#{window_panes} panes) [layout #{window_layout}]'";
 
 #[derive(Debug, Deserialize)]
 pub struct Window {

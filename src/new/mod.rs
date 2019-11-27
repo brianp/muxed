@@ -20,8 +20,8 @@ use std::io::Read;
 use std::io::Write;
 use std::path::PathBuf;
 
-static TEMPLATE: &'static str = include_str!("template.yml");
-static MUXED_FOLDER: &'static str = "muxed";
+static TEMPLATE: &str = include_str!("template.yml");
+static MUXED_FOLDER: &str = "muxed";
 
 /// The main execution method.
 /// Accept the name of a project to create a configuration file in the

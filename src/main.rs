@@ -38,7 +38,7 @@ macro_rules! try_or_err (
     })
 );
 
-static USAGE: &'static str = "
+static USAGE: &str = "
 Usage:
     muxed [options] <project>
     muxed new [options] <project>
