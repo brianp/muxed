@@ -1,4 +1,4 @@
-.PHONY : build cargo explain run start stop
+.PHONY : build cargo explain fmt run start stop
 .DEFAULT_GOAL := start
 
 local_path := $(shell pwd)
@@ -26,6 +26,9 @@ cargo:
 explain:
 	${docker_exec} rustc --explain ${err}
 
+fmt:
+	${docker_exec} cargo fix -Z unstable-options --clippy --target ${target}
+
 run:
 	${docker_exec} ${cmd}
 
@@ -39,6 +42,7 @@ help:
 	@echo build: build docker image
 	@echo cargo: run cargo commands inside development container
 	@echo explain: use the rustc --explain command
+	@echo fmt: run cargo autofix
 	@echo run: run any command inside the development container
 	@echo start: run the docker development container
 	@echo stop: stop the running development container
