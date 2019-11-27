@@ -6,7 +6,6 @@
 use dirs::home_dir;
 use load::command::{Attach, Commands};
 use load::tmux::has_session;
-use load::tmux::target::*;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]
@@ -81,10 +80,10 @@ fn homedir() -> Result<PathBuf, String> {
 /// session is not active return None and let the app carry on.
 pub fn session_exists(project_name: &str) -> Option<Commands> {
     if has_session(project_name).success() {
-        Some(Commands::Attach(Attach {
-            name: SessionTarget::new(&project_name),
-            root_path: None,
-        }))
+        Some(Attach::new(
+            &project_name,
+            None,
+        ).into())
     } else {
         None
     }

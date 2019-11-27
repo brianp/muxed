@@ -65,7 +65,7 @@ pub fn call<'a>(
                     if v.as_hash().is_some() {
                         let path = match expand_path(&v["path"]) {
                             Some(x) => Some(x),
-                            None => root.clone(),
+                            None => root.clone()
                         };
 
                         commands.push(Window::new(
@@ -139,7 +139,7 @@ pub fn call<'a>(
     if let Commands::Window(ref w) = &first {
         remains.insert(
             0,
-            Session::new(&project_name, w.name.clone(), root.clone()).into(),
+            Session::new(&project_name, Rc::clone(&w.name), root.clone()).into(),
         );
 
         if let Some(path) = &w.path {
@@ -181,7 +181,7 @@ fn pane_matcher<'a, T>(
     target: &WindowTarget,
     common_commands: T,
     tmux_config: &Config,
-    inherited_path: Option<PathBuf>,
+    inherited_path: Option<Rc<PathBuf>>,
 ) -> Result<Vec<Commands<'a>>, String>
 where
     T: Fn(Target) -> Vec<Commands<'a>>,
@@ -193,7 +193,7 @@ where
 
     let path = match expand_path(&window["path"]) {
         Some(x) => Some(x),
-        None => inherited_path,
+        None => inherited_path.clone(),
     };
 
     for (i, pane) in panes.iter().enumerate() {
@@ -256,16 +256,18 @@ fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
     }
 }
 
-fn expand_path(node: &Yaml) -> Option<PathBuf> {
+fn expand_path(node: &Yaml) -> Option<Rc<PathBuf>> {
     match node.as_str() {
         Some(string) => {
-            if string.contains("~/") {
-                let home = home_dir().expect("Home dir could not be expanded");
-                let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
-                Some(path)
-            } else {
-                Some(PathBuf::from(string))
-            }
+            Some(
+              if string.contains("~/") {
+                  let home = home_dir().expect("Home dir could not be expanded");
+                  let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
+                  Rc::new(path)
+              } else {
+                  Rc::new(PathBuf::from(string))
+              }
+            )
         }
         None => None,
     }
@@ -793,7 +795,7 @@ windows:
     let home = dirs::home_dir().unwrap();
     let path = PathBuf::from("JustPlainSimple Technologies Inc./financials/ledgers");
 
-    assert_eq!(root.root_path, Some(home.join(path)),)
+    assert_eq!(root.root_path, Some(Rc::new(home.join(path))))
 }
 
 #[test]

@@ -24,11 +24,11 @@ pub trait Command {
 pub struct Session<'a> {
     pub target: SessionTarget<'a>,
     pub window_name: Rc<String>,
-    pub root_path: Option<PathBuf>,
+    pub root_path: Option<Rc<PathBuf>>,
 }
 
 impl<'a> Session<'a> {
-    pub fn new(name: &'a str, window_name: Rc<String>, root_path: Option<PathBuf>) -> Session<'a> {
+    pub fn new(name: &'a str, window_name: Rc<String>, root_path: Option<Rc<PathBuf>>) -> Session<'a> {
         Session {
             target: SessionTarget::new(name),
             window_name,
@@ -51,7 +51,8 @@ impl<'a> Command for Session<'a> {
 
 /// The Window command is used to identify every new window opened in the tmux
 /// session.
-/// `session_name`: The name of the session.
+/// `session_name`: The name of the session followed by a ':' to state we want
+/// to open a new window in the next open index.
 /// `name`: The named window to be opened.
 /// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
 /// `-c` arguement.
@@ -59,12 +60,12 @@ impl<'a> Command for Session<'a> {
 pub struct Window<'a> {
     pub session_name: &'a str,
     pub name: Rc<String>,
-    pub path: Option<PathBuf>,
+    pub path: Option<Rc<PathBuf>>,
     pub session_name_arg: String
 }
 
 impl<'a> Window<'a> {
-    pub fn new(session_name: &'a str, name: Rc<String>, path: Option<PathBuf>) -> Window<'a> {
+    pub fn new(session_name: &'a str, name: Rc<String>, path: Option<Rc<PathBuf>>) -> Window<'a> {
         let mut name_arg: String = String::from(session_name);
         name_arg.push(':');
 
@@ -96,11 +97,11 @@ impl<'a> Command for Window<'a> {
 #[derive(Debug, Clone)]
 pub struct Split {
     pub target: PaneTarget,
-    pub path: Option<PathBuf>,
+    pub path: Option<Rc<PathBuf>>,
 }
 
 impl Split {
-    pub fn new(target: PaneTarget, path: Option<PathBuf>) -> Split {
+    pub fn new(target: PaneTarget, path: Option<Rc<PathBuf>>) -> Split {
         Split {
             target,
             path,
@@ -177,11 +178,11 @@ impl Command for SendKeys {
 #[derive(Debug, Clone)]
 pub struct Attach<'a> {
     pub name: SessionTarget<'a>,
-    pub root_path: Option<PathBuf>,
+    pub root_path: Option<Rc<PathBuf>>,
 }
 
 impl<'a> Attach<'a> {
-    pub fn new(name: &'a str, root_path: Option<PathBuf>) -> Attach<'a> {
+    pub fn new(name: &'a str, root_path: Option<Rc<PathBuf>>) -> Attach<'a> {
         Attach {
             name: SessionTarget::new(name),
             root_path,
