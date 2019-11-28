@@ -1,6 +1,6 @@
 [package]
 name = "muxed"
-version = "0.7.0-development"
+version = "0.7.0"
 authors = ["Brian Pearce"]
 
 [workspace]

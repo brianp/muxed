@@ -1,30 +1,29 @@
 <a name="0.7.0"></a>
-## 0.7.0 (2019-04-28)
-
-#### Improvements
-
-* **Command:**
-  *  Fix root directory for new sessions ([d52cba96](d52cba96))
-  *  Begin trait based Command system ([65223007](65223007))
-  *  Add Window and Split to Commands ([94a46b75](94a46b75))
-* **Paths:**  Assign proper paths when possible ([8262d695](8262d695))
-* **Root paths:**  New window path reliability ([c9c979ea](c9c979ea))
-* **Default path:**  Set default path on the session ([4460f026](4460f026))
-
-#### Documentation
-
-*   Fixup minor errors ([2a035b27](2a035b27))
-*   Move root docs back to project root ([8f78742a](8f78742a))
-* **Commands:**  Add docs to new commands ([669b18dd](669b18dd))
-* **Readme:**  Update the usage ([07b9618f](07b9618f))
-
-#### Features
-
-* **Window Paths:**  Add support for window paths ([f52438fc](f52438fc))
+## 0.7.0 (2019-11-28)
 
 #### Bug Fixes
 
-* **pane-index:**  Use pane-base-index properly ([4b9ee44a](4b9ee44a))
+  *  Use pane-base-index properly ([4b9ee44a](4b9ee44a))
+  *  Fix root directory for new sessions ([d52cba96](d52cba96))
+
+#### Features
+
+  *  Add support for window paths ([f52438fc](f52438fc))
+
+#### Improvements
+
+  *  Begin trait based Command system ([65223007](65223007))
+  *  Set default path on the session ([4460f026](4460f026))
+  *  Major internal refactoring of type
+  *  Restructured code into workspaces
+
+#### Documentation
+
+  *  Version bump to 0.7.0 ([19b44ef5](19b44ef5))
+  *  Fixup minor errors ([2a035b27](2a035b27))
+  *  Move root docs back to project root ([8f78742a](8f78742a))
+  *  Update the usage ([07b9618f](07b9618f))
+
 
 <a name="0.6.0"></a>
 ## 0.6.0 (2017-03-08)
