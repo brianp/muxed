@@ -20,3 +20,4 @@ ENV LC_ALL en_US.UTF-8
 
 RUN rustup component add rustfmt
 RUN rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
+RUN cargo install clog-cli
