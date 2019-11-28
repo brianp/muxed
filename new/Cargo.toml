@@ -2,10 +2,14 @@
 name = "new"
 version = "0.7.0-development"
 authors = ["Brian Pearce"]
+publish = false
+
+[lib]
+doctest = false
 
 [dependencies]
-common          = { path = "../common" }
-dirs            = "1.0.5"
+common = { path = "../common" }
+dirs   = "1.0.5"
 
 [dev-dependencies]
-rand      = "0.3.15"
+rand   = "0.3.15"

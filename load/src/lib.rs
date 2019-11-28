@@ -1,6 +1,8 @@
 extern crate dirs;
 extern crate libc;
 extern crate yaml_rust;
+#[cfg(test)]
+extern crate rand;
 
 extern crate common;
 
@@ -8,10 +10,10 @@ pub mod command;
 pub mod project;
 pub mod tmux;
 
-use self::command::Commands;
-use self::project::parser;
+use command::Commands;
+use project::parser;
 use common::{args, first_run}; 
-use self::tmux::config::Config;
+use tmux::config::Config;
 use args::Args;
 
 #[cfg(not(test))]

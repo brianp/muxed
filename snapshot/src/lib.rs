@@ -4,6 +4,8 @@ extern crate dirs;
 extern crate regex;
 extern crate serde;
 extern crate serde_yaml;
+#[cfg(test)]
+extern crate rand;
 
 pub mod capture;
 pub mod tmux;

@@ -12,19 +12,15 @@ members = [
 ]
 
 [dependencies]
-common          = { path = "./common" }
-load            = { path = "./load" }
-new             = { path = "./new" }
-snapshot        = { path = "./snapshot" }
-dirs            = "1.0.5"
-docopt          = "0.7"
-libc            = "0.2.21"
-regex           = "0.2.1"
-rustc-serialize = "0.3"
-serde           = "0.8.18"
-serde_derive    = "0.8.18"
-serde_yaml      = "0.5"
-yaml-rust       = { version = "0.3.2", default-features = false }
+common   = { path = "./common" }
+load     = { path = "./load" }
+new      = { path = "./new" }
+snapshot = { path = "./snapshot" }
+docopt   = "0.7"
 
 [dev-dependencies]
+dirs      = "1.0.5"
+libc      = "0.2.21"
 rand      = "0.3.15"
+regex     = "0.2.1"
+yaml-rust = { version = "0.3.2", default-features = false }
