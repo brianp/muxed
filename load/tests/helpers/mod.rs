@@ -1,5 +1,6 @@
 //! The integration suite helpers.
 
+use common::args::Args;
 use regex::Regex;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -24,19 +25,19 @@ pub fn list_windows(target: &str) -> String {
     String::from_utf8_lossy(&output.stdout).into_owned()
 }
 
-pub fn open_muxed(project: &str, project_root: &Path)  {
-    println!("root: {}", project_root.display());
-    let output = Command::new("./target/debug/muxed")
-        .arg("-d")
-        .arg("-p")
-        .arg(format!("{}", project_root.display()))
-        .arg(project)
-        .output()
-        .unwrap_or_else(|e| panic!("failed to execute process: {}", e));
+pub fn open_muxed(project: &str, project_root: &Path) -> Result<(), String>  {
+    let args = Args {
+        flag_d: true,
+        flag_v: false,
+        flag_f: false,
+        flag_p: Some(format!("{}", project_root.display())),
+        flag_t: None,
+        arg_project: project.to_string(),
+        cmd_new: false,
+        cmd_snapshot: false,
+    };
 
-    println!("status: {}", output.status);
-    println!("stdout: {}", String::from_utf8_lossy(&output.stdout));
-    println!("stderr: {}", String::from_utf8_lossy(&output.stderr));
+    load::exec(args)
 }
 
 pub fn kill_session(target: &str)  {
