@@ -1,4 +1,4 @@
-.PHONY : build cargo explain fmt run start stop
+.PHONY : build cargo explain fmt release run start stop
 .DEFAULT_GOAL := start
 
 local_path := $(shell pwd)
@@ -31,6 +31,9 @@ fmt:
 
 run:
 	${docker_exec} ${cmd}
+
+release:
+	${docker_exec} cargo build --release --target ${target}
 
 start:
 	docker run -d -it -v "${local_path}:/usr/src/" --name ${docker_instance_name} --rm ${repo_name}
