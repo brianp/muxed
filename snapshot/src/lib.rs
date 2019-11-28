@@ -1,11 +1,20 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
+extern crate common;
+extern crate dirs;
+extern crate regex;
+extern crate serde;
+extern crate serde_yaml;
+
 pub mod capture;
 pub mod tmux;
 
-use args::Args;
+#[macro_use]
+extern crate serde_derive;
+
+use common::args::Args;
+use common::first_run::check_first_run;
 #[cfg(not(test))]
 use dirs::home_dir;
-use first_run::check_first_run;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;

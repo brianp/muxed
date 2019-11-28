@@ -1,26 +1,19 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-extern crate dirs;
 extern crate docopt;
-extern crate libc;
 extern crate regex;
 extern crate rustc_serialize;
 extern crate serde;
 extern crate serde_yaml;
 extern crate yaml_rust;
 
+extern crate common;
+extern crate load;
+extern crate new;
+extern crate snapshot;
 #[cfg(test)]
 extern crate rand;
 
-#[macro_use]
-extern crate serde_derive;
-
-mod args;
-mod first_run;
-mod load;
-mod new;
-mod snapshot;
-
-use args::Args;
+use common::args::Args;
 use docopt::Docopt;
 use std::env;
 use std::process::exit;

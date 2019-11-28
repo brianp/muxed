@@ -1,7 +1,7 @@
 //! The structures used to manage commands sent over to tmux.
 
-use load::tmux::target::*;
-use load::tmux;
+use tmux::target::*;
+use tmux;
 use std::io;
 use std::path::PathBuf;
 use std::process::Output;

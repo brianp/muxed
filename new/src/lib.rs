@@ -1,10 +1,11 @@
 //! Muxednew. A Muxed project Template Generator
+extern crate common;
 extern crate dirs;
 #[cfg(test)]
 extern crate rand;
 
-use args::Args;
-use first_run::check_first_run;
+use common::args::Args;
+use common::first_run::check_first_run;
 
 #[cfg(not(test))]
 use dirs::home_dir;

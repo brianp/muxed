@@ -1,7 +1,7 @@
 use serde::ser::Serialize;
 use serde::Serializer;
-use snapshot::capture::retrieve_capture;
-use snapshot::tmux::pane::Pane;
+use capture::retrieve_capture;
+use tmux::pane::Pane;
 use std::io;
 use std::process::{Command, Output};
 

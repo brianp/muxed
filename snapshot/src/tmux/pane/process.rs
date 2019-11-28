@@ -1,4 +1,4 @@
-use snapshot::tmux::pane::pid::Pid;
+use tmux::pane::pid::Pid;
 use std::fmt;
 use std::process::Command;
 

@@ -1,0 +1,15 @@
+[package]
+name = "snapshot"
+version = "0.7.0-development"
+authors = ["Brian Pearce"]
+
+[dependencies]
+common          = { path = "../common" }
+dirs            = "1.0.5"
+regex           = "0.2.1"
+serde           = "0.8.18"
+serde_derive    = "0.8.18"
+serde_yaml      = "0.5"
+
+[dev-dependencies]
+rand      = "0.3.15"

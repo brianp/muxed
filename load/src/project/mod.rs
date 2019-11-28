@@ -4,8 +4,8 @@
 
 #[cfg(not(test))]
 use dirs::home_dir;
-use load::command::{Attach, Commands};
-use load::tmux::has_session;
+use command::{Attach, Commands};
+use tmux::has_session;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]

@@ -2,9 +2,9 @@
 //! processed later.
 
 use dirs::home_dir;
-use load::command::*;
-use load::tmux::config::Config;
-use load::tmux::target::*;
+use command::*;
+use tmux::config::Config;
+use tmux::target::*;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use yaml_rust::Yaml;

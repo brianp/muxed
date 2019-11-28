@@ -2,7 +2,7 @@
 //use tmux::window::Window;
 use serde::ser::Serialize;
 use serde::Serializer;
-use snapshot::capture::retrieve_capture;
+use capture::retrieve_capture;
 use std::io;
 use std::path::PathBuf;
 use std::process::{Command, Output};

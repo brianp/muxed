@@ -1,4 +1,4 @@
-use snapshot::tmux::window::Window;
+use tmux::window::Window;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {
