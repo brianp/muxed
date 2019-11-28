@@ -1,4 +1,4 @@
-.PHONY : build cargo explain fmt release run start stop
+.PHONY : build cargo explain fmt package release run start stop
 .DEFAULT_GOAL := start
 
 local_path := $(shell pwd)
@@ -28,6 +28,9 @@ explain:
 
 fmt:
 	${docker_exec} cargo fix -Z unstable-options --clippy --target ${target}
+
+package:
+	${docker_exec} tar -cvzf muxed-$(shell git tag  | grep -E '^[0-9]' | sort -V | tail -1)-${target}.tar.gz -C ./target/${target}/release/ muxed
 
 run:
 	${docker_exec} ${cmd}
