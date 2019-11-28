@@ -1,8 +1,13 @@
 language: rust
 cache: cargo
 
+git:
+  depth: 3
+
 rust:
   - nightly
+
+script: cargo test --workspace
 
 matrix:
   allow_failures:
