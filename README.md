@@ -4,14 +4,17 @@ Muxed - “Another TMUX project manager”
 
 Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
-## Muxed Tools
+## Muxed
 
-**muxed**: Provides the functionality for opening and parsing your project configs to
+**Muxed**: Provides the functionality for creating, opening and parsing your project configs to
 launch a TMUX session.
+
+**Snapshot**: __Experimental__ : Create a config file based on a running tmux
+session.
 
 ## Installation
 
-### Download:
+### Download a release:
 
 See the [releases](https://github.com/brianp/muxed/releases) page for muxed packages.
 Download and untar the package as desired. The complete package contains
@@ -24,7 +27,16 @@ $ tar -xvzf muxed-VERSION-SYSTEM.tar.gz
 x muxed
 $ mv muxed /usr/local/bin
 $ muxed --help
-$ muxed my_project
+$ muxed my_new_project
+```
+
+### From Homebrew taps
+
+This will add a tap to install a pre-compiled muxed bin.
+
+```shell
+$ brew tap brianp/homebrew-muxed
+$ brew install muxed_bin
 ```
 
 ### From source:
@@ -36,7 +48,7 @@ Clone this repo. Then run cargo to build the source, and again use cargo to run 
 $ git clone git@github.com:brianp/muxed.git
 $ cargo build
 $ cargo run -- --help
-$ cargo run my_project
+$ cargo run my_new_project
 ```
 
 ## Setup
