@@ -32,7 +32,7 @@ $ muxed my_new_project
 
 ### From Homebrew taps
 
-This will add a tap to install a pre-compiled muxed bin.
+This will add a [tap](https://github.com/brianp/homebrew-muxed) to install a pre-compiled Muxed bin.
 
 ```shell
 $ brew tap brianp/homebrew-muxed
@@ -48,7 +48,7 @@ Clone this repo. Then run cargo to build the source, and again use cargo to run 
 $ git clone git@github.com:brianp/muxed.git
 $ cargo build
 $ cargo run -- --help
-$ cargo run my_new_project
+$ cargo run my_project
 ```
 
 ## Setup
