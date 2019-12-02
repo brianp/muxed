@@ -2,10 +2,11 @@ FROM rustlang/rust:nightly
 
 WORKDIR /usr/src
 RUN USER=root cargo init
-COPY Cargo.toml .
-COPY Cargo.lock .
 
-RUN cargo fetch
+# This is a dummy build to get the dependencies cached
+COPY . .
+RUN cargo fetch --target x86_64-unknown-linux-gnu
+RUN rm -rf ./*
 
 RUN apt-get update && \
       apt install -y tmux && \
