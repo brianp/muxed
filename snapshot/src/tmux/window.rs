@@ -19,18 +19,18 @@ pub struct Window {
     pub active: bool,
     pub layout: String,
     pub name: String,
-    pub panes: Option<Vec<Pane>>,
+    pub panes: Vec<Pane>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WindowInner {
     pub active: bool,
     pub layout: String,
-    pub panes: Option<Vec<Pane>>,
+    pub panes: Vec<Pane>,
 }
 
 impl Window {
-    pub fn new<S>(active: bool, layout: S, name: S, panes: Option<Vec<Pane>>) -> Window
+    pub fn new<S>(active: bool, layout: S, name: S, panes: Vec<Pane>) -> Window
     where
         S: Into<String>,
     {
@@ -43,7 +43,7 @@ impl Window {
     }
 
     pub fn from_window(panes: Vec<Pane>, w: Window) -> Window {
-        Window::new(w.active, w.layout, w.name, Some(panes))
+        Window::new(w.active, w.layout, w.name, panes)
     }
 
     pub fn from_line(line: &str) -> Option<Window> {
@@ -59,7 +59,7 @@ impl Window {
             None => return None,
         };
 
-        Some(Window::new(active, layout, name, None))
+        Some(Window::new(active, layout, name, vec![]))
     }
 
     pub fn window_list(target: &str) -> Result<Output, io::Error> {

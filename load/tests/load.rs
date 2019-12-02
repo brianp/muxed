@@ -58,7 +58,7 @@ mod test {
             kill_session(project_name);
         }
     
-        fn test_with_contents(contents: &[u8]) -> TmuxSession {
+        fn test_with_contents(contents: &[u8]) -> snapshot::tmux::session::Session {
             let (project_name, config_path) = setup(contents);
             open_muxed(&project_name, config_path.parent().unwrap());
     
@@ -72,7 +72,7 @@ mod test {
             send_keys(&project_name, &exec);
             wait_on(&completed);
     
-            let session = TmuxSession::from_string(&list_windows(&project_name.to_string()));
+            let session = tmux::inspect(&project_name).unwrap();
             cleanup(&project_name, &config_path);
             session
         }
@@ -80,88 +80,88 @@ mod test {
         #[test]
         fn opens_3_windows_from_array() {
             let contents = b"---
-    windows: ['ls', 'vi', 'git']
-    ";
+windows: ['ls', 'vi', 'git']
+";
             let session = test_with_contents(contents);
-            assert_eq!(session.num_of_windows, 3)
+            assert_eq!(session.windows.len(), 3)
         }
     
         #[test]
         fn opens_2_windows() {
             let contents = b"---
-    windows:
-      - editor:
-          layout: 'main-vertical'
-          panes: ['ls', 'vi']
-      - stuff: ''
-    ";
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['ls', 'vi']
+  - stuff: ''
+";
             let session = test_with_contents(contents);
-            assert_eq!(session.num_of_windows, 2)
+            assert_eq!(session.windows.len(), 2)
         }
     
         #[test]
         fn opens_3_windows_with_integer_names() {
             let contents = b"---
-    windows: [1, 'ls', 3]
-    ";
+windows: [1, 'ls', 3]
+";
             let session = test_with_contents(contents);
-            assert_eq!(session.num_of_windows, 3)
+            assert_eq!(session.windows.len(), 3)
         }
     
         #[test]
         fn single_window_has_2_panes() {
             let contents = b"---
-    windows:
-      - editor:
-          layout: 'main-vertical'
-          panes: ['ls', 'vi']
-    ";
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['ls', 'vi']
+";
             let session = test_with_contents(contents);
-            let num = session.windows["editor"].panes.as_usize().unwrap();
-            assert_eq!(num, 2)
+            let window = session.find_window("editor").unwrap();
+            assert_eq!(window.panes.len(), 2)
         }
     
         #[test]
         fn multiple_windows_with_panes() {
             let contents = b"---
-    windows:
-      - editor:
-          layout: 'main-vertical'
-          panes: ['ls', 'vi']
-      - tests:
-          layout: 'main-vertical'
-          panes: ['ls', 'vi', 'ls']
-    ";
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes: ['ls', 'vi']
+  - tests:
+      layout: 'main-vertical'
+      panes: ['ls', 'vi', 'ls']
+";
             let session = test_with_contents(contents);
-            let num = session.windows["editor"].panes.as_usize().unwrap();
-            let num1 = session.windows["tests"].panes.as_usize().unwrap();
-            assert_eq!(num, 2);
-            assert_eq!(num1, 3)
+            let editor_window = session.find_window("editor").unwrap();
+            let tests_window = session.find_window("tests").unwrap();
+            assert_eq!(editor_window.panes.len(), 2);
+            assert_eq!(tests_window.panes.len(), 3)
         }
     
         #[test]
         fn window_with_empty_command_is_valid() {
             let contents = b"---
-    windows:
-      - editor:
-    ";
+windows:
+  - editor:
+";
             let session = test_with_contents(contents);
-            assert_eq!(session.num_of_windows, 1)
+            assert_eq!(session.windows.len(), 1)
         }
     
         #[test]
         fn panes_with_empty_commands_are_valid() {
             let contents = b"---
-    windows:
-      - editor:
-          layout: 'main-vertical'
-          panes:
-            -
-            -
-    ";
+windows:
+  - editor:
+      layout: 'main-vertical'
+      panes:
+        -
+        -
+";
             let session = test_with_contents(contents);
-            let num = session.windows["editor"].panes.as_usize().unwrap();
-            assert_eq!(num, 2)
+            let window = session.find_window("editor").unwrap();
+            assert_eq!(window.panes.len(), 2)
         }
     
         #[test]
@@ -171,242 +171,237 @@ mod test {
                 println!("{:?}", fs::create_dir(&dir))
             };
             let contents = b"---
-    root: /tmp/Directory With Spaces/
-    windows:
-      - editor: ''
-    ";
+root: /tmp/Directory With Spaces/
+windows:
+  - editor: ''
+";
             let session = test_with_contents(contents);
-            let pane_current_path = session.windows["editor"]
-                .pane_current_path
-                .as_str()
-                .unwrap();
+            let window = session.find_window("editor").unwrap();
+            let pane = &window.panes[0];
+
             let _ = fs::remove_dir(dir);
             // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
             // resulting in `pane_current_path` being `/private/tmp/Direct…`
-            assert!(pane_current_path.contains("/tmp/Directory With Spaces"));
+            assert!(pane.path.to_str().unwrap().contains("/tmp/Directory With Spaces"));
         }
     
         #[test]
         fn expect_home_var_to_open_in_home_dir() {
             let contents = b"---
-    root: '$HOME'
-    windows:
-      - editor: ''
-    ";
+root: '$HOME'
+windows:
+  - editor: ''
+";
             let session = test_with_contents(contents);
-            let pane_current_path = session.windows["editor"]
-                .pane_current_path
-                .as_str()
-                .unwrap();
-            assert_eq!(Some(PathBuf::from(pane_current_path)), home_dir());
+            let window = session.find_window("editor").unwrap();
+            let pane = &window.panes[0];
+            assert_eq!(pane.path, home_dir().unwrap());
         }
     
         #[test]
         fn expect_tilde_slash_to_open_in_home_dir() {
             let contents = b"---
-    root: ~/
-    windows:
-      - editor: ''
-    ";
+root: ~/
+windows:
+  - editor: ''
+";
             let session = test_with_contents(contents);
-            let pane_current_path = session.windows["editor"]
-                .pane_current_path
-                .as_str()
-                .unwrap();
-            assert_eq!(Some(PathBuf::from(pane_current_path)), home_dir());
+            let window = session.find_window("editor").unwrap();
+            let pane = &window.panes[0];
+            assert_eq!(pane.path, home_dir().unwrap());
         }
-    
-        // TODO: Figure out why these hang in travis
-        //    #[test]
-        //    fn expect_window_path_to_take_priority() {
-        //        let dir = PathBuf::from("/tmp/special/");
-        //        if !dir.exists() {
-        //            println!("{:?}", fs::create_dir(&dir))
-        //        };
-        //        let contents = b"---
-        //root: ~/
-        //windows:
-        //  - editor:
-        //      panes:
-        //        - vi
-        //      path: /tmp/special/
-        //";
-        //        let session = test_with_contents(contents);
-        //        let pane_current_path = session.windows["editor"]
-        //            .pane_current_path
-        //            .as_str()
-        //            .unwrap();
-        //
-        //        assert_eq!(
-        //            PathBuf::from("/tmp/special/"),
-        //            PathBuf::from(pane_current_path)
-        //        );
-        //    }
-        //
-        //    #[test]
-        //    fn expect_root_path_on_default_session_window_when_not_specified() {
-        //        let contents = b"---
-        //root: ~/
-        //windows:
-        //  - editor:
-        //      panes:
-        //        - vi
-        //";
-        //        let session = test_with_contents(contents);
-        //        let pane_current_path = session.windows["editor"]
-        //            .pane_current_path
-        //            .as_str()
-        //            .unwrap();
-        //
-        //        assert_eq!(
-        //            home_dir(),
-        //            Some(PathBuf::from(pane_current_path))
-        //        );
-        //    }
-        //
-        //    #[test]
-        //    fn first_window_path_shouldnt_be_default_path() {
-        //        let contents = b"---
-        //root: ~/
-        //windows:
-        //  - editor:
-        //      panes:
-        //        - vi
-        //      path: /tmp/
-        //  - other: pwd
-        //";
-        //        let session = test_with_contents(contents);
-        //        let editor_current_path = session.windows["editor"]
-        //            .pane_current_path
-        //            .as_str()
-        //            .unwrap();
-        //
-        //        assert_eq!(
-        //            PathBuf::from("/var/log"),
-        //            PathBuf::from(editor_current_path)
-        //        );
-        //
-        //        let other_current_path = session.windows["other"]
-        //            .pane_current_path
-        //            .as_str()
-        //            .unwrap();
-        //
-        //        assert_eq!(
-        //            home_dir(),
-        //            Some(PathBuf::from(other_current_path))
-        //        );
-        //    }
-    
-        #[test]
-        fn expect_focus_on_the_first_window() {
-            let contents = b"---
-    windows: ['ssh', 'git']
-    ";
-            let session = test_with_contents(contents);
-            let window_active = session.window_active.as_str().unwrap();
-            assert_eq!(window_active, "ssh")
-        }
-    
-        #[test]
-        fn expect_pre_to_create_file() {
-            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-            let contents = format!(
-                "---
-    pre: touch {}
-    windows: ['ssh', 'git']
-    ",
-                file.display()
-            );
-            let _ = test_with_contents(contents.as_bytes());
-            assert!(file.exists());
-            let _ = fs::remove_file(file);
-        }
-    
-        #[test]
-        fn expect_pre_to_create_two_files() {
-            let file1 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-            let file2 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-            let contents = format!(
-                "---
-    pre:
-      - touch {}
-      - touch {}
-    windows: ['ssh', 'git']
-    ",
-                file1.display(),
-                file2.display()
-            );
-            let _ = test_with_contents(contents.as_bytes());
-            assert!(file1.exists());
-            assert!(file2.exists());
-            let _ = fs::remove_file(file1);
-            let _ = fs::remove_file(file2);
-        }
-    
-        #[test]
-        fn expect_pre_window_to_be_called_for_each_window() {
-            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-            let contents = format!(
-                "---
-    pre_window: echo 'pre_window' >> {}
-    windows: ['ssh', 'git']
-    ",
-                file.display()
-            );
-            let _ = test_with_contents(contents.as_bytes());
-            let mut f = File::open(&file).unwrap();
-            let mut s = String::new();
-            let _ = f.read_to_string(&mut s);
-            assert_eq!(s.lines().count(), 2);
-            let _ = fs::remove_file(&file);
-        }
-    
-        #[test]
-        fn expect_pre_window_to_be_called_twice_for_each_window() {
-            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-            let contents = format!(
-                "---
-    pre_window:
-     - echo 'pre_window' >> {}
-     - echo 'pre_window' >> {}
-    windows: ['ssh', 'git']
-    ",
-                file.display(),
-                file.display()
-            );
-            let _ = test_with_contents(contents.as_bytes());
-            let mut f = File::open(&file).unwrap();
-            let mut s = String::new();
-            let _ = f.read_to_string(&mut s);
-            assert_eq!(s.lines().count(), 4);
-            let _ = fs::remove_file(&file);
-        }
-    
-        #[test]
-        fn expect_session_name_brians_session() {
-            let contents = b"---
-    name: 'Brians Session'
-    windows: ['ssh', 'git']
-    ";
-            let session = test_with_contents(contents);
-            let name = session.name.as_str().unwrap();
-            assert_eq!(name, "Brians Session")
-        }
-    
-        // This test should exist but we currently don't do anything to list panes.
-        //    #[test]
-        //    fn expect_focus_on_the_top_pane() {
-        //        let contents = b"---
-        //windows:
-        //  - ssh:
-        //    layout: main-horizontal
-        //    panes:
-        //      - ''
-        //      - ''
-        //  - git: ''
-        //";
-        //        let session = test_with_contents(contents);
-        //        assert_eq!(session.pane_active, "ssh.0")
-        //    }
+//    
+//        // TODO: Figure out why these hang in travis
+//        //    #[test]
+//        //    fn expect_window_path_to_take_priority() {
+//        //        let dir = PathBuf::from("/tmp/special/");
+//        //        if !dir.exists() {
+//        //            println!("{:?}", fs::create_dir(&dir))
+//        //        };
+//        //        let contents = b"---
+//        //root: ~/
+//        //windows:
+//        //  - editor:
+//        //      panes:
+//        //        - vi
+//        //      path: /tmp/special/
+//        //";
+//        //        let session = test_with_contents(contents);
+//        //        let pane_current_path = session.windows["editor"]
+//        //            .pane_current_path
+//        //            .as_str()
+//        //            .unwrap();
+//        //
+//        //        assert_eq!(
+//        //            PathBuf::from("/tmp/special/"),
+//        //            PathBuf::from(pane_current_path)
+//        //        );
+//        //    }
+//        //
+//        //    #[test]
+//        //    fn expect_root_path_on_default_session_window_when_not_specified() {
+//        //        let contents = b"---
+//        //root: ~/
+//        //windows:
+//        //  - editor:
+//        //      panes:
+//        //        - vi
+//        //";
+//        //        let session = test_with_contents(contents);
+//        //        let pane_current_path = session.windows["editor"]
+//        //            .pane_current_path
+//        //            .as_str()
+//        //            .unwrap();
+//        //
+//        //        assert_eq!(
+//        //            home_dir(),
+//        //            Some(PathBuf::from(pane_current_path))
+//        //        );
+//        //    }
+//        //
+//        //    #[test]
+//        //    fn first_window_path_shouldnt_be_default_path() {
+//        //        let contents = b"---
+//        //root: ~/
+//        //windows:
+//        //  - editor:
+//        //      panes:
+//        //        - vi
+//        //      path: /tmp/
+//        //  - other: pwd
+//        //";
+//        //        let session = test_with_contents(contents);
+//        //        let editor_current_path = session.windows["editor"]
+//        //            .pane_current_path
+//        //            .as_str()
+//        //            .unwrap();
+//        //
+//        //        assert_eq!(
+//        //            PathBuf::from("/var/log"),
+//        //            PathBuf::from(editor_current_path)
+//        //        );
+//        //
+//        //        let other_current_path = session.windows["other"]
+//        //            .pane_current_path
+//        //            .as_str()
+//        //            .unwrap();
+//        //
+//        //        assert_eq!(
+//        //            home_dir(),
+//        //            Some(PathBuf::from(other_current_path))
+//        //        );
+//        //    }
+//    
+//        #[test]
+//        fn expect_focus_on_the_first_window() {
+//            let contents = b"---
+//    windows: ['ssh', 'git']
+//    ";
+//            let session = test_with_contents(contents);
+//            let window_active = session.window_active.as_str().unwrap();
+//            assert_eq!(window_active, "ssh")
+//        }
+//    
+//        #[test]
+//        fn expect_pre_to_create_file() {
+//            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+//            let contents = format!(
+//                "---
+//    pre: touch {}
+//    windows: ['ssh', 'git']
+//    ",
+//                file.display()
+//            );
+//            let _ = test_with_contents(contents.as_bytes());
+//            assert!(file.exists());
+//            let _ = fs::remove_file(file);
+//        }
+//    
+//        #[test]
+//        fn expect_pre_to_create_two_files() {
+//            let file1 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+//            let file2 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+//            let contents = format!(
+//                "---
+//    pre:
+//      - touch {}
+//      - touch {}
+//    windows: ['ssh', 'git']
+//    ",
+//                file1.display(),
+//                file2.display()
+//            );
+//            let _ = test_with_contents(contents.as_bytes());
+//            assert!(file1.exists());
+//            assert!(file2.exists());
+//            let _ = fs::remove_file(file1);
+//            let _ = fs::remove_file(file2);
+//        }
+//    
+//        #[test]
+//        fn expect_pre_window_to_be_called_for_each_window() {
+//            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+//            let contents = format!(
+//                "---
+//    pre_window: echo 'pre_window' >> {}
+//    windows: ['ssh', 'git']
+//    ",
+//                file.display()
+//            );
+//            let _ = test_with_contents(contents.as_bytes());
+//            let mut f = File::open(&file).unwrap();
+//            let mut s = String::new();
+//            let _ = f.read_to_string(&mut s);
+//            assert_eq!(s.lines().count(), 2);
+//            let _ = fs::remove_file(&file);
+//        }
+//    
+//        #[test]
+//        fn expect_pre_window_to_be_called_twice_for_each_window() {
+//            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+//            let contents = format!(
+//                "---
+//    pre_window:
+//     - echo 'pre_window' >> {}
+//     - echo 'pre_window' >> {}
+//    windows: ['ssh', 'git']
+//    ",
+//                file.display(),
+//                file.display()
+//            );
+//            let _ = test_with_contents(contents.as_bytes());
+//            let mut f = File::open(&file).unwrap();
+//            let mut s = String::new();
+//            let _ = f.read_to_string(&mut s);
+//            assert_eq!(s.lines().count(), 4);
+//            let _ = fs::remove_file(&file);
+//        }
+//    
+//        #[test]
+//        fn expect_session_name_brians_session() {
+//            let contents = b"---
+//    name: 'Brians Session'
+//    windows: ['ssh', 'git']
+//    ";
+//            let session = test_with_contents(contents);
+//            let name = session.name.as_str().unwrap();
+//            assert_eq!(name, "Brians Session")
+//        }
+//    
+//        // This test should exist but we currently don't do anything to list panes.
+//        //    #[test]
+//        //    fn expect_focus_on_the_top_pane() {
+//        //        let contents = b"---
+//        //windows:
+//        //  - ssh:
+//        //    layout: main-horizontal
+//        //    panes:
+//        //      - ''
+//        //      - ''
+//        //  - git: ''
+//        //";
+//        //        let session = test_with_contents(contents);
+//        //        assert_eq!(session.pane_active, "ssh.0")
+//        //    }
     }
 }

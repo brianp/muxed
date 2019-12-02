@@ -16,4 +16,8 @@ impl Session {
             windows,
         }
     }
+
+    pub fn find_window(&self, name: &str) -> Option<&Window> {
+        self.windows.iter().find(|&w| w.name == name)
+    }
 }
