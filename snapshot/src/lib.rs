@@ -7,7 +7,7 @@ extern crate serde_yaml;
 #[cfg(test)]
 extern crate rand;
 
-pub mod capture;
+mod capture;
 pub mod tmux;
 
 #[macro_use]

@@ -1,6 +1,8 @@
 //! The integration suite for inspecting sessions.
 
 extern crate common;
+extern crate snapshot;
+
 extern crate dirs;
 extern crate libc;
 extern crate load;
@@ -16,8 +18,9 @@ mod test {
         use dirs::home_dir;
         use helpers::*;
         use rand::random;
-        use std::fs;
+        use snapshot::tmux;
         use std::fs::File;
+        use std::fs;
         use std::io::prelude::*;
         use std::path::PathBuf;
         use std::str;
