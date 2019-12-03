@@ -27,16 +27,17 @@ explain:
 	${docker_exec} rustc --explain ${err}
 
 fmt:
-	${docker_exec} cargo fix -Z unstable-options --clippy --target ${target}
+	${docker_exec} cargo fix -Z unstable-options --clippy --target ${target} --allow-dirty; \
+	${docker_exec} cargo fmt
 
 package:
 	${docker_exec} tar -cvzf muxed-$(shell git tag  | grep -E '^[0-9]' | sort -V | tail -1)-${target}.tar.gz -C ./target/${target}/release/ muxed
 
-run:
-	${docker_exec} ${cmd}
-
 release:
 	${docker_exec} cargo build --release --target ${target}
+
+run:
+	${docker_exec} ${cmd}
 
 start:
 	docker run -d -it -v "${local_path}:/usr/src/" --name ${docker_instance_name} --rm ${repo_name}
@@ -48,7 +49,9 @@ help:
 	@echo build: build docker image
 	@echo cargo: run cargo commands inside development container
 	@echo explain: use the rustc --explain command
-	@echo fmt: run cargo autofix
+	@echo fmt: run cargo clippy and rustfmt
+	@echo package: bundle releases into compressed packages
+	@echo release: build release bin
 	@echo run: run any command inside the development container
 	@echo start: run the docker development container
 	@echo stop: stop the running development container
