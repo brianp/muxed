@@ -1,6 +1,6 @@
-use tmux::pane::pid::Pid;
 use std::fmt;
 use std::process::Command;
+use tmux::pane::pid::Pid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Process {

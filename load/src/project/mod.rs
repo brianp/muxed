@@ -2,10 +2,9 @@
 //! users home directory. Finding the desired config files, and reading the
 //! configs in.
 
+use command::{Attach, Commands};
 #[cfg(not(test))]
 use dirs::home_dir;
-use command::{Attach, Commands};
-use tmux::has_session;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]
@@ -13,6 +12,7 @@ use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
+use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
 
 pub mod parser;
@@ -80,10 +80,7 @@ fn homedir() -> Result<PathBuf, String> {
 /// session is not active return None and let the app carry on.
 pub fn session_exists(project_name: &str) -> Option<Commands> {
     if has_session(project_name).success() {
-        Some(Attach::new(
-            &project_name,
-            None,
-        ).into())
+        Some(Attach::new(&project_name, None).into())
     } else {
         None
     }

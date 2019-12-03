@@ -18,7 +18,7 @@ impl PaneTarget {
             session: session.to_string(),
             window: window.to_string(),
             pane_index,
-		        arg_string: format!("{}:{}.{}", session, window, pane_index),
+            arg_string: format!("{}:{}.{}", session, window, pane_index),
         }
     }
 }
@@ -42,7 +42,7 @@ impl WindowTarget {
         WindowTarget {
             session: session.to_string(),
             window: window.to_string(),
-		        arg_string: format!("{}:{}", session, window),
+            arg_string: format!("{}:{}", session, window),
         }
     }
 }
@@ -85,7 +85,7 @@ impl Target {
     pub fn arg_string(&self) -> &str {
         match *self {
             Target::PaneTarget(ref c) => &c.arg_string,
-            Target::WindowTarget(ref c) => &c.arg_string
+            Target::WindowTarget(ref c) => &c.arg_string,
         }
     }
 }

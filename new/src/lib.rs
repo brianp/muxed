@@ -74,10 +74,12 @@ fn write_template(template: &str, path: &PathBuf) -> Result<(), String> {
         .open(path)
         .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e))?;
 
-    file.write_all(template.as_bytes()).map_err(|e| format!(
-        "Could not write contents of template to the file {}. Error {}",
-        &path_str, e
-    ))?;
+    file.write_all(template.as_bytes()).map_err(|e| {
+        format!(
+            "Could not write contents of template to the file {}. Error {}",
+            &path_str, e
+        )
+    })?;
 
     file.sync_all()
         .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;

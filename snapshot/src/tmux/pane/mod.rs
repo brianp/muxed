@@ -1,8 +1,8 @@
 //use std::path::PathBuf;
 //use tmux::window::Window;
+use capture::retrieve_capture;
 use serde::ser::Serialize;
 use serde::Serializer;
-use capture::retrieve_capture;
 use std::io;
 use std::path::PathBuf;
 use std::process::{Command, Output};

@@ -24,20 +24,20 @@ mod test {
                 cmd_new: false,
                 cmd_snapshot: false,
             };
-    
+
             new::exec(args)
         }
 
         fn setup(project_name: &str) -> (PathBuf, PathBuf) {
             let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
             let project_path = PathBuf::from(&project_file);
-    
+
             let m = project_path.clone();
             let muxed_path = project_path.parent().unwrap();
             (m, muxed_path.to_path_buf())
         }
 
-        fn cleanup(config_path: &PathBuf)  {
+        fn cleanup(config_path: &PathBuf) {
             let _ = fs::remove_file(config_path);
             let _ = fs::remove_dir(config_path.parent().unwrap());
         }

@@ -1,11 +1,11 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
 extern crate common;
 extern crate dirs;
+#[cfg(test)]
+extern crate rand;
 extern crate regex;
 extern crate serde;
 extern crate serde_yaml;
-#[cfg(test)]
-extern crate rand;
 
 mod capture;
 pub mod tmux;
@@ -75,11 +75,12 @@ where
         .open(path)
         .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e))?;
 
-    file.write_all(template.into().as_bytes())
-        .map_err(|e| format!(
+    file.write_all(template.into().as_bytes()).map_err(|e| {
+        format!(
             "Could not write contents of template to the file {}. Error {}",
             &path_str, e
-        ))?;
+        )
+    })?;
 
     file.sync_all()
         .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;

@@ -1,12 +1,12 @@
 //! The structures used to manage commands sent over to tmux.
 
-use tmux::target::*;
-use tmux;
 use std::io;
 use std::path::PathBuf;
 use std::process::Output;
 use std::rc::Rc;
 use std::{process, str};
+use tmux;
+use tmux::target::*;
 
 pub trait Command {
     fn call(&self) -> Result<Output, io::Error> {
@@ -61,7 +61,7 @@ pub struct Window<'a> {
     pub session_name: &'a str,
     pub name: Rc<String>,
     pub path: Option<Rc<PathBuf>>,
-    pub session_name_arg: String
+    pub session_name_arg: String,
 }
 
 impl<'a> Window<'a> {
@@ -73,7 +73,7 @@ impl<'a> Window<'a> {
             session_name,
             name,
             path,
-            session_name_arg: name_arg
+            session_name_arg: name_arg,
         }
     }
 }
@@ -102,10 +102,7 @@ pub struct Split {
 
 impl Split {
     pub fn new(target: PaneTarget, path: Option<Rc<PathBuf>>) -> Split {
-        Split {
-            target,
-            path,
-        }
+        Split { target, path }
     }
 }
 
@@ -132,10 +129,7 @@ pub struct Layout {
 
 impl Layout {
     pub fn new(target: WindowTarget, layout: String) -> Layout {
-        Layout {
-            target,
-            layout,
-        }
+        Layout { target, layout }
     }
 }
 
@@ -158,10 +152,7 @@ pub struct SendKeys {
 
 impl SendKeys {
     pub fn new(target: Target, exec: String) -> SendKeys {
-        SendKeys {
-            target,
-            exec
-        }
+        SendKeys { target, exec }
     }
 }
 
@@ -216,9 +207,7 @@ pub struct SelectWindow {
 
 impl SelectWindow {
     pub fn new(target: WindowTarget) -> SelectWindow {
-        SelectWindow {
-            target,
-        }
+        SelectWindow { target }
     }
 }
 
@@ -237,9 +226,7 @@ pub struct SelectPane {
 
 impl SelectPane {
     pub fn new(target: PaneTarget) -> SelectPane {
-        SelectPane {
-            target,
-        }
+        SelectPane { target }
     }
 }
 
@@ -259,9 +246,7 @@ pub struct Pre {
 
 impl Pre {
     pub fn new(exec: String) -> Pre {
-        Pre {
-            exec,
-        }
+        Pre { exec }
     }
 }
 

@@ -1,12 +1,12 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
 //! processed later.
 
-use dirs::home_dir;
 use command::*;
-use tmux::config::Config;
-use tmux::target::*;
+use dirs::home_dir;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
+use tmux::config::Config;
+use tmux::target::*;
 use yaml_rust::Yaml;
 
 #[cfg(test)]
@@ -43,10 +43,7 @@ pub fn call<'a>(
         if let Some(p) = pre_window.clone() {
             for v in &p {
                 if let Some(ref r) = *v {
-                    commands2.push(SendKeys::new(
-                        target.clone(),
-                        r.clone()
-                    ).into());
+                    commands2.push(SendKeys::new(target.clone(), r.clone()).into());
                 };
             }
         };
@@ -65,18 +62,22 @@ pub fn call<'a>(
                     if v.as_hash().is_some() {
                         let path = match expand_path(&v["path"]) {
                             Some(x) => Some(x),
-                            None => root.clone()
+                            None => root.clone(),
                         };
 
-                        commands.push(Window::new(
-                            &project_name,
-                            Rc::new(k.as_str().expect("window should have a name").to_string()),
-                            path.clone()
-                        ).into());
+                        commands.push(
+                            Window::new(
+                                &project_name,
+                                Rc::new(k.as_str().expect("window should have a name").to_string()),
+                                path.clone(),
+                            )
+                            .into(),
+                        );
 
-                        let target = WindowTarget::new(project_name, k.as_str().ok_or_else(||
-                            { "no target specified" }
-                        )?);
+                        let target = WindowTarget::new(
+                            project_name,
+                            k.as_str().ok_or_else(|| "no target specified")?,
+                        );
                         commands.append(&mut pane_matcher(
                             v,
                             &target,
@@ -100,31 +101,29 @@ pub fn call<'a>(
                         // SendKeys for the exec command
                         if let Some(ex) = v.as_str() {
                             if !ex.is_empty() {
-                                commands.push(SendKeys::new(
-                                    Target::WindowTarget(target.clone()),
-                                    v.as_str().unwrap().to_string()
-                                ).into());
+                                commands.push(
+                                    SendKeys::new(
+                                        Target::WindowTarget(target.clone()),
+                                        v.as_str().unwrap().to_string(),
+                                    )
+                                    .into(),
+                                );
                             };
                         }
                     }
                 }
             }
             Yaml::String(ref s) => {
-                commands.push(Window::new(
-                    &project_name,
-                    Rc::new(s.to_string()),
-                    root.clone()
-                ).into());
+                commands
+                    .push(Window::new(&project_name, Rc::new(s.to_string()), root.clone()).into());
 
                 let target = WindowTarget::new(&project_name, &s);
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             Yaml::Integer(ref s) => {
-                commands.push(Window::new(
-                    &project_name,
-                    Rc::new(format!("{}", s)),
-                    root.clone()
-                ).into());
+                commands.push(
+                    Window::new(&project_name, Rc::new(format!("{}", s)), root.clone()).into(),
+                );
 
                 let target = WindowTarget::new(&project_name, &s.to_string());
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
@@ -147,13 +146,21 @@ pub fn call<'a>(
                 1,
                 SendKeys::new(
                     Target::WindowTarget(WindowTarget::new(&project_name, &w.name)),
-                    format!("cd {}", path.display())
-                ).into()
+                    format!("cd {}", path.display()),
+                )
+                .into(),
             );
         }
 
         remains.push(SelectWindow::new(WindowTarget::new(&project_name, &w.name)).into());
-        remains.push(SelectPane::new(PaneTarget::new(&project_name, &w.name, tmux_config.base_index)).into());
+        remains.push(
+            SelectPane::new(PaneTarget::new(
+                &project_name,
+                &w.name,
+                tmux_config.base_index,
+            ))
+            .into(),
+        );
     };
 
     // FIXME: Due to inserting the Pre commands into the 0 position in the stack,
@@ -197,14 +204,15 @@ where
     };
 
     for (i, pane) in panes.iter().enumerate() {
-        let pt = PaneTarget::new(&target.session, &target.window, i + tmux_config.pane_base_index);
+        let pt = PaneTarget::new(
+            &target.session,
+            &target.window,
+            i + tmux_config.pane_base_index,
+        );
         // For every pane, we need one less split.
         // ex. An existing window to become 2 panes, needs 1 split.
         if i < (panes.len() - 1) {
-            commands.push(Split::new(
-                pt.clone(),
-                path.clone()
-            ).into());
+            commands.push(Split::new(pt.clone(), path.clone()).into());
         };
 
         // Call the common_commands clojure to execute `cd` and `pre_window` options in
@@ -215,10 +223,7 @@ where
         // complete.
         if let Some(p) = pane.as_str() {
             if !p.is_empty() {
-                commands.push(SendKeys::new(
-                    Target::PaneTarget(pt.clone()),
-                    p.to_string()
-                ).into());
+                commands.push(SendKeys::new(Target::PaneTarget(pt.clone()), p.to_string()).into());
             };
         };
     }
@@ -230,10 +235,7 @@ where
             target
         );
         let layout = window["layout"].as_str().expect(&err);
-        commands.push(Layout::new(
-            target.clone(),
-            layout.to_string()
-        ).into());
+        commands.push(Layout::new(target.clone(), layout.to_string()).into());
     };
 
     Ok(commands)
@@ -258,17 +260,13 @@ fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
 
 fn expand_path(node: &Yaml) -> Option<Rc<PathBuf>> {
     match node.as_str() {
-        Some(string) => {
-            Some(
-              if string.contains("~/") {
-                  let home = home_dir().expect("Home dir could not be expanded");
-                  let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
-                  Rc::new(path)
-              } else {
-                  Rc::new(PathBuf::from(string))
-              }
-            )
-        }
+        Some(string) => Some(if string.contains("~/") {
+            let home = home_dir().expect("Home dir could not be expanded");
+            let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
+            Rc::new(path)
+        } else {
+            Rc::new(PathBuf::from(string))
+        }),
         None => None,
     }
 }

@@ -1,9 +1,9 @@
+use capture::retrieve_capture;
 use serde::ser::Serialize;
 use serde::Serializer;
-use capture::retrieve_capture;
-use tmux::pane::Pane;
 use std::io;
 use std::process::{Command, Output};
+use tmux::pane::Pane;
 
 // Come back and question the accuracy of windows without names
 // that have active, or previous window designations.

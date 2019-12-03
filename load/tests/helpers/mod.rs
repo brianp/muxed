@@ -3,8 +3,8 @@
 use common::args::Args;
 use rand::random;
 use snapshot::tmux;
-use std::fs::File;
 use std::fs;
+use std::fs::File;
 use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 use std::str;
@@ -29,7 +29,7 @@ fn setup(contents: &[u8]) -> (String, PathBuf) {
 
     let muxed_path = project_path.parent().unwrap();
     if !muxed_path.exists() {
-          println!("{:?}", fs::create_dir(muxed_path))
+        println!("{:?}", fs::create_dir(muxed_path))
     };
 
     let mut buffer = File::create(&project_path).unwrap();
@@ -38,7 +38,7 @@ fn setup(contents: &[u8]) -> (String, PathBuf) {
     (project_name, project_path.clone())
 }
 
-fn cleanup(project_name: &str, config_path: &PathBuf)  {
+fn cleanup(project_name: &str, config_path: &PathBuf) {
     let _ = fs::remove_file(config_path);
     let _ = fs::remove_dir(config_path.parent().unwrap());
     kill_session(project_name);
@@ -63,7 +63,7 @@ pub fn test_with_contents(contents: &[u8]) -> snapshot::tmux::session::Session {
     session
 }
 
-fn open_muxed(project: &str, project_root: &Path) -> Result<(), String>  {
+fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
     let args = Args {
         flag_d: true,
         flag_v: false,
@@ -78,15 +78,15 @@ fn open_muxed(project: &str, project_root: &Path) -> Result<(), String>  {
     load::exec(args)
 }
 
-fn kill_session(target: &str)  {
-		let _ = load::tmux::call(&["kill-session", "-t", target]);
+fn kill_session(target: &str) {
+    let _ = load::tmux::call(&["kill-session", "-t", target]);
 }
 
-fn send_keys(target: &str, exec: &str)  {
-		let _ = load::tmux::call(&["send-keys", "-t", target, exec, "KPEnter"]);
+fn send_keys(target: &str, exec: &str) {
+    let _ = load::tmux::call(&["send-keys", "-t", target, exec, "KPEnter"]);
 }
 
-fn wait_on(file: &PathBuf)  {
+fn wait_on(file: &PathBuf) {
     while !file.exists() {
         // Wait increased from 10 to 750 due to the pre_window tests.
         sleep(Duration::from_millis(750));
