@@ -16,67 +16,13 @@ mod helpers;
 mod test {
     mod load {
         use dirs::home_dir;
-        use helpers::*;
+        use helpers::test_with_contents;
         use rand::random;
-        use snapshot::tmux;
         use std::fs::File;
         use std::fs;
         use std::io::prelude::*;
         use std::path::PathBuf;
-        use std::str;
-        use yaml_rust::YamlLoader;
-    
-        fn project_name(contents: &[u8]) -> String {
-            let string_content = str::from_utf8(contents).unwrap();
-            let yaml = YamlLoader::load_from_str(string_content).unwrap();
-    
-            match yaml[0]["name"].as_str() {
-                Some(x) => x.to_string(),
-                None => format!("muxed_int_test_{}", random::<u16>()),
-            }
-        }
-    
-        fn setup(contents: &[u8]) -> (String, PathBuf) {
-            let project_name = project_name(contents);
-            let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
-            let project_path = PathBuf::from(&project_file);
-    
-            let muxed_path = project_path.parent().unwrap();
-            if !muxed_path.exists() {
-                println!("{:?}", fs::create_dir(muxed_path))
-            };
-    
-            let mut buffer = File::create(&project_path).unwrap();
-            let _ = buffer.write(contents);
-    
-            (project_name, project_path.clone())
-        }
-    
-        fn cleanup(project_name: &str, config_path: &PathBuf)  {
-            let _ = fs::remove_file(config_path);
-            let _ = fs::remove_dir(config_path.parent().unwrap());
-            kill_session(project_name);
-        }
-    
-        fn test_with_contents(contents: &[u8]) -> snapshot::tmux::session::Session {
-            let (project_name, config_path) = setup(contents);
-            open_muxed(&project_name, config_path.parent().unwrap());
-    
-            let completed = PathBuf::from(format!(
-                "/tmp/{}-{}.complete",
-                project_name,
-                random::<u16>()
-            ));
-            let exec = format!("touch '{}'", completed.display());
-    
-            send_keys(&project_name, &exec);
-            wait_on(&completed);
-    
-            let session = tmux::inspect(&project_name).unwrap();
-            cleanup(&project_name, &config_path);
-            session
-        }
-    
+
         #[test]
         fn opens_3_windows_from_array() {
             let contents = b"---
@@ -291,117 +237,123 @@ windows:
 //        //            Some(PathBuf::from(other_current_path))
 //        //        );
 //        //    }
-//    
-//        #[test]
-//        fn expect_focus_on_the_first_window() {
-//            let contents = b"---
-//    windows: ['ssh', 'git']
-//    ";
-//            let session = test_with_contents(contents);
-//            let window_active = session.window_active.as_str().unwrap();
-//            assert_eq!(window_active, "ssh")
-//        }
-//    
-//        #[test]
-//        fn expect_pre_to_create_file() {
-//            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-//            let contents = format!(
-//                "---
-//    pre: touch {}
-//    windows: ['ssh', 'git']
-//    ",
-//                file.display()
-//            );
-//            let _ = test_with_contents(contents.as_bytes());
-//            assert!(file.exists());
-//            let _ = fs::remove_file(file);
-//        }
-//    
-//        #[test]
-//        fn expect_pre_to_create_two_files() {
-//            let file1 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-//            let file2 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-//            let contents = format!(
-//                "---
-//    pre:
-//      - touch {}
-//      - touch {}
-//    windows: ['ssh', 'git']
-//    ",
-//                file1.display(),
-//                file2.display()
-//            );
-//            let _ = test_with_contents(contents.as_bytes());
-//            assert!(file1.exists());
-//            assert!(file2.exists());
-//            let _ = fs::remove_file(file1);
-//            let _ = fs::remove_file(file2);
-//        }
-//    
-//        #[test]
-//        fn expect_pre_window_to_be_called_for_each_window() {
-//            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-//            let contents = format!(
-//                "---
-//    pre_window: echo 'pre_window' >> {}
-//    windows: ['ssh', 'git']
-//    ",
-//                file.display()
-//            );
-//            let _ = test_with_contents(contents.as_bytes());
-//            let mut f = File::open(&file).unwrap();
-//            let mut s = String::new();
-//            let _ = f.read_to_string(&mut s);
-//            assert_eq!(s.lines().count(), 2);
-//            let _ = fs::remove_file(&file);
-//        }
-//    
-//        #[test]
-//        fn expect_pre_window_to_be_called_twice_for_each_window() {
-//            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-//            let contents = format!(
-//                "---
-//    pre_window:
-//     - echo 'pre_window' >> {}
-//     - echo 'pre_window' >> {}
-//    windows: ['ssh', 'git']
-//    ",
-//                file.display(),
-//                file.display()
-//            );
-//            let _ = test_with_contents(contents.as_bytes());
-//            let mut f = File::open(&file).unwrap();
-//            let mut s = String::new();
-//            let _ = f.read_to_string(&mut s);
-//            assert_eq!(s.lines().count(), 4);
-//            let _ = fs::remove_file(&file);
-//        }
-//    
-//        #[test]
-//        fn expect_session_name_brians_session() {
-//            let contents = b"---
-//    name: 'Brians Session'
-//    windows: ['ssh', 'git']
-//    ";
-//            let session = test_with_contents(contents);
-//            let name = session.name.as_str().unwrap();
-//            assert_eq!(name, "Brians Session")
-//        }
-//    
-//        // This test should exist but we currently don't do anything to list panes.
-//        //    #[test]
-//        //    fn expect_focus_on_the_top_pane() {
-//        //        let contents = b"---
-//        //windows:
-//        //  - ssh:
-//        //    layout: main-horizontal
-//        //    panes:
-//        //      - ''
-//        //      - ''
-//        //  - git: ''
-//        //";
-//        //        let session = test_with_contents(contents);
-//        //        assert_eq!(session.pane_active, "ssh.0")
-//        //    }
+
+				// TODO: should ssh or git be a command or window name?
+        #[test]
+        fn expect_focus_on_the_first_window() {
+            let contents = b"---
+windows: ['ssh', 'git']
+";
+            let session = test_with_contents(contents);
+            let first_window = &session.windows[0];
+            let other_window = &session.windows[1];
+
+            assert!(first_window.active);
+            assert_eq!(other_window.active, false)
+        }
+
+        #[test]
+        fn expect_pre_to_create_file() {
+            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let contents = format!(
+                "---
+pre: touch {}
+windows: ['ssh', 'git']
+",
+                file.display()
+            );
+
+            let _ = test_with_contents(contents.as_bytes());
+            assert!(file.exists());
+            let _ = fs::remove_file(file);
+        }
+
+        #[test]
+        fn expect_pre_to_create_two_files() {
+            let file1 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let file2 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let contents = format!(
+                "---
+pre:
+  - touch {}
+  - touch {}
+windows: ['ssh', 'git']
+",
+                file1.display(),
+                file2.display()
+            );
+
+            let _ = test_with_contents(contents.as_bytes());
+            assert!(file1.exists());
+            assert!(file2.exists());
+            let _ = fs::remove_file(file1);
+            let _ = fs::remove_file(file2);
+        }
+
+        #[test]
+        fn expect_pre_window_to_be_called_for_each_window() {
+            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let contents = format!(
+                "---
+pre_window: echo 'pre_window' >> {}
+windows: ['ssh', 'git']
+",
+                file.display()
+            );
+            let _ = test_with_contents(contents.as_bytes());
+            let mut f = File::open(&file).unwrap();
+            let mut s = String::new();
+            let _ = f.read_to_string(&mut s);
+            assert_eq!(s.lines().count(), 2);
+            let _ = fs::remove_file(&file);
+        }
+
+        #[test]
+        fn expect_pre_window_to_be_called_twice_for_each_window() {
+            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let contents = format!(
+                "---
+pre_window:
+  - echo 'pre_window' >> {}
+  - echo 'pre_window' >> {}
+windows: ['ssh', 'git']
+",
+                file.display(),
+                file.display()
+            );
+            let _ = test_with_contents(contents.as_bytes());
+            let mut f = File::open(&file).unwrap();
+            let mut s = String::new();
+            let _ = f.read_to_string(&mut s);
+            assert_eq!(s.lines().count(), 4);
+            let _ = fs::remove_file(&file);
+        }
+
+        #[test]
+        fn expect_session_name_brians_session() {
+            let contents = b"---
+name: 'Brians Session'
+windows: ['ssh', 'git']
+";
+            let session = test_with_contents(contents);
+            assert_eq!(session.name, "Brians Session")
+        }
+
+				// TODO: Fix
+        // This test should exist but we currently don't do anything to list panes.
+        //    #[test]
+        //    fn expect_focus_on_the_top_pane() {
+        //        let contents = b"---
+        //windows:
+        //  - ssh:
+        //    layout: main-horizontal
+        //    panes:
+        //      - ''
+        //      - ''
+        //  - git: ''
+        //";
+        //        let session = test_with_contents(contents);
+        //        assert_eq!(session.pane_active, "ssh.0")
+        //    }
     }
 }

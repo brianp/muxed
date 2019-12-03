@@ -141,6 +141,13 @@ mod test {
     }
 
     #[test]
+    fn expect_some_from_line_with_dollar_sign() {
+        let line = "2: vim$ (1 panes) [layout b5be,173x42,0,0,1]";
+        let window = Window::from_line(line);
+        assert!(window.is_some())
+    }
+
+    #[test]
     fn expect_active_to_be_true() {
         let line = "2: vim* (1 panes) [layout b5be,173x42,0,0,1]";
         let window = Window::from_line(line).unwrap();
