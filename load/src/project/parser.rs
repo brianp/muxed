@@ -291,7 +291,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Session(_) => true,
+        Commands::Session(_) => true,
         _ => false,
     })
     .collect();
@@ -317,7 +317,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Window(_) => true,
+        Commands::Window(_) => true,
         _ => false,
     })
     .collect();
@@ -343,7 +343,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Attach(_) => true,
+        Commands::Attach(_) => true,
         _ => false,
     })
     .collect();
@@ -369,7 +369,7 @@ windows: [1, 'vim', 3]
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Window(_) => true,
+        Commands::Window(_) => true,
         _ => false,
     })
     .collect();
@@ -397,7 +397,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Window(_) => true,
+        Commands::Window(_) => true,
         _ => false,
     })
     .collect();
@@ -443,7 +443,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SendKeys(_) => true,
+        Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -514,7 +514,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SendKeys(_) => true,
+        Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -544,7 +544,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Split(_) => true,
+        Commands::Split(_) => true,
         _ => false,
     })
     .collect();
@@ -574,7 +574,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Layout(_) => true,
+        Commands::Layout(_) => true,
         _ => false,
     })
     .collect();
@@ -604,7 +604,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Session(_) => true,
+        Commands::Session(_) => true,
         _ => false,
     })
     .collect();
@@ -633,7 +633,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::Layout(_) => true,
+        Commands::Layout(_) => true,
         _ => false,
     })
     .collect();
@@ -666,7 +666,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SendKeys(_) => true,
+        Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -696,7 +696,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SendKeys(_) => true,
+        Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -725,7 +725,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SendKeys(_) => true,
+        Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -753,7 +753,7 @@ windows:
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SendKeys(_) => true,
+        Commands::SendKeys(_) => true,
         _ => false,
     })
     .collect();
@@ -782,7 +782,7 @@ windows:
     .unwrap()
     .into_iter()
     .find(|x| match x {
-        &Commands::Session(_) => true,
+        Commands::Session(_) => true,
         _ => false,
     })
     .unwrap();
@@ -816,7 +816,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SelectWindow(_) => true,
+        Commands::SelectWindow(_) => true,
         _ => false,
     })
     .collect();
@@ -842,7 +842,7 @@ windows: ['cargo', 'vim', 'git']
     .unwrap()
     .into_iter()
     .filter(|x| match x {
-        &Commands::SelectPane(_) => true,
+        Commands::SelectPane(_) => true,
         _ => false,
     })
     .collect();
