@@ -7,17 +7,19 @@
 /// `flag_f` to force overwrite of a file
 /// `flag_p` the project directory to read or write to
 /// `flag_t` the session to read from
+/// `flag_debug` run inline print statements for debugging
 /// `arg_project` the project file to read
 /// `cmd_new` literally nothing
 /// `cmd_snapshot` not sure why I have these
 ///
 #[derive(Debug, RustcDecodable)]
 pub struct Args {
+    pub flag_debug: bool,
     pub flag_d: bool,
-    pub flag_v: bool,
     pub flag_f: bool,
     pub flag_p: Option<String>,
     pub flag_t: Option<String>,
+    pub flag_v: bool,
     pub arg_project: String,
     pub cmd_new: bool,
     pub cmd_snapshot: bool,

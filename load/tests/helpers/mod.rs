@@ -65,6 +65,7 @@ pub fn test_with_contents(contents: &[u8]) -> snapshot::tmux::session::Session {
 
 fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
     let args = Args {
+        flag_debug: false,
         flag_d: true,
         flag_v: false,
         flag_f: false,

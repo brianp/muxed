@@ -9,7 +9,11 @@ use tmux;
 use tmux::target::*;
 
 pub trait Command {
-    fn call(&self) -> Result<Output, io::Error> {
+    fn call(&self, debug: bool) -> Result<Output, io::Error> {
+        if debug {
+            println!("{:?}", &self.args());
+        };
+
         tmux::call(&self.args())
     }
 
@@ -193,7 +197,11 @@ impl<'a> Command for Attach<'a> {
         [&args[..], &[">/dev/null"]].concat()
     }
 
-    fn call(&self) -> Result<Output, io::Error> {
+    fn call(&self, debug: bool) -> Result<Output, io::Error> {
+        if debug {
+            println!("{:?}", &self.args());
+        };
+
         tmux::attach(&self.args())
     }
 }
@@ -256,7 +264,11 @@ impl Command for Pre {
         vec![]
     }
 
-    fn call(&self) -> Result<Output, io::Error> {
+    fn call(&self, debug: bool) -> Result<Output, io::Error> {
+        if debug {
+            println!("{:?}", &self.exec);
+        };
+
         let cmd_array: Vec<&str> = self.exec.split(' ').collect();
         let (program, args) = cmd_array
             .split_first()

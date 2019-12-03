@@ -49,11 +49,14 @@ pub fn exec(args: Args) -> Result<(), String> {
         }
     };
 
+    if args.flag_debug {
+      println!("{:?}", &commands);
+    };
+
     for command in &commands {
-        println!("{:?}", command);
         command
             .as_trait()
-            .call()
+            .call(args.flag_debug)
             .map_err(|e| format!("Had a problem running commands for tmux {}", e))
             .unwrap();
     }

@@ -35,6 +35,7 @@ Usage:
 Flags:
     -d                  If you want to create a muxed session without connecting to it
     -f                  Overwrite existing file if one exists
+    --debug             Prints debug information while executing (project opening only)
     -h, --help          Prints help information
     -v, --version       Prints version information
 

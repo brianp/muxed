@@ -15,6 +15,7 @@ mod test {
 
         pub fn new(project: &str, project_root: &PathBuf) -> Result<(), String> {
             let args = Args {
+                flag_debug: false,
                 flag_d: true,
                 flag_v: false,
                 flag_f: false,
