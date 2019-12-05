@@ -50,7 +50,7 @@ pub fn exec(args: Args) -> Result<(), String> {
     };
 
     if args.flag_debug {
-      println!("{:?}", &commands);
+        println!("{:?}", &commands);
     };
 
     for command in &commands {
