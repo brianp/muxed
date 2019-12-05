@@ -1,4 +1,4 @@
-<a name="0.7.1"></a>
+<a name="0.7.1">The one that removes debug lines</a>
 ### 0.7.1 (2019-12-05)
 
 #### Documentation
@@ -13,7 +13,7 @@
 
   *  Adds the debug flag ([20ee37e3](20ee37e3))
 
-<a name="0.7.0"></a>
+<a name="0.7.0">Modernizing the repo and fixing bugs</a>
 ## 0.7.0 (2019-11-28)
 
 #### Bug Fixes
