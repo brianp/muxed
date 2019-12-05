@@ -1,6 +1,6 @@
 [package]
 name = "snapshot"
-version = "0.7.1-development"
+version = "0.7.1"
 authors = ["Brian Pearce"]
 publish = false
 
