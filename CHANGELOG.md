@@ -1,3 +1,18 @@
+<a name="0.7.1"></a>
+### 0.7.1 (2019-12-05)
+
+#### Documentation
+
+  *  Update installation methods ([06266d1d](06266d1d))
+
+#### Bug Fixes
+
+  *  Remove debug lines being printed during execution
+
+#### Features
+
+  *  Adds the debug flag ([20ee37e3](20ee37e3))
+
 <a name="0.7.0"></a>
 ## 0.7.0 (2019-11-28)
 
