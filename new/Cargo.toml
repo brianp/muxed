@@ -1,6 +1,6 @@
 [package]
 name = "new"
-version = "0.7.0-development"
+version = "0.7.2-development"
 authors = ["Brian Pearce"]
 publish = false
 
