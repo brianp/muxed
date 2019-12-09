@@ -6,6 +6,7 @@ authors = ["Brian Pearce"]
 [workspace]
 members = [
     "common",
+    "edit",
     "load",
     "new",
     "snapshot"
@@ -13,6 +14,7 @@ members = [
 
 [dependencies]
 common   = { path = "./common" }
+edit     = { path = "./edit" }
 load     = { path = "./load" }
 new      = { path = "./new" }
 snapshot = { path = "./snapshot" }

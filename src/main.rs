@@ -2,6 +2,7 @@
 extern crate docopt;
 
 extern crate common;
+extern crate edit;
 extern crate load;
 extern crate new;
 extern crate snapshot;
@@ -27,6 +28,7 @@ macro_rules! try_or_err (
 static USAGE: &str = "
 Usage:
     muxed [options] <project>
+    muxed edit [options] <project>
     muxed new [options] <project>
     muxed snapshot [options] <project>
     muxed (-h | --help)
@@ -47,6 +49,7 @@ Args:
     <project>           The name of your project to open
 
 Subcommands:
+    edit <project>                 Edit an existing project file
     new <project>                  To create a new project file
     snapshot -t session <project>  Capture a running session and create a config file for it
 ";
@@ -87,6 +90,7 @@ pub fn main() {
 
     if let Some(x) = input.nth(1) {
         match x.as_ref() {
+            "edit" => try_or_err!(edit::exec(args)),
             "new" => try_or_err!(new::exec(args)),
             "snapshot" => try_or_err!(snapshot::exec(args)),
             _ => try_or_err!(load::exec(args)),
