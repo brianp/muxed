@@ -1,0 +1,16 @@
+[package]
+name = "edit"
+version = "0.7.2-development"
+authors = ["Brian Pearce"]
+publish = false
+
+[lib]
+doctest = false
+
+[dependencies]
+common = { path = "../common" }
+dirs   = "1.0.5"
+libc      = "0.2.21"
+
+[dev-dependencies]
+rand   = "0.3.15"

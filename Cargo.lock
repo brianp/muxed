@@ -123,6 +123,16 @@ version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "edit"
+version = "0.7.2-development"
+dependencies = [
+ "common 0.7.2-development",
+ "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
+ "libc 0.2.49 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "failure"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
