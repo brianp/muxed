@@ -9,6 +9,7 @@
 /// `flag_t` the session to read from
 /// `flag_debug` run inline print statements for debugging
 /// `arg_project` the project file to read
+/// `cmd_edit`
 /// `cmd_new` literally nothing
 /// `cmd_snapshot` not sure why I have these
 ///
@@ -21,6 +22,7 @@ pub struct Args {
     pub flag_t: Option<String>,
     pub flag_v: bool,
     pub arg_project: String,
+    pub cmd_edit: bool,
     pub cmd_new: bool,
     pub cmd_snapshot: bool,
 }
