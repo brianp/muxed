@@ -15,16 +15,10 @@ mod test {
 
         pub fn new(project: &str, project_root: &PathBuf) -> Result<(), String> {
             let args = Args {
-                flag_debug: false,
-                flag_d: true,
-                flag_v: false,
-                flag_f: false,
                 flag_p: Some(format!("{}", project_root.display())),
-                flag_t: None,
                 arg_project: project.to_string(),
-                cmd_edit: false,
                 cmd_new: true,
-                cmd_snapshot: false,
+                ..Default::default()
             };
 
             new::exec(args)

@@ -1,4 +1,5 @@
 //! The struct managing cli args
+use rand::random;
 
 /// The args struct for taking arguments passed in from the command line
 /// and making it easier to pass around.
@@ -25,4 +26,23 @@ pub struct Args {
     pub cmd_edit: bool,
     pub cmd_new: bool,
     pub cmd_snapshot: bool,
+}
+
+impl Default for Args {
+    fn default() -> Self {
+        let name = format!("{}", random::<u16>());
+
+        Args {
+            arg_project: name,
+            cmd_edit: false,
+            cmd_new: true,
+            cmd_snapshot: false,
+            flag_d: true,
+            flag_debug: false,
+            flag_f: false,
+            flag_p: None,
+            flag_t: None,
+            flag_v: false,
+        }
+    }
 }
