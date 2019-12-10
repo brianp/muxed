@@ -10,7 +10,7 @@ doctest = false
 [dependencies]
 common = { path = "../common" }
 dirs   = "1.0.5"
-libc      = "0.2.21"
+libc   = "0.2.21"
 
 [dev-dependencies]
 rand   = "0.3.15"

@@ -8,4 +8,5 @@ publish = false
 doctest = false
 
 [dependencies]
+dirs            = "1.0.5"
 rustc-serialize = "0.3"

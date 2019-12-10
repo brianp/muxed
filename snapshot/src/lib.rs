@@ -1,6 +1,5 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
 extern crate common;
-extern crate dirs;
 #[cfg(test)]
 extern crate rand;
 extern crate regex;
@@ -15,13 +14,10 @@ extern crate serde_derive;
 
 use common::args::Args;
 use common::first_run::check_first_run;
-#[cfg(not(test))]
-use dirs::home_dir;
+use common::project_paths::project_paths;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
-
-static MUXED_FOLDER: &str = "muxed";
 
 /// The main execution method.
 /// Accepts two arguments. -n for the name of the project file and -t to target
@@ -41,22 +37,15 @@ static MUXED_FOLDER: &str = "muxed";
 /// $ ./muxed snapshot -n jasper -t 1
 /// ```
 pub fn exec(args: Args) -> Result<(), String> {
-    let home = homedir().expect("Can't find home dir");
-    let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
-    let project_name = format!("{}.yml", &args.arg_project);
-    let session_name = &args.flag_t.expect("No TMUX session running");
-    let muxed_dir = match args.flag_p {
-        Some(ref x) => x.as_str(),
-        _ => default_dir.as_str(),
-    };
-    let new_project_path = PathBuf::from(format!("{}/{}", muxed_dir, project_name));
+    let session_name = &args.flag_t.as_ref().expect("No TMUX session running");
+    let project_paths = project_paths(&args);
 
-    check_first_run(&muxed_dir);
+    check_first_run(&project_paths.project_directory);
 
     let session = tmux::inspect(&session_name).unwrap();
     let s = serde_yaml::to_string(&session).unwrap();
 
-    write_config(s, &new_project_path, args.flag_f).unwrap();
+    write_config(s, &project_paths.project_file, args.flag_f).unwrap();
     println!("We made a snapshot of your session! \u{1F60A}");
     Ok(())
 }
@@ -86,21 +75,6 @@ where
         .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;
 
     Ok(())
-}
-
-/// Return the users homedir as a string.
-#[cfg(not(test))]
-fn homedir() -> Result<PathBuf, String> {
-    match home_dir() {
-        Some(dir) => Ok(dir),
-        None => Err(String::from("We couldn't find your home directory.")),
-    }
-}
-
-/// Return the temp dir as the users home dir during testing.
-#[cfg(test)]
-fn homedir() -> Result<PathBuf, String> {
-    Ok(PathBuf::from("/tmp"))
 }
 
 #[cfg(test)]

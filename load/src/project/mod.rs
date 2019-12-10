@@ -3,25 +3,19 @@
 //! configs in.
 
 use command::{Attach, Commands};
-#[cfg(not(test))]
-use dirs::home_dir;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
-use std::path::{Path, PathBuf};
 use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
 
 pub mod parser;
 
+use common::project_paths::ProjectPaths;
 use first_run::check_first_run;
-
-/// The muxed project folder name. Should be located in the users home dir as a
-/// hidden directory.
-static MUXED_FOLDER: &str = "muxed";
 
 /// Using the provided project name, locate the path to that project file. It
 /// should be something similar to: `~/.muxed/my_project.yml`
@@ -39,17 +33,10 @@ static MUXED_FOLDER: &str = "muxed";
 ///
 /// `project_name`: The name of the project, corresponding to the project config
 /// file.
-pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>, String> {
-    let home = homedir().map_err(|e| e)?;
-    let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
-    let muxed_dir = project_dir.unwrap_or_else(|| default_dir.as_str());
+pub fn read(project_name: &str, project_paths: &ProjectPaths) -> Result<Vec<Yaml>, String> {
+    check_first_run(&project_paths.project_directory);
 
-    check_first_run(&muxed_dir);
-
-    let config = format!("{}/{}.yml", muxed_dir, project_name);
-    let path = Path::new(&config);
-
-    let mut file = File::open(path).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, muxed_dir, e.to_string()))?;
+    let mut file = File::open(&project_paths.project_file).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e.to_string()))?;
     let mut contents = String::new();
 
     file.read_to_string(&mut contents)
@@ -58,21 +45,6 @@ pub fn read(project_name: &str, project_dir: &Option<&str>) -> Result<Vec<Yaml>,
     let parsed_yaml = YamlLoader::load_from_str(&contents).map_err(|e| e.to_string())?;
 
     Ok(parsed_yaml)
-}
-
-/// Return the users homedir as a string.
-#[cfg(not(test))]
-fn homedir() -> Result<PathBuf, String> {
-    match home_dir() {
-        Some(dir) => Ok(dir),
-        None => Err(String::from("We couldn't find your home directory.")),
-    }
-}
-
-/// Return the temp dir as the users home dir during testing.
-#[cfg(test)]
-fn homedir() -> Result<PathBuf, String> {
-    Ok(PathBuf::from("/tmp"))
 }
 
 /// Find out if a tmux session is already active with this name. If it is active
@@ -88,38 +60,39 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
 
 #[test]
 fn missing_file_returns_err() {
-    let result = read(&String::from("not_a_file"), &None);
+    let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "");
+    let result = read(&String::from("not_a_file"), &project_paths);
     assert!(result.is_err())
 }
 
 #[test]
 fn poorly_formatted_file_returns_err() {
-    let name = random::<u16>();
-    let name1 = format!("/tmp/.muxed/{}.yml", name);
-    let path = Path::new(&name1);
-    let _ = fs::create_dir(Path::new("/tmp/.muxed/"));
-    let mut buffer = File::create(path).unwrap();
+    let name = format!("{}", random::<u16>());
+    let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
+
+    let _ = fs::create_dir(&project_paths.project_directory);
+    let mut buffer = File::create(&project_paths.project_file).unwrap();
     let _ = buffer.write(b"mix: [1,2,3]: muxed");
 
-    let result = read(&format!("{}", name), &None);
-    let _ = fs::remove_file(path);
+    let result = read(&name, &project_paths);
+    let _ = fs::remove_file(&project_paths.project_file);
     assert!(result.is_err());
 }
 
 #[test]
 fn good_file_returns_ok() {
-    let name = random::<u16>();
-    let name1 = format!("/tmp/.muxed/{}.yml", name);
-    let path = Path::new(&name1);
-    let _ = fs::create_dir(Path::new("/tmp/.muxed/"));
-    let mut buffer = File::create(path).unwrap();
+    let name = format!("{}", random::<u16>());
+    let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
+
+    let _ = fs::create_dir(&project_paths.project_directory);
+    let mut buffer = File::create(&project_paths.project_file).unwrap();
     let _ = buffer.write(
         b"---
 windows: ['cargo', 'vim', 'git']
 ",
     );
 
-    let result = read(&format!("{}", name), &None);
-    let _ = fs::remove_file(path);
+    let result = read(&name, &project_paths);
+    let _ = fs::remove_file(&project_paths.project_file);
     assert!(result.is_ok());
 }

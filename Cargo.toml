@@ -14,11 +14,11 @@ members = [
 
 [dependencies]
 common   = { path = "./common" }
+docopt   = "0.7"
 edit     = { path = "./edit" }
 load     = { path = "./load" }
 new      = { path = "./new" }
 snapshot = { path = "./snapshot" }
-docopt   = "0.7"
 
 [dev-dependencies]
 dirs      = "1.0.5"

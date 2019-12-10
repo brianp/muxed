@@ -12,26 +12,15 @@ pub mod tmux;
 
 use args::Args;
 use command::Commands;
+use common::project_paths::project_paths;
 use common::{args, first_run};
 use project::parser;
 use tmux::config::Config;
 
-#[cfg(not(test))]
-use dirs::home_dir;
-use std::path::PathBuf;
-
-static MUXED_FOLDER: &str = "muxed";
-
 pub fn exec(args: Args) -> Result<(), String> {
-    // FIXME: If -p flag isn't set there's no default?
-    let home = homedir().expect("Can't find home dir");
-    let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
-    let muxed_dir = match args.flag_p {
-        Some(ref x) => Some(x.as_str()),
-        _ => Some(default_dir.as_str()),
-    };
+    let project_paths = project_paths(&args);
 
-    let yaml = project::read(&args.arg_project, &muxed_dir).unwrap();
+    let yaml = project::read(&args.arg_project, &project_paths).unwrap();
     let project_name = &yaml[0]["name"]
         .as_str()
         .unwrap_or(&args.arg_project)
@@ -62,19 +51,4 @@ pub fn exec(args: Args) -> Result<(), String> {
     }
 
     Ok(())
-}
-
-/// Return the users homedir as a string.
-#[cfg(not(test))]
-fn homedir() -> Result<PathBuf, String> {
-    match home_dir() {
-        Some(dir) => Ok(dir),
-        None => Err(String::from("We couldn't find your home directory.")),
-    }
-}
-
-/// Return the temp dir as the users home dir during testing.
-#[cfg(test)]
-fn homedir() -> Result<PathBuf, String> {
-    Ok(PathBuf::from("/tmp"))
 }

@@ -1,14 +1,12 @@
 //! Muxednew. A Muxed project Template Generator
 extern crate common;
-extern crate dirs;
 #[cfg(test)]
 extern crate rand;
 
 use common::args::Args;
 use common::first_run::check_first_run;
+use common::project_paths::project_paths;
 
-#[cfg(not(test))]
-use dirs::home_dir;
 #[cfg(test)]
 use rand::random;
 #[cfg(test)]
@@ -22,7 +20,6 @@ use std::io::Write;
 use std::path::PathBuf;
 
 static TEMPLATE: &str = include_str!("template.yml");
-static MUXED_FOLDER: &str = "muxed";
 
 /// The main execution method.
 /// Accept the name of a project to create a configuration file in the
@@ -42,22 +39,16 @@ static MUXED_FOLDER: &str = "muxed";
 /// $ ./muxednew -p ~/.some_other_dir/ projectName
 /// ```
 pub fn exec(args: Args) -> Result<(), String> {
-    let home = homedir().expect("Can't find home dir");
-    let default_dir = format!("{}/.{}", home.display(), MUXED_FOLDER);
-    let project_name = format!("{}.yml", &args.arg_project);
-    let muxed_dir = match args.flag_p {
-        Some(ref x) => x.as_str(),
-        _ => default_dir.as_str(),
-    };
+    let project_paths = project_paths(&args);
 
-    check_first_run(&muxed_dir);
+    check_first_run(&project_paths.project_directory);
 
-    let file = PathBuf::from(muxed_dir).join(&project_name);
-    let template = modified_template(TEMPLATE, &file);
-    write_template(&template, &file).unwrap();
+    let template = modified_template(TEMPLATE, &project_paths.project_file);
+    write_template(&template, &project_paths.project_file).unwrap();
     println!(
         "\u{270C} The template file {} has been written to {}\nHappy tmuxing!",
-        project_name, muxed_dir
+        &project_paths.project_file.display(),
+        &project_paths.project_directory.display()
     );
     Ok(())
 }
@@ -85,21 +76,6 @@ fn write_template(template: &str, path: &PathBuf) -> Result<(), String> {
         .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;
 
     Ok(())
-}
-
-/// Return the users homedir as a string.
-#[cfg(not(test))]
-fn homedir() -> Result<PathBuf, String> {
-    match home_dir() {
-        Some(dir) => Ok(dir),
-        None => Err(String::from("We couldn't find your home directory.")),
-    }
-}
-
-/// Return the temp dir as the users home dir during testing.
-#[cfg(test)]
-fn homedir() -> Result<PathBuf, String> {
-    Ok(PathBuf::from("/tmp"))
 }
 
 #[test]

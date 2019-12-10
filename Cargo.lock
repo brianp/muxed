@@ -88,6 +88,7 @@ dependencies = [
 name = "common"
 version = "0.7.2-development"
 dependencies = [
+ "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rustc-serialize 0.3.22 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -228,7 +229,6 @@ name = "new"
 version = "0.7.2-development"
 dependencies = [
  "common 0.7.2-development",
- "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -403,7 +403,6 @@ name = "snapshot"
 version = "0.7.2-development"
 dependencies = [
  "common 0.7.2-development",
- "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
  "regex 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "serde 0.8.23 (registry+https://github.com/rust-lang/crates.io-index)",
