@@ -21,7 +21,6 @@ impl ProjectPaths {
         }
     }
 
-    #[cfg(test)]
     pub fn from_strs(home_directory: &str, project_directory: &str, project_file: &str) -> ProjectPaths {
         let home_directory = PathBuf::from(home_directory);
         let project_directory = home_directory.join(project_directory);
@@ -66,7 +65,85 @@ fn homedir() -> Option<PathBuf> {
 
 #[cfg(test)]
 mod test {
-    #[test]
-    fn 
+    use super::*;
 
+    #[test]
+    fn expects_tmp_as_default_homedir() {
+        let args = Args {
+            arg_project: "projectname".to_string(),
+            cmd_edit: false,
+            cmd_new: false,
+            cmd_snapshot: false,
+            flag_d: false,
+            flag_debug: false,
+            flag_dryrun: false,
+            flag_f: false,
+            flag_p: None,
+            flag_t: None,
+            flag_v: false,
+        };
+
+        let project_paths = project_paths(&args);
+        assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"))
+    }
+
+    #[test]
+    fn expects_muxed_as_default_project_dir() {
+        let args = Args {
+            arg_project: "projectname".to_string(),
+            cmd_edit: false,
+            cmd_new: false,
+            cmd_snapshot: false,
+            flag_d: false,
+            flag_debug: false,
+            flag_dryrun: false,
+            flag_f: false,
+            flag_p: None,
+            flag_t: None,
+            flag_v: false,
+        };
+
+        let project_paths = project_paths(&args);
+        assert_eq!(project_paths.project_directory, PathBuf::from("/tmp/.muxed"))
+    }
+
+    #[test]
+    fn expects_spacey_as_homedir() {
+        let args = Args {
+            arg_project: "projectname".to_string(),
+            cmd_edit: false,
+            cmd_new: false,
+            cmd_snapshot: false,
+            flag_d: false,
+            flag_debug: false,
+            flag_dryrun: false,
+            flag_f: false,
+            flag_p: Some("/spacey".to_string()),
+            flag_t: None,
+            flag_v: false,
+        };
+
+        let project_paths = project_paths(&args);
+        assert_eq!(project_paths.project_directory, PathBuf::from("/spacey"))
+    }
+
+    #[test]
+    fn expects_projectname_as_yml_file() {
+        let args = Args {
+            arg_project: "projectname".to_string(),
+            cmd_edit: false,
+            cmd_new: false,
+            cmd_snapshot: false,
+            flag_d: false,
+            flag_debug: false,
+            flag_dryrun: false,
+            flag_f: false,
+            flag_p: None,
+            flag_t: None,
+            flag_v: false,
+        };
+
+        let project_paths = project_paths(&args);
+        assert_eq!(project_paths.project_file, PathBuf::from("/tmp/.muxed/projectname.yml"))
+    }
 }
