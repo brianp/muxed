@@ -72,6 +72,7 @@ fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
         flag_p: Some(format!("{}", project_root.display())),
         flag_t: None,
         arg_project: project.to_string(),
+        cmd_edit: false,
         cmd_new: false,
         cmd_snapshot: false,
     };
