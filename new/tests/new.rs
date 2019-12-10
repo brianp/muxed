@@ -22,7 +22,8 @@ mod test {
                 flag_p: Some(format!("{}", project_root.display())),
                 flag_t: None,
                 arg_project: project.to_string(),
-                cmd_new: false,
+                cmd_edit: false,
+                cmd_new: true,
                 cmd_snapshot: false,
             };
 
