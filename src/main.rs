@@ -43,15 +43,15 @@ Flags:
 
 Options:
     -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
-    -t <tmux_session>   The name of the running TMUX session to codify
+    -t <session>        The name of the running TMUX session to codify
 
 Args:
     <project>           The name of your project to open
 
 Subcommands:
-    edit <project>                 Edit an existing project file
-    new <project>                  To create a new project file
-    snapshot -t session <project>  Capture a running session and create a config file for it
+    edit <project>                   Edit an existing project file
+    new <project>                    To create a new project file
+    snapshot -t <session> <project>  Capture a running session and create a config file for it
 ";
 
 /// The main execution method.
