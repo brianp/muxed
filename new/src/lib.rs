@@ -153,6 +153,7 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
+        let _ = buffer.sync_all();
 
         // Attempt to create the same named file with new content
         let _ = write_template(&"new_content".to_string(), &path);
@@ -171,6 +172,7 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
+        let _ = buffer.sync_all();
         let result = write_template(&"new_content".to_string(), &path);
 
         assert!(result.is_err());

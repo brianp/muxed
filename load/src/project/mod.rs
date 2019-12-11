@@ -73,6 +73,7 @@ mod test {
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();
         let _ = buffer.write(b"mix: [1,2,3]: muxed");
+        let _ = buffer.sync_all();
 
         let result = read(&name, &project_paths);
         let _ = fs::remove_file(&project_paths.project_file);
@@ -91,6 +92,7 @@ mod test {
     windows: ['cargo', 'vim', 'git']
     ",
         );
+        let _ = buffer.sync_all();
 
         let result = read(&name, &project_paths);
         let _ = fs::remove_file(&project_paths.project_file);

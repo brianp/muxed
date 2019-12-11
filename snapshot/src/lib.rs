@@ -120,6 +120,7 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
+        let _ = buffer.sync_all();
 
         // Attempt to create the same named file with new content
         let _ = write_config("new_content", &path, false);
@@ -138,6 +139,7 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
+        let _ = buffer.sync_all();
         let result = write_config("new_content", &path, false);
 
         assert!(result.is_err());
@@ -149,6 +151,7 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
+        let _ = buffer.sync_all();
         let result = write_config("new_content", &path, true);
 
         assert!(result.is_ok());
@@ -161,6 +164,7 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
+        let _ = buffer.sync_all();
 
         // Attempt to create the same named file with new content
         let _ = write_config("new content", &path, true);
