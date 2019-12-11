@@ -2,21 +2,20 @@
 
 extern crate common;
 extern crate new;
-extern crate rand;
 
 #[cfg(test)]
 mod test {
     mod new {
         use common::args::Args;
+        use common::rand_names;
         use new;
-        use rand::random;
         use std::fs;
-        use std::path::PathBuf;
+        use std::path::Path;
 
-        pub fn new(project: &str, project_root: &PathBuf) -> Result<(), String> {
+        pub fn new(project_path: &Path) -> Result<(), String> {
             let args = Args {
-                flag_p: Some(format!("{}", project_root.display())),
-                arg_project: project.to_string(),
+                flag_p: Some(project_path.parent().unwrap().display().to_string()),
+                arg_project: project_path.file_name().unwrap().to_str().unwrap().to_string(),
                 cmd_new: true,
                 ..Default::default()
             };
@@ -24,26 +23,18 @@ mod test {
             new::exec(args)
         }
 
-        fn setup(project_name: &str) -> (PathBuf, PathBuf) {
-            let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
-            let project_path = PathBuf::from(&project_file);
-
-            let m = project_path.clone();
-            let muxed_path = project_path.parent().unwrap();
-            (m, muxed_path.to_path_buf())
-        }
-
-        fn cleanup(config_path: &PathBuf) {
+        fn cleanup(config_path: &Path) {
             let _ = fs::remove_file(config_path);
             let _ = fs::remove_dir(config_path.parent().unwrap());
         }
 
         #[test]
-        fn creates_new_file_muxed() {
-            let project_name = format!("muxed_int_test_{}", random::<u16>());
-            let (project_path, muxed_path) = setup(&project_name);
-            let _ = new(&project_name, &muxed_path);
+        fn creates_new_file() {
+            let project_path = rand_names::project_file_path();
+
+            assert!(new(&project_path).is_ok());
             assert!(&project_path.exists());
+
             cleanup(&project_path);
         }
     }

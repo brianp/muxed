@@ -9,6 +9,3 @@ doctest = false
 
 [dependencies]
 common = { path = "../common" }
-
-[dev-dependencies]
-rand   = "0.3.15"
