@@ -1,10 +1,10 @@
 use args::Args;
-#[cfg(not(test))]
+#[cfg(not(any(test, doctest)))]
 use dirs::home_dir;
 use std::path::PathBuf;
 
-pub static MUXED_FOLDER: &str = ".muxed";
-static CONFIG_EXTENSION: &str = "yml";
+pub static CONFIG_EXTENSION: &str = "yml";
+static MUXED_FOLDER: &str = ".muxed";
 
 pub struct ProjectPaths {
     pub home_directory: PathBuf,
@@ -38,6 +38,32 @@ impl ProjectPaths {
 /// will check for a passed argument set with -p but if it does not exist will
 /// map the path for the .muxed directory in the users home directory and return
 /// that as the default.
+///
+/// # Examples
+///
+/// #cfg(doctest) isn't working. This results in different home dirs
+/// ```rust,no_run
+/// use common::project_paths::{ProjectPaths, project_paths};
+/// use common::args::Args;
+/// use std::path::PathBuf;
+///
+/// let args = Args {
+///     arg_project: "projectname".to_string(),
+///     ..Default::default()
+/// };
+///
+/// let project_paths = project_paths(&args);
+///
+/// let paths = ProjectPaths::new(
+///     PathBuf::from("/tmp"),
+///     PathBuf::from("/tmp/.muxed"),
+///     PathBuf::from("/tmp/.muxed/projectname.yml")
+/// );
+///
+/// assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"));
+/// assert_eq!(project_paths.project_directory, PathBuf::from("/tmp/.muxed"));
+/// assert_eq!(project_paths.project_file, PathBuf::from("/tmp/.muxed/projectname.yml"))
+/// ```
 pub fn project_paths(args: &Args) -> ProjectPaths {
     let homedir = homedir().expect("We couldn't find your home directory.");
     let default_dir = homedir.join(MUXED_FOLDER);
@@ -51,17 +77,16 @@ pub fn project_paths(args: &Args) -> ProjectPaths {
 
 /// A Thin wrapper around the home_dir crate. This is so we can swap the default
 /// dir out during testing.
-#[cfg(not(test))]
+#[cfg(not(any(test, doctest)))]
 fn homedir() -> Option<PathBuf> {
     home_dir()
 }
 
 /// Return the temp dir as the users home dir during testing.
-#[cfg(test)]
+#[cfg(any(test, doctest))]
 fn homedir() -> Option<PathBuf> {
     Some(PathBuf::from("/tmp"))
 }
-
 
 #[cfg(test)]
 mod test {
@@ -84,7 +109,7 @@ mod test {
     }
 
     #[test]
-    fn expects_spacey_as_homedir() {
+    fn expects_spacey_as_project_dir() {
         let args = Args {
             flag_p: Some("/spacey".to_string()),
             ..Default::default()

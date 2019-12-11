@@ -4,9 +4,6 @@ version = "0.7.2-development"
 authors = ["Brian Pearce"]
 publish = false
 
-[lib]
-doctest = false
-
 [dependencies]
 dirs            = "1.0.5"
 rand            = "0.3.15"
