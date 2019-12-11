@@ -1,7 +1,5 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
 extern crate common;
-#[cfg(test)]
-extern crate rand;
 extern crate regex;
 extern crate serde;
 extern crate serde_yaml;
@@ -79,18 +77,15 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::write_config;
-    use rand::random;
-    use std::fs;
+    use common::rand_names;
     use std::fs::File;
+    use std::fs;
     use std::io::{Read, Write};
-    use std::path::PathBuf;
+    use super::write_config;
 
     #[test]
     fn expect_ok_result() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let result = write_config("test template", &path, false);
         let _ = fs::remove_file(path);
         assert!(result.is_ok());
@@ -98,18 +93,14 @@ mod test {
 
     #[test]
     fn expect_err_result() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/non_existent_path/{}.yml", name);
-        let path = PathBuf::from(name1);
+        let path = rand_names::project_file_with_dir("/tmp/non_existent/");
         let result = write_config("test template", &path, false);
         assert!(result.is_err());
     }
 
     #[test]
     fn expect_file_to_exist() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let _ = write_config("test template", &path, false);
         let result = &path.exists();
         let _ = fs::remove_file(&path);
@@ -118,9 +109,7 @@ mod test {
 
     #[test]
     fn expect_file_not_to_exist() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/non_existent_path/{}.yml", name);
-        let path = PathBuf::from(name1);
+        let path = rand_names::project_file_with_dir("/tmp/non_existent/");
         let _ = write_config("test template", &path, false);
         assert!(!path.exists());
     }
@@ -128,9 +117,7 @@ mod test {
     #[test]
     fn expect_no_truncation_or_overwrite() {
         // Write a file with content
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(&name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
 
@@ -148,9 +135,7 @@ mod test {
 
     #[test]
     fn expect_err_when_file_exists() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(&name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let result = write_config("new_content", &path, false);
@@ -161,9 +146,7 @@ mod test {
 
     #[test]
     fn expect_ok_when_file_exists_using_force() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(&name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let result = write_config("new_content", &path, true);
@@ -175,9 +158,7 @@ mod test {
     #[test]
     fn expect_truncation_or_overwrite_using_force() {
         // Write a file with content
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(&name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
 
@@ -194,19 +175,15 @@ mod test {
     }
 
     #[test]
-    fn expect_file_not_to_exist_using_force() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/non_existent_path/{}.yml", name);
-        let path = PathBuf::from(name1);
+    fn expect_file_not_to_exist_using_force_with_bad_dir() {
+        let path = rand_names::project_file_with_dir("/tmp/non_existent_path/");
         let _ = write_config("test template", &path, true);
         assert!(!path.exists());
     }
 
     #[test]
     fn expect_ok_result_using_force_when_file_doesnt_exist() {
-        let name = random::<u16>();
-        let name1 = format!("/tmp/{}.yml", name);
-        let path = PathBuf::from(name1);
+        let path = rand_names::project_file_with_dir("/tmp");
         let result = write_config("test template", &path, true);
         let _ = fs::remove_file(path);
         assert!(result.is_ok());
