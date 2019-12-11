@@ -30,7 +30,7 @@ static TEMPLATE: &str = include_str!("template.yml");
 pub fn exec(args: Args) -> Result<(), String> {
     let project_paths = project_paths(&args);
 
-    check_first_run(&project_paths.project_directory);
+    check_first_run(&project_paths.project_directory)?;
 
     let template = modified_template(TEMPLATE, &project_paths.project_file);
     write_template(&template, &project_paths.project_file).unwrap();

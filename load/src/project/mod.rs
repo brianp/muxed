@@ -28,7 +28,7 @@ use yaml_rust::{Yaml, YamlLoader};
 /// `project_name`: The name of the project, corresponding to the project config
 /// file.
 pub fn read(project_name: &str, project_paths: &ProjectPaths) -> Result<Vec<Yaml>, String> {
-    check_first_run(&project_paths.project_directory);
+    check_first_run(&project_paths.project_directory)?;
 
     let mut file = File::open(&project_paths.project_file).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e.to_string()))?;
     let mut contents = String::new();

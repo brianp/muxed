@@ -38,7 +38,7 @@ pub fn exec(args: Args) -> Result<(), String> {
     let session_name = &args.flag_t.as_ref().expect("No TMUX session running");
     let project_paths = project_paths(&args);
 
-    check_first_run(&project_paths.project_directory);
+    check_first_run(&project_paths.project_directory)?;
 
     let session = tmux::inspect(&session_name).unwrap();
     let s = serde_yaml::to_string(&session).unwrap();
