@@ -19,10 +19,3 @@ edit     = { path = "./edit" }
 load     = { path = "./load" }
 new      = { path = "./new" }
 snapshot = { path = "./snapshot" }
-
-[dev-dependencies]
-dirs      = "1.0.5"
-libc      = "0.2.21"
-rand      = "0.3.15"
-regex     = "0.2.1"
-yaml-rust = { version = "0.3.2", default-features = false }

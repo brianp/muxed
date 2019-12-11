@@ -213,16 +213,11 @@ name = "muxed"
 version = "0.7.2-development"
 dependencies = [
  "common 0.7.2-development",
- "dirs 1.0.5 (registry+https://github.com/rust-lang/crates.io-index)",
  "docopt 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "edit 0.7.2-development",
- "libc 0.2.49 (registry+https://github.com/rust-lang/crates.io-index)",
  "load 0.7.2-development",
  "new 0.7.2-development",
- "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
- "regex 0.2.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "snapshot 0.7.2-development",
- "yaml-rust 0.3.5 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -230,7 +225,6 @@ name = "new"
 version = "0.7.2-development"
 dependencies = [
  "common 0.7.2-development",
- "rand 0.3.15 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
