@@ -1,21 +1,15 @@
 //! The project module takes care of muxed related initialization. Locating the
 //! users home directory. Finding the desired config files, and reading the
 //! configs in.
+pub mod parser;
 
 use command::{Attach, Commands};
-#[cfg(test)]
-use rand::random;
-#[cfg(test)]
-use std::fs;
+use common::project_paths::ProjectPaths;
+use first_run::check_first_run;
 use std::fs::File;
 use std::io::prelude::*;
 use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
-
-pub mod parser;
-
-use common::project_paths::ProjectPaths;
-use first_run::check_first_run;
 
 /// Using the provided project name, locate the path to that project file. It
 /// should be something similar to: `~/.muxed/my_project.yml`
@@ -58,41 +52,48 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
     }
 }
 
-#[test]
-fn missing_file_returns_err() {
-    let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "");
-    let result = read(&String::from("not_a_file"), &project_paths);
-    assert!(result.is_err())
-}
+#[cfg(test)]
+mod test {
+    use common::rand_names;
+    use std::fs;
+    use super::*;
 
-#[test]
-fn poorly_formatted_file_returns_err() {
-    let name = format!("{}", random::<u16>());
-    let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
+    #[test]
+    fn missing_file_returns_err() {
+        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "");
+        let result = read(&String::from("not_a_file"), &project_paths);
+        assert!(result.is_err())
+    }
 
-    let _ = fs::create_dir(&project_paths.project_directory);
-    let mut buffer = File::create(&project_paths.project_file).unwrap();
-    let _ = buffer.write(b"mix: [1,2,3]: muxed");
+    #[test]
+    fn poorly_formatted_file_returns_err() {
+        let name = rand_names::project_file_name();
+        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
 
-    let result = read(&name, &project_paths);
-    let _ = fs::remove_file(&project_paths.project_file);
-    assert!(result.is_err());
-}
+        let _ = fs::create_dir(&project_paths.project_directory);
+        let mut buffer = File::create(&project_paths.project_file).unwrap();
+        let _ = buffer.write(b"mix: [1,2,3]: muxed");
 
-#[test]
-fn good_file_returns_ok() {
-    let name = format!("{}", random::<u16>());
-    let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
+        let result = read(&name, &project_paths);
+        let _ = fs::remove_file(&project_paths.project_file);
+        assert!(result.is_err());
+    }
 
-    let _ = fs::create_dir(&project_paths.project_directory);
-    let mut buffer = File::create(&project_paths.project_file).unwrap();
-    let _ = buffer.write(
-        b"---
-windows: ['cargo', 'vim', 'git']
-",
-    );
+    #[test]
+    fn good_file_returns_ok() {
+        let name = rand_names::project_file_name();
+        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
 
-    let result = read(&name, &project_paths);
-    let _ = fs::remove_file(&project_paths.project_file);
-    assert!(result.is_ok());
+        let _ = fs::create_dir(&project_paths.project_directory);
+        let mut buffer = File::create(&project_paths.project_file).unwrap();
+        let _ = buffer.write(
+            b"---
+    windows: ['cargo', 'vim', 'git']
+    ",
+        );
+
+        let result = read(&name, &project_paths);
+        let _ = fs::remove_file(&project_paths.project_file);
+        assert!(result.is_ok());
+    }
 }

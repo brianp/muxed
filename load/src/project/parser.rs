@@ -9,9 +9,6 @@ use tmux::config::Config;
 use tmux::target::*;
 use yaml_rust::Yaml;
 
-#[cfg(test)]
-use yaml_rust::YamlLoader;
-
 /// Here was pass in the parsed yaml and project name. The purpose of this call
 /// loop is to build the stack of commands that are run to setup a users tmux
 /// session.
@@ -271,624 +268,630 @@ fn expand_path(node: &Yaml) -> Option<Rc<PathBuf>> {
     }
 }
 
-#[test]
-pub fn expect_1_session() {
-    let s = "---
-windows: ['cargo', 'vim', 'git']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Session(_) => true,
-        _ => false,
-    })
-    .collect();
+#[cfg(test)]
+mod test {
+    use super::*;
+    use yaml_rust::YamlLoader;
 
-    assert_eq!(remains.len(), 1)
-}
+    #[test]
+    pub fn expect_1_session() {
+        let s = "---
+    windows: ['cargo', 'vim', 'git']
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Session(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_2_windows_from_array() {
-    let s = "---
-windows: ['cargo', 'vim', 'git']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Window(_) => true,
-        _ => false,
-    })
-    .collect();
+        assert_eq!(remains.len(), 1)
+    }
 
-    assert_eq!(remains.len(), 2)
-}
+    #[test]
+    pub fn expect_2_windows_from_array() {
+        let s = "---
+    windows: ['cargo', 'vim', 'git']
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Window(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_1_attach() {
-    let s = "---
-windows: ['cargo', 'vim', 'git']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Attach(_) => true,
-        _ => false,
-    })
-    .collect();
+        assert_eq!(remains.len(), 2)
+    }
 
-    assert_eq!(remains.len(), 1)
-}
+    #[test]
+    pub fn expect_1_attach() {
+        let s = "---
+    windows: ['cargo', 'vim', 'git']
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Attach(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_2_windows_with_mixed_type_names() {
-    let s = "---
-windows: [1, 'vim', 3]
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Window(_) => true,
-        _ => false,
-    })
-    .collect();
-    assert_eq!(remains.len(), 2)
-}
+        assert_eq!(remains.len(), 1)
+    }
 
-#[test]
-pub fn expect_2_windows_from_list() {
-    let s = "---
-windows:
-  - cargo: ''
-  - vim: ''
-  - git: ''
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Window(_) => true,
-        _ => false,
-    })
-    .collect();
-    assert_eq!(remains.len(), 2)
-}
+    #[test]
+    pub fn expect_2_windows_with_mixed_type_names() {
+        let s = "---
+    windows: [1, 'vim', 3]
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Window(_) => true,
+            _ => false,
+        })
+        .collect();
+        assert_eq!(remains.len(), 2)
+    }
 
-#[test]
-pub fn expect_ok_with_empty_syscommands() {
-    let s = "---
-windows:
-  - editor:
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let result = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    );
-    assert!(result.is_ok())
-}
+    #[test]
+    pub fn expect_2_windows_from_list() {
+        let s = "---
+    windows:
+      - cargo: ''
+      - vim: ''
+      - git: ''
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Window(_) => true,
+            _ => false,
+        })
+        .collect();
+        assert_eq!(remains.len(), 2)
+    }
 
-#[test]
-pub fn expect_no_send_keys_commands() {
-    let s = "---
-windows:
-  - editor:
-";
+    #[test]
+    pub fn expect_ok_with_empty_syscommands() {
+        let s = "---
+    windows:
+      - editor:
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let result = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        );
+        assert!(result.is_ok())
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SendKeys(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_no_send_keys_commands() {
+        let s = "---
+    windows:
+      - editor:
+    ";
 
-    assert_eq!(remains.len(), 0)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SendKeys(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_err_with_nameless_window() {
-    let s = "---
-windows:
-  - : ls
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let result = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    );
-    assert!(result.is_err())
-}
+        assert_eq!(remains.len(), 0)
+    }
 
-#[test]
-pub fn expect_ok_with_empty_panes_syscommands() {
-    let s = "---
-windows:
-  - cargo:
-      layout: 'main-vertical'
-      panes:
-        -
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let result = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    );
-    assert!(result.is_ok())
-}
+    #[test]
+    pub fn expect_err_with_nameless_window() {
+        let s = "---
+    windows:
+      - : ls
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let result = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        );
+        assert!(result.is_err())
+    }
 
-#[test]
-pub fn expect_no_send_keys_with_empty_panes_syscommands() {
-    let s = "---
-windows:
-  - editor:
-      panes:
-        -
-";
+    #[test]
+    pub fn expect_ok_with_empty_panes_syscommands() {
+        let s = "---
+    windows:
+      - cargo:
+          layout: 'main-vertical'
+          panes:
+            -
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let result = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        );
+        assert!(result.is_ok())
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SendKeys(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_no_send_keys_with_empty_panes_syscommands() {
+        let s = "---
+    windows:
+      - editor:
+          panes:
+            -
+    ";
 
-    assert_eq!(remains.len(), 0)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SendKeys(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_1_split_window() {
-    let s = "---
-windows:
-  - editor:
-      layout: 'main-vertical'
-      panes: ['vim', 'guard']
-";
+        assert_eq!(remains.len(), 0)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Split(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_1_split_window() {
+        let s = "---
+    windows:
+      - editor:
+          layout: 'main-vertical'
+          panes: ['vim', 'guard']
+    ";
 
-    assert_eq!(remains.len(), 1)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Split(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_1_layout() {
-    let s = "---
-windows:
-  - editor:
-      layout: 'main-vertical'
-      panes: ['vim', 'guard']
-";
+        assert_eq!(remains.len(), 1)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Layout(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_1_layout() {
+        let s = "---
+    windows:
+      - editor:
+          layout: 'main-vertical'
+          panes: ['vim', 'guard']
+    ";
 
-    assert_eq!(remains.len(), 1)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Layout(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_1_session_with_panes_array() {
-    let s = "---
-windows:
-  - editor:
-      layout: 'main-vertical'
-      panes: ['vim', 'guard']
-";
+        assert_eq!(remains.len(), 1)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Session(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_1_session_with_panes_array() {
+        let s = "---
+    windows:
+      - editor:
+          layout: 'main-vertical'
+          panes: ['vim', 'guard']
+    ";
 
-    assert_eq!(remains.len(), 1)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Session(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_no_layout() {
-    let s = "---
-windows:
-  - editor:
-      panes: ['vim', 'guard']
-";
+        assert_eq!(remains.len(), 1)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::Layout(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_no_layout() {
+        let s = "---
+    windows:
+      - editor:
+          panes: ['vim', 'guard']
+    ";
 
-    assert_eq!(remains.len(), 0)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::Layout(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_three_send_keys_commands_from_pre_window() {
-    // pre gets run on all 2 panes and 1 window for a total of 3
-    let s = "---
-pre_window: 'ls'
-windows:
-  - editor:
-      panes:
-        -
-        -
-  - logs:
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SendKeys(_) => true,
-        _ => false,
-    })
-    .collect();
+        assert_eq!(remains.len(), 0)
+    }
 
-    assert_eq!(remains.len(), 3)
-}
+    #[test]
+    pub fn expect_three_send_keys_commands_from_pre_window() {
+        // pre gets run on all 2 panes and 1 window for a total of 3
+        let s = "---
+    pre_window: 'ls'
+    windows:
+      - editor:
+          panes:
+            -
+            -
+      - logs:
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SendKeys(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_two_send_keys_commands_from_pre_window() {
-    let s = "---
-pre_window:
- - 'ls'
- - 'ls'
-windows:
-  - editor:
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SendKeys(_) => true,
-        _ => false,
-    })
-    .collect();
+        assert_eq!(remains.len(), 3)
+    }
 
-    assert_eq!(remains.len(), 2)
-}
+    #[test]
+    pub fn expect_two_send_keys_commands_from_pre_window() {
+        let s = "---
+    pre_window:
+     - 'ls'
+     - 'ls'
+    windows:
+      - editor:
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SendKeys(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_no_send_keys_with_blank_panes() {
-    let s = "---
-windows:
-  - editor:
-      panes: ['','','']
-";
+        assert_eq!(remains.len(), 2)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SendKeys(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_no_send_keys_with_blank_panes() {
+        let s = "---
+    windows:
+      - editor:
+          panes: ['','','']
+    ";
 
-    assert_eq!(remains.len(), 0)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SendKeys(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_no_send_keys_with_blank_window() {
-    let s = "---
-windows:
-  - editor: ''
-";
+        assert_eq!(remains.len(), 0)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SendKeys(_) => true,
-        _ => false,
-    })
-    .collect();
+    #[test]
+    pub fn expect_no_send_keys_with_blank_window() {
+        let s = "---
+    windows:
+      - editor: ''
+    ";
 
-    assert_eq!(remains.len(), 0)
-}
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SendKeys(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_full_directory_name() {
-    let s = "---
-root: ~/JustPlainSimple Technologies Inc./financials/ledgers
-windows:
-  - dir: ''
-";
+        assert_eq!(remains.len(), 0)
+    }
 
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Commands = call(
-        &yaml,
-        "financials",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .find(|x| match x {
-        Commands::Session(_) => true,
-        _ => false,
-    })
-    .unwrap();
+    #[test]
+    pub fn expect_full_directory_name() {
+        let s = "---
+    root: ~/JustPlainSimple Technologies Inc./financials/ledgers
+    windows:
+      - dir: ''
+    ";
 
-    let root = match remains {
-        Commands::Session(ref k) => k,
-        _ => panic!("nope"),
-    };
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Commands = call(
+            &yaml,
+            "financials",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .find(|x| match x {
+            Commands::Session(_) => true,
+            _ => false,
+        })
+        .unwrap();
 
-    let home = dirs::home_dir().unwrap();
-    let path = PathBuf::from("JustPlainSimple Technologies Inc./financials/ledgers");
+        let root = match remains {
+            Commands::Session(ref k) => k,
+            _ => panic!("nope"),
+        };
 
-    assert_eq!(root.root_path, Some(Rc::new(home.join(path))))
-}
+        let home = dirs::home_dir().unwrap();
+        let path = PathBuf::from("JustPlainSimple Technologies Inc./financials/ledgers");
 
-#[test]
-pub fn expect_1_select_window() {
-    let s = "---
-windows: ['cargo', 'vim', 'git']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SelectWindow(_) => true,
-        _ => false,
-    })
-    .collect();
+        assert_eq!(root.root_path, Some(Rc::new(home.join(path))))
+    }
 
-    assert_eq!(remains.len(), 1)
-}
+    #[test]
+    pub fn expect_1_select_window() {
+        let s = "---
+    windows: ['cargo', 'vim', 'git']
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SelectWindow(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_1_select_pane() {
-    let s = "---
-windows: ['cargo', 'vim', 'git']
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let remains: Vec<Commands> = call(
-        &yaml,
-        "muxed",
-        false,
-        &Config {
-            base_index: 0,
-            pane_base_index: 0,
-        },
-    )
-    .unwrap()
-    .into_iter()
-    .filter(|x| match x {
-        Commands::SelectPane(_) => true,
-        _ => false,
-    })
-    .collect();
+        assert_eq!(remains.len(), 1)
+    }
 
-    assert_eq!(remains.len(), 1)
-}
+    #[test]
+    pub fn expect_1_select_pane() {
+        let s = "---
+    windows: ['cargo', 'vim', 'git']
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let remains: Vec<Commands> = call(
+            &yaml,
+            "muxed",
+            false,
+            &Config {
+                base_index: 0,
+                pane_base_index: 0,
+            },
+        )
+        .unwrap()
+        .into_iter()
+        .filter(|x| match x {
+            Commands::SelectPane(_) => true,
+            _ => false,
+        })
+        .collect();
 
-#[test]
-pub fn expect_vec_of_option_string() {
-    let s = "---
-pre: ls -alh
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let pre = pre_matcher(&yaml[0]["pre"]);
-    assert_eq!(pre.unwrap(), vec!(Some("ls -alh".to_string())))
-}
+        assert_eq!(remains.len(), 1)
+    }
 
-#[test]
-pub fn expect_vec_of_option_strings() {
-    let s = "---
-pre:
-  - ls -alh
-  - tail -f
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let pre = pre_matcher(&yaml[0]["pre"]);
-    assert_eq!(
-        pre.unwrap(),
-        vec!(Some("ls -alh".to_string()), Some("tail -f".to_string()))
-    )
-}
+    #[test]
+    pub fn expect_vec_of_option_string() {
+        let s = "---
+    pre: ls -alh
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let pre = pre_matcher(&yaml[0]["pre"]);
+        assert_eq!(pre.unwrap(), vec!(Some("ls -alh".to_string())))
+    }
 
-#[test]
-pub fn expect_some_from_pre_matcher() {
-    let s = "---
-pre: ls -alh
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let pre = pre_matcher(&yaml[0]["pre"]);
-    assert!(pre.is_some())
-}
+    #[test]
+    pub fn expect_vec_of_option_strings() {
+        let s = "---
+    pre:
+      - ls -alh
+      - tail -f
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let pre = pre_matcher(&yaml[0]["pre"]);
+        assert_eq!(
+            pre.unwrap(),
+            vec!(Some("ls -alh".to_string()), Some("tail -f".to_string()))
+        )
+    }
 
-#[test]
-pub fn expect_none_from_pre_matcher() {
-    let s = "---
-pre:
-";
-    let yaml = YamlLoader::load_from_str(s).unwrap();
-    let pre = pre_matcher(&yaml[0]["pre"]);
-    assert!(pre.is_none())
+    #[test]
+    pub fn expect_some_from_pre_matcher() {
+        let s = "---
+    pre: ls -alh
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let pre = pre_matcher(&yaml[0]["pre"]);
+        assert!(pre.is_some())
+    }
+
+    #[test]
+    pub fn expect_none_from_pre_matcher() {
+        let s = "---
+    pre:
+    ";
+        let yaml = YamlLoader::load_from_str(s).unwrap();
+        let pre = pre_matcher(&yaml[0]["pre"]);
+        assert!(pre.is_none())
+    }
 }

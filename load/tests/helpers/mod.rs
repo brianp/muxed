@@ -1,6 +1,7 @@
 //! The integration suite helpers.
 
 use common::args::Args;
+use common::rand_names;
 use rand::random;
 use snapshot::tmux;
 use std::fs;
@@ -18,14 +19,13 @@ fn project_name(contents: &[u8]) -> String {
 
     match yaml[0]["name"].as_str() {
         Some(x) => x.to_string(),
-        None => format!("muxed_int_test_{}", random::<u16>()),
+        None => rand_names::project_file_name(),
     }
 }
 
 fn setup(contents: &[u8]) -> (String, PathBuf) {
     let project_name = project_name(contents);
-    let project_file = format!("/tmp/muxed_{}/{}.yml", random::<u16>(), project_name);
-    let project_path = PathBuf::from(&project_file);
+    let project_path = rand_names::project_file_path_with_name(&project_name);
 
     let muxed_path = project_path.parent().unwrap();
     if !muxed_path.exists() {
@@ -34,8 +34,9 @@ fn setup(contents: &[u8]) -> (String, PathBuf) {
 
     let mut buffer = File::create(&project_path).unwrap();
     let _ = buffer.write(contents);
+    let _ = buffer.sync_all();
 
-    (project_name, project_path.clone())
+    (project_name, project_path)
 }
 
 fn cleanup(project_name: &str, config_path: &PathBuf) {

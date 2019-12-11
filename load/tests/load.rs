@@ -15,9 +15,9 @@ mod helpers;
 #[cfg(test)]
 mod test {
     mod load {
+        use common::rand_names;
         use dirs::home_dir;
         use helpers::test_with_contents;
-        use rand::random;
         use std::fs;
         use std::fs::File;
         use std::io::prelude::*;
@@ -254,7 +254,7 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_to_create_file() {
-            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let file = rand_names::project_file_with_dir("/tmp");
             let contents = format!(
                 "---
 pre: touch {}
@@ -270,8 +270,8 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_to_create_two_files() {
-            let file1 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
-            let file2 = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let file1 = rand_names::project_file_with_dir("/tmp");
+            let file2 = rand_names::project_file_with_dir("/tmp");
             let contents = format!(
                 "---
 pre:
@@ -292,7 +292,7 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_window_to_be_called_for_each_window() {
-            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let file = rand_names::project_file_with_dir("/tmp");
             let contents = format!(
                 "---
 pre_window: echo 'pre_window' >> {}
@@ -310,7 +310,7 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_window_to_be_called_twice_for_each_window() {
-            let file = PathBuf::from(format!("/tmp/{}", random::<u16>()));
+            let file = rand_names::project_file_with_dir("/tmp");
             let contents = format!(
                 "---
 pre_window:

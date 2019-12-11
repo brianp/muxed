@@ -1,7 +1,5 @@
 extern crate dirs;
 extern crate libc;
-#[cfg(test)]
-extern crate rand;
 extern crate yaml_rust;
 
 extern crate common;
