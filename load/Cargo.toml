@@ -10,11 +10,10 @@ doctest = false
 [dependencies]
 common    = { path = "../common" }
 dirs      = "2.0.2"
-libc      = "0.2.21"
+libc      = "0.2.66"
 yaml-rust = { version = "0.3.2", default-features = false }
 
 [dev-dependencies]
-libc      = "0.2.21"
 rand      = "0.7.2"
 regex     = "0.2.1"
 snapshot  = { path = "../snapshot" }
