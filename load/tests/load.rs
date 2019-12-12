@@ -7,7 +7,6 @@ extern crate dirs;
 extern crate libc;
 extern crate load;
 extern crate rand;
-extern crate regex;
 extern crate yaml_rust;
 
 mod helpers;
