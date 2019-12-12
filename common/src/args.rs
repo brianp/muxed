@@ -1,5 +1,6 @@
 //! The struct managing cli args
 use rand::random;
+use serde::Deserialize;
 
 /// The args struct for taking arguments passed in from the command line
 /// and making it easier to pass around.
@@ -14,7 +15,7 @@ use rand::random;
 /// `cmd_new` literally nothing
 /// `cmd_snapshot` not sure why I have these
 ///
-#[derive(Debug, RustcDecodable)]
+#[derive(Debug, Deserialize)]
 pub struct Args {
     pub flag_debug: bool,
     pub flag_d: bool,

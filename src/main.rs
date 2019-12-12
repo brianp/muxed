@@ -1,7 +1,6 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
-extern crate docopt;
-
 extern crate common;
+extern crate docopt;
 extern crate edit;
 extern crate load;
 extern crate new;
@@ -80,7 +79,7 @@ pub fn main() {
     let mut input: std::env::Args = env::args();
 
     let args: Args = Docopt::new(USAGE)
-        .and_then(|d| d.decode())
+        .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
 
     if args.flag_v {

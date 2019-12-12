@@ -14,7 +14,7 @@ members = [
 
 [dependencies]
 common   = { path = "./common" }
-docopt   = "0.7"
+docopt   = "1.1.0"
 edit     = { path = "./edit" }
 load     = { path = "./load" }
 new      = { path = "./new" }
