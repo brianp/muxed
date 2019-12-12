@@ -1,7 +1,7 @@
 FROM rustlang/rust:nightly
 
+ENV TMUX_VERSION 3.0a
 WORKDIR /usr/src
-RUN USER=root cargo init
 
 # This is a dummy build to get the dependencies cached
 COPY . .
@@ -9,8 +9,19 @@ RUN cargo fetch --target x86_64-unknown-linux-gnu
 RUN rm -rf ./*
 
 RUN apt-get update && \
-      apt install -y tmux && \
-      apt install -y locales
+      apt-get install -y libevent-dev \
+      locales \
+      bison \
+      byacc && \
+      apt-get remove tmux
+
+RUN git clone https://github.com/tmux/tmux.git /opt/tmux && \
+    cd /opt/tmux && \
+    git checkout $TMUX_VERSION && \
+    sh autogen.sh && \
+    ./configure --prefix=/opt/tmux && make && make install
+
+ENV PATH $PATH:/opt/tmux/bin
 
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
       locale-gen
