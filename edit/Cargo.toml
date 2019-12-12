@@ -11,6 +11,3 @@ doctest = false
 common = { path = "../common" }
 dirs   = "2.0.2"
 libc   = "0.2.21"
-
-[dev-dependencies]
-rand   = "0.3.15"
