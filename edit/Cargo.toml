@@ -9,7 +9,7 @@ doctest = false
 
 [dependencies]
 common = { path = "../common" }
-dirs   = "1.0.5"
+dirs   = "2.0.2"
 libc   = "0.2.21"
 
 [dev-dependencies]
