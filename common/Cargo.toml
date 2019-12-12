@@ -6,5 +6,5 @@ publish = false
 
 [dependencies]
 dirs            = "2.0.2"
-rand            = "0.3.15"
+rand            = "0.7.2"
 serde           = { version = "1", features = ["derive"] }
