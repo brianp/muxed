@@ -45,8 +45,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         command
             .as_trait()
             .call(args.flag_debug)
-            .map_err(|e| format!("Had a problem running commands for tmux {}", e))
-            .unwrap();
+            .map_err(|e| format!("Had a problem running commands for tmux {}", e))?;
     }
 
     Ok(())
