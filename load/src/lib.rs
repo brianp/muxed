@@ -18,6 +18,7 @@ use tmux::config::Config;
 pub fn exec(args: Args) -> Result<(), String> {
     let project_paths = project_paths(&args);
 
+    // FIXME: Should have an error message
     let yaml = project::read(&args.arg_project, &project_paths).unwrap();
     let project_name = &yaml[0]["name"]
         .as_str()

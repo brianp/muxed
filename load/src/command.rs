@@ -60,6 +60,9 @@ impl<'a> Command for Session<'a> {
 /// `name`: The named window to be opened.
 /// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
 /// `-c` arguement.
+/// TODO: Turn session_name into a SessionTarget. Remove session_name_arg. Store
+/// the mutated value ':' in the SessionTarget. Convert SessionTarget from &str
+/// to Rc<String>.
 #[derive(Debug, Clone)]
 pub struct Window<'a> {
     pub session_name: &'a str,
