@@ -7,9 +7,6 @@ extern crate serde_yaml;
 mod capture;
 pub mod tmux;
 
-#[macro_use]
-extern crate serde_derive;
-
 use common::args::Args;
 use common::first_run::check_first_run;
 use common::project_paths::project_paths;

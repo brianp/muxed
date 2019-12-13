@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use tmux::window::Window;
 
 #[derive(Debug, Serialize, Deserialize)]

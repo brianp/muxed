@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::process::Command;
 use tmux::pane::pid::Pid;

@@ -1,6 +1,6 @@
 use capture::retrieve_capture;
-use serde::ser::Serialize;
-use serde::Serializer;
+use serde::{Deserialize, Serialize, Serializer};
+use serde::ser::SerializeMap;
 use std::io;
 use std::process::{Command, Output};
 use tmux::pane::Pane;
@@ -70,7 +70,7 @@ impl Window {
 }
 
 impl Serialize for Window {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
@@ -80,10 +80,9 @@ impl Serialize for Window {
             panes: self.panes.clone(),
         };
 
-        let mut state = serializer.serialize_map(Some(1))?;
-        serializer.serialize_map_key(&mut state, &self.name)?;
-        serializer.serialize_map_value(&mut state, window)?;
-        serializer.serialize_map_end(state)
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_entry(&self.name, &window)?;
+        map.end()
     }
 }
 

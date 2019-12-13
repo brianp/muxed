@@ -1,8 +1,7 @@
 //use std::path::PathBuf;
 //use tmux::window::Window;
 use capture::retrieve_capture;
-use serde::ser::Serialize;
-use serde::Serializer;
+use serde::{Deserialize, Serialize, Serializer};
 use std::io;
 use std::path::PathBuf;
 use std::process::{Command, Output};
@@ -65,7 +64,7 @@ impl Pane {
 }
 
 impl Serialize for Pane {
-    fn serialize<S>(&self, serializer: &mut S) -> Result<(), S::Error>
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {

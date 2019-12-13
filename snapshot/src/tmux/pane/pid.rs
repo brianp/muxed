@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 use std::ffi::OsStr;
 use std::fmt;
 use std::str::FromStr;
