@@ -6,6 +6,7 @@ publish = false
 
 [lib]
 doctest = false
+test = false
 
 [dependencies]
 common = { path = "../common" }

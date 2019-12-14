@@ -3,6 +3,10 @@ name = "muxed"
 version = "0.7.2-development"
 authors = ["Brian Pearce"]
 
+[[bin]]
+name = "muxed"
+test = false
+
 [workspace]
 members = [
     "common",
