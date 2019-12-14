@@ -1,3 +1,48 @@
+<a name="0.8.0">The one that adds Edit and upgrades all the Dependencies</a>
+## 0.8.0 (2019-12-14)
+
+#### Features
+
+*   Add github issue template ([f805c103](https://github.com/brianp/muxed/commit/f805c103c3abba16b55e77946bf5d17bb3a46e72))
+* **Edit:**  The edit subcommand ([43ebe607](https://github.com/brianp/muxed/commit/43ebe607616da784d277cf27a79635a71ff6426c), closes [#6](https://github.com/brianp/muxed/issues/6))
+
+#### Improvements
+
+* **New:**  Expand the new command's arguments to accept -F ([9f1f04e5](https://github.com/brianp/muxed/commit/9f1f04e5ef6c3878d6e251bfe93a799d6d9430ea))
+
+#### Fixes
+
+* **New:**  Don't panic when file already exists ([9f1f04e5](https://github.com/brianp/muxed/commit/9f1f04e5ef6c3878d6e251bfe93a799d6d9430ea))
+
+#### Documentation
+
+* **Readme:**  Update usage ([051f83c2](https://github.com/brianp/muxed/commit/051f83c227bb4131f933ec8c67af5dace670ca6e))
+
+#### Refactor
+
+*   Refactor file naming in tests ([c104abd5](https://github.com/brianp/muxed/commit/c104abd5fc0cfa76259652625c195b2bbcaa8bb6))
+*   Don't compile untested crates ([9999778b](https://github.com/brianp/muxed/commit/9999778ba8492efbd37306bfc022ea9fdeb50bcd))
+*   Utilize same template creation code ([46ecae5b](https://github.com/brianp/muxed/commit/46ecae5b88338260e8c3e7e1e228012f16fd19e8))
+*   Fixup un-used result warning ([101bf984](https://github.com/brianp/muxed/commit/101bf9844bd3b7037d271ed2838f0d7336fde164))
+* **Muxed:**  Upgrade docopt 0.7.0 -> 1.1.0 ([d0429ef3](https://github.com/brianp/muxed/commit/d0429ef3f785a6898f082d1a3558a2ae025abaca))
+* **Common:**
+  *  Upgrade rand 0.3.15 -> 0.7.2 ([ef2b3dd0](https://github.com/brianp/muxed/commit/ef2b3dd099f84145dcfe23f1823e4807d4ecf038))
+  *  Upgrade dirs 1.0.5 -> 2.0.2 ([90f60ed9](https://github.com/brianp/muxed/commit/90f60ed9a21786f62f34e1f4606d0cb45794a8cd))
+* **Edit:**
+  *  Upgrade libc 0.2.21 -> 0.2.66 ([672430fc](https://github.com/brianp/muxed/commit/672430fc7550059ed0a750bc3103c226db26c664))
+  *  Upgrade dirs 1.0.5 -> 2.0.2 ([07422d76](https://github.com/brianp/muxed/commit/07422d7622de2050300e35cc298074796bf01048))
+* **Load:**
+  *  Upgrade yaml-rust 0.3.2 -> 0.4.3 ([31476536](https://github.com/brianp/muxed/commit/31476536ae8067ec74fb5a3c731a8b08478c18fe))
+  *  Upgrade libc 0.2.21 -> 0.2.66 ([37562a42](https://github.com/brianp/muxed/commit/37562a42f8068d761fc45e71c64d130bc198f0e0))
+  *  Upgrade rand 0.3.15 -> 0.7.2 ([95392372](https://github.com/brianp/muxed/commit/9539237241cb74ca7dcda7811592d5dd4d458d40))
+  *  Upgrade dirs 1.0.5 -> 2.0.2 ([958a382b](https://github.com/brianp/muxed/commit/958a382bc938548599914ef475a8fddd6233d7fb))
+* **Snapshot:**
+  *  Upgrade serde 0.8.23->1.0.103 ([46f1e872](https://github.com/brianp/muxed/commit/46f1e87200f2a72cc239a2733d1ae2ebb44a36f2))
+  *  Upgrade regex 0.2.1 -> 1.3.1 ([2824b0ad](https://github.com/brianp/muxed/commit/2824b0adfcaff1adbe0cad80e4fbf3b4271076fa))
+* **Docker:**  Rename and fixup docker files ([d6bec594](https://github.com/brianp/muxed/commit/d6bec594f435e108c96585f66c3f332582ec822d))
+* **First Run:**  Use paths for first run check ([98fecbd2](https://github.com/brianp/muxed/commit/98fecbd20c891af5d780ba95384cbdaae0b7f8e1))
+* **Project Paths:**  Use std::default for Args ([9a0ec6dd](https://github.com/brianp/muxed/commit/9a0ec6dd786889d99ec3c563d256c63d38181137))
+
 <a name="0.7.1">The one that removes debug lines</a>
 ### 0.7.1 (2019-12-05)
 
