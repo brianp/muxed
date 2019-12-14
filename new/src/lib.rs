@@ -44,10 +44,10 @@ pub fn exec(args: Args) -> Result<(), String> {
 }
 
 fn modified_template(template: &str, file: &PathBuf) -> String {
-    template.replace("{file}", file.to_str().unwrap())
+    template.replace("{file}", file.to_str().expect("Couldn't convert the {:?} path into a String to write into the new file"))
 }
 
-fn write_template<S>(template: S, path: &PathBuf, force: bool) -> Result<(), String>
+pub fn write_template<S>(template: S, path: &PathBuf, force: bool) -> Result<(), String>
 where
     S: Into<String>,
 {

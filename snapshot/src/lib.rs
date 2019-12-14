@@ -1,5 +1,6 @@
 //! Muxedsnapshot. A tmux session cloner for Muxed.
 extern crate common;
+extern crate new;
 extern crate regex;
 extern crate serde;
 extern crate serde_yaml;
@@ -10,9 +11,7 @@ pub mod tmux;
 use common::args::Args;
 use common::first_run::check_first_run;
 use common::project_paths::project_paths;
-use std::fs::OpenOptions;
-use std::io::Write;
-use std::path::PathBuf;
+use new::write_template as write_config;
 
 /// The main execution method.
 /// Accepts two arguments. -n for the name of the project file and -t to target
@@ -42,33 +41,6 @@ pub fn exec(args: Args) -> Result<(), String> {
 
     write_config(s, &project_paths.project_file, args.flag_f).unwrap();
     println!("We made a snapshot of your session! \u{1F60A}");
-    Ok(())
-}
-
-/// Write the new file
-fn write_config<S>(template: S, path: &PathBuf, force: bool) -> Result<(), String>
-where
-    S: Into<String>,
-{
-    let path_str = path.to_str().expect("Path could not be opened");
-    let mut file = OpenOptions::new()
-        .write(true)
-        .truncate(force)
-        .create(force)
-        .create_new(!force)
-        .open(path)
-        .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e))?;
-
-    file.write_all(template.into().as_bytes()).map_err(|e| {
-        format!(
-            "Could not write contents of template to the file {}. Error {}",
-            &path_str, e
-        )
-    })?;
-
-    file.sync_all()
-        .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;
-
     Ok(())
 }
 
