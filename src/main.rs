@@ -24,12 +24,15 @@ macro_rules! try_or_err (
     })
 );
 
+static DISALLOWED_PROJECT_NAMES: [&str; 3] = ["new", "edit", "load"];
+
 static USAGE: &str = "
 Usage:
-    muxed [options] <project>
     muxed edit [options] <project>
     muxed new [options] <project>
     muxed snapshot [options] <project>
+    muxed load [options] <project>
+    muxed [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
@@ -76,8 +79,6 @@ Subcommands:
 /// $ ./muxed projectName
 /// ```
 pub fn main() {
-    let mut input: std::env::Args = env::args();
-
     let args: Args = Docopt::new(USAGE)
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
@@ -87,12 +88,19 @@ pub fn main() {
         exit(0);
     };
 
-    if let Some(x) = input.nth(1) {
-        match x.as_ref() {
-            "edit" => try_or_err!(edit::exec(args)),
-            "new" => try_or_err!(new::exec(args)),
-            "snapshot" => try_or_err!(snapshot::exec(args)),
-            _ => try_or_err!(load::exec(args)),
-        }
+    if args.cmd_new {
+        try_or_err!(new::exec(args))
+    } else if args.cmd_edit {
+        try_or_err!(edit::exec(args))
+    } else if args.cmd_snapshot {
+        try_or_err!(snapshot::exec(args))
+    } else if DISALLOWED_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
+        println!(
+            "Tried to call sub-command {} without a project. Please specify a project name.",
+            args.arg_project
+        );
+        exit(1);
+    } else {
+        try_or_err!(load::exec(args))
     }
 }
