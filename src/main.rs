@@ -24,7 +24,7 @@ macro_rules! try_or_err (
     })
 );
 
-static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 2] = ["new", "edit"];
+static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 4] = ["new", "edit", "load", "snapshot"];
 
 static USAGE: &str = "
 Usage:
