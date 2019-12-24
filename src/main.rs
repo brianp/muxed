@@ -54,6 +54,7 @@ Subcommands:
     edit <project>                   Edit an existing project file
     new <project>                    To create a new project file
     snapshot -t <session> <project>  Capture a running session and create a config file for it
+    load                             Load the specified project, this is the default command
 ";
 
 /// The main execution method.
