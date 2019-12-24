@@ -24,7 +24,7 @@ macro_rules! try_or_err (
     })
 );
 
-static DISALLOWED_PROJECT_NAMES: [&str; 2] = ["new", "edit"];
+static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 2] = ["new", "edit"];
 
 static USAGE: &str = "
 Usage:
@@ -32,6 +32,7 @@ Usage:
     muxed edit [options] <project>
     muxed new [options] <project>
     muxed snapshot [options] <project>
+    muxed load [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
@@ -93,7 +94,9 @@ pub fn main() {
         try_or_err!(edit::exec(args))
     } else if args.cmd_snapshot {
         try_or_err!(snapshot::exec(args))
-    } else if DISALLOWED_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
+    } else if args.cmd_load {
+        try_or_err!(load::exec(args))
+    } else if DISALLOWED_SHORTHAND_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
         println!(
             "Tried to call sub-command '{}' without a project. Please specify a project name.",
             args.arg_project
