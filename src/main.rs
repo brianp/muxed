@@ -24,7 +24,7 @@ macro_rules! try_or_err (
     })
 );
 
-static DISALLOWED_PROJECT_NAMES: [&str; 3] = ["new", "edit", "load"];
+static DISALLOWED_PROJECT_NAMES: [&str; 2] = ["new", "edit"];
 
 static USAGE: &str = "
 Usage:
@@ -32,7 +32,6 @@ Usage:
     muxed edit [options] <project>
     muxed new [options] <project>
     muxed snapshot [options] <project>
-    muxed load [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
