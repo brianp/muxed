@@ -95,7 +95,7 @@ pub fn main() {
         try_or_err!(snapshot::exec(args))
     } else if DISALLOWED_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
         println!(
-            "Tried to call sub-command {} without a project. Please specify a project name.",
+            "Tried to call sub-command '{}' without a project. Please specify a project name.",
             args.arg_project
         );
         exit(1);

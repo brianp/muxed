@@ -11,9 +11,9 @@ use serde::Deserialize;
 /// `flag_t` the session to read from
 /// `flag_debug` run inline print statements for debugging
 /// `arg_project` the project file to read
-/// `cmd_edit`
-/// `cmd_new` literally nothing
-/// `cmd_snapshot` not sure why I have these
+/// `cmd_edit` if `true` run edit command
+/// `cmd_new` if `true` run new command
+/// `cmd_snapshot` if `true` run snapshot command
 ///
 #[derive(Debug, Deserialize)]
 pub struct Args {
