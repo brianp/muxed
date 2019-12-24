@@ -96,13 +96,15 @@ pub fn main() {
         try_or_err!(snapshot::exec(args))
     } else if args.cmd_load {
         try_or_err!(load::exec(args))
-    } else if DISALLOWED_SHORTHAND_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
-        println!(
-            "Tried to call sub-command '{}' without a project. Please specify a project name.",
-            args.arg_project
-        );
-        exit(1);
     } else {
-        try_or_err!(load::exec(args))
+        if DISALLOWED_SHORTHAND_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
+            println!(
+                "Tried to call sub-command '{}' without a project. Please specify a project name.",
+                args.arg_project
+            );
+            exit(1);
+        } else {
+            try_or_err!(load::exec(args))
+        }
     }
 }
