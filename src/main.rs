@@ -103,8 +103,8 @@ pub fn main() {
                 args.arg_project
             );
             exit(1);
-        } else {
-            try_or_err!(load::exec(args))
         }
+
+        try_or_err!(load::exec(args))
     }
 }
