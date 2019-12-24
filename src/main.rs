@@ -28,11 +28,11 @@ static DISALLOWED_PROJECT_NAMES: [&str; 3] = ["new", "edit", "load"];
 
 static USAGE: &str = "
 Usage:
+    muxed [options] <project>
     muxed edit [options] <project>
     muxed new [options] <project>
     muxed snapshot [options] <project>
     muxed load [options] <project>
-    muxed [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
