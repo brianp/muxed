@@ -28,11 +28,11 @@ static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 4] = ["new", "edit", "load", "
 
 static USAGE: &str = "
 Usage:
-    muxed [options] <project>
+    muxed [flags] [options] <project>
     muxed edit [options] <project>
-    muxed new [options] <project>
-    muxed snapshot [options] <project>
-    muxed load [options] <project>
+    muxed load [flags] [options] <project>
+    muxed new [flags] [options] <project>
+    muxed snapshot [flags] [options] <project>
     muxed (-h | --help)
     muxed (-v | --version)
 
@@ -52,9 +52,9 @@ Args:
 
 Subcommands:
     edit <project>                   Edit an existing project file
+    load <project>                   Load the specified project, this is the default command
     new <project>                    To create a new project file
     snapshot -t <session> <project>  Capture a running session and create a config file for it
-    load                             Load the specified project, this is the default command
 ";
 
 /// The main execution method.
@@ -89,14 +89,14 @@ pub fn main() {
         exit(0);
     };
 
-    if args.cmd_new {
-        try_or_err!(new::exec(args));
-    } else if args.cmd_edit {
+    if args.cmd_edit {
         try_or_err!(edit::exec(args));
-    } else if args.cmd_snapshot {
-        try_or_err!(snapshot::exec(args));
     } else if args.cmd_load {
         try_or_err!(load::exec(args));
+    } else if args.cmd_new {
+        try_or_err!(new::exec(args));
+    } else if args.cmd_snapshot {
+        try_or_err!(snapshot::exec(args));
     } else {
         if DISALLOWED_SHORTHAND_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
             println!(
