@@ -17,9 +17,8 @@ session.
 ### Download a release:
 
 See the [releases](https://github.com/brianp/muxed/releases) page for muxed packages.
-Download and untar the package as desired. The complete package contains
-both `muxed`, `muxednew`, and `muxedsnapshot`.
-Make sure all bins are somewhere in your `$PATH`. I
+Download and untar the package as desired.
+Make sure the bin is somewhere in your `$PATH`. I
 generally move the bins in to `/usr/local/bin`.
 
 ```shell
@@ -38,6 +37,19 @@ This will add a [tap](https://github.com/brianp/homebrew-muxed) to install a pre
 $ brew tap brianp/homebrew-muxed
 $ brew install muxed_bin
 ```
+
+## For development
+
+### With Docker
+
+Docker commands are long so I use a make file that points all the commands to a
+runing docker container.
+
+$ git clone git@github.com:brianp/muxed.git
+$ export MUXED_ENV=nix
+$ make build
+$ make start
+$ make cargo cmd=test
 
 ### From source:
 
@@ -59,10 +71,10 @@ If this is your first run, muxed will create the `~/.muxed/` directory for you.
 
 ```shell
 $ muxed new my_project
-Looks like this is your first time here. Muxed could't find the configuration directory: `/home/vagrant/.muxed`
+Looks like this is your first time here. Muxed could't find the configuration directory: `/root/.muxed`
 Creating that now 👌
 
-✌ The template file my_project.yml has been written to /home/vagrant/.muxed
+✌ The template file my_project.yml has been written to /root/.muxed
 Happy tmuxing!
 ```
 
@@ -86,9 +98,10 @@ right will have a shell listing of your current working directory.
 
 ### 2. Edit your template
 Now you can use your favourite editor and make changes to the config as desired.
+This makes the assumption you have an `$EDITOR` env var set.
 
 ```shell
-$ $EDITOR ~/.muxed/my_project.yml
+$ muxed edit my_project
 ```
 
 ### 3. Open TMUX with your muxed config
