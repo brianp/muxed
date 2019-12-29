@@ -1,6 +1,6 @@
+use project_paths::CONFIG_EXTENSION;
 use rand::random;
 use std::path::PathBuf;
-use project_paths::CONFIG_EXTENSION;
 
 pub fn project_path_name() -> String {
     format!("/tmp/.muxed-test-{}/", random::<u16>())

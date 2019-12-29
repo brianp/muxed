@@ -54,9 +54,9 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
 
 #[cfg(test)]
 mod test {
+    use super::*;
     use common::rand_names;
     use std::fs;
-    use super::*;
 
     #[test]
     fn missing_file_returns_err() {

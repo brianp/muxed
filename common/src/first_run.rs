@@ -36,28 +36,28 @@ pub fn check_first_run(muxed_dir: &Path) -> Result<(), String> {
 
 #[cfg(test)]
 mod test {
-  use rand_names;
-  use std::fs::remove_dir;
-  use super::*;
+    use super::*;
+    use rand_names;
+    use std::fs::remove_dir;
 
-  #[test]
-  fn creates_dir_if_not_exist() {
-    let path = rand_names::project_path();
+    #[test]
+    fn creates_dir_if_not_exist() {
+        let path = rand_names::project_path();
 
-    assert!(!path.exists());
-    assert!(check_first_run(&path).is_ok()); // Side effects
-    assert!(path.exists());
+        assert!(!path.exists());
+        assert!(check_first_run(&path).is_ok()); // Side effects
+        assert!(path.exists());
 
-    let _ = remove_dir(path);
-  }
+        let _ = remove_dir(path);
+    }
 
-  #[test]
-  fn returns_ok_if_already_exists() {
-    let path = rand_names::project_path();
-    let _ = create_dir(&path);
+    #[test]
+    fn returns_ok_if_already_exists() {
+        let path = rand_names::project_path();
+        let _ = create_dir(&path);
 
-    assert!(check_first_run(&path).is_ok());
+        assert!(check_first_run(&path).is_ok());
 
-    let _ = remove_dir(path);
-  }
+        let _ = remove_dir(path);
+    }
 }

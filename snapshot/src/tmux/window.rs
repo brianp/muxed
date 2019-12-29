@@ -1,6 +1,6 @@
 use capture::retrieve_capture;
-use serde::{Deserialize, Serialize, Serializer};
 use serde::ser::SerializeMap;
+use serde::{Deserialize, Serialize, Serializer};
 use std::io;
 use std::process::{Command, Output};
 use tmux::pane::Pane;

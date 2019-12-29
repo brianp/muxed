@@ -46,11 +46,11 @@ pub fn exec(args: Args) -> Result<(), String> {
 
 #[cfg(test)]
 mod test {
-    use common::rand_names;
-    use std::fs::File;
-    use std::fs;
-    use std::io::{Read, Write};
     use super::write_config;
+    use common::rand_names;
+    use std::fs;
+    use std::fs::File;
+    use std::io::{Read, Write};
 
     #[test]
     fn expect_ok_result() {

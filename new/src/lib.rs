@@ -75,10 +75,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use common::rand_names;
-    use std::fs::File;
-    use std::fs;
     use super::*;
+    use common::rand_names;
+    use std::fs;
+    use std::fs::File;
 
     #[test]
     fn expect_muxed_project_text() {
