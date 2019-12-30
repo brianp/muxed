@@ -3,9 +3,10 @@
 //! configs in.
 pub mod parser;
 
-use command::{Attach, Commands};
+use command::{Attach, Commands, SwitchClient};
 use common::project_paths::ProjectPaths;
 use first_run::check_first_run;
+use std::env;
 use std::fs::File;
 use std::io::prelude::*;
 use tmux::has_session;
@@ -46,9 +47,19 @@ pub fn read(project_name: &str, project_paths: &ProjectPaths) -> Result<Vec<Yaml
 /// session is not active return None and let the app carry on.
 pub fn session_exists(project_name: &str) -> Option<Commands> {
     if has_session(project_name).success() {
-        Some(Attach::new(&project_name, None).into())
+        Some(open(project_name))
     } else {
         None
+    }
+}
+
+/// Check to see how we want to open the project. Do we need to attach to a new
+/// tmux session or can we switch the client from a running session.
+pub fn open(project_name: &str) -> Commands {
+    if env::var_os("TMUX").is_some() {
+        SwitchClient::new(&project_name).into()
+    } else {
+        Attach::new(&project_name, None).into()
     }
 }
 

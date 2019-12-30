@@ -3,6 +3,7 @@
 
 use command::*;
 use dirs::home_dir;
+use project;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use tmux::config::Config;
@@ -172,7 +173,7 @@ pub fn call<'a>(
     };
 
     if !daemonize {
-        remains.push(Attach::new(&project_name, root).into());
+        remains.push(project::open(&project_name).into());
     };
 
     Ok(remains)

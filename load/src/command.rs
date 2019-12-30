@@ -247,6 +247,27 @@ impl Command for SelectPane {
     }
 }
 
+/// Used to switch to a daemonized session when already within a tmux session.
+/// name: The named session to switch to.
+#[derive(Debug, Clone)]
+pub struct SwitchClient<'a> {
+    pub name: SessionTarget<'a>,
+}
+
+impl<'a> SwitchClient<'a> {
+    pub fn new(name: &'a str) -> SwitchClient<'a> {
+        SwitchClient {
+            name: SessionTarget::new(name),
+        }
+    }
+}
+
+impl<'a> Command for SwitchClient<'a> {
+    fn args(&self) -> Vec<&str> {
+        vec!["switch-client", "-t", &self.name.arg_string]
+    }
+}
+
 /// Used for executing the `pre` option to execute commands before building the
 /// tmux session.
 /// exec: The command to execute
@@ -295,6 +316,7 @@ pub enum Commands<'a> {
     SendKeys(SendKeys),
     Session(Session<'a>),
     Split(Split),
+    SwitchClient(SwitchClient<'a>),
     Window(Window<'a>),
 }
 
@@ -309,6 +331,7 @@ impl<'a> Commands<'a> {
             Commands::SendKeys(c) => c,
             Commands::Session(c) => c,
             Commands::Split(c) => c,
+            Commands::SwitchClient(c) => c,
             Commands::Window(c) => c,
         }
     }
@@ -359,6 +382,12 @@ impl<'a> From<Session<'a>> for Commands<'a> {
 impl<'a> From<Split> for Commands<'a> {
     fn from(command: Split) -> Self {
         Commands::Split(command)
+    }
+}
+
+impl<'a> From<SwitchClient<'a>> for Commands<'a> {
+    fn from(command: SwitchClient<'a>) -> Self {
+        Commands::SwitchClient(command)
     }
 }
 
