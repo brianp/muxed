@@ -12,6 +12,8 @@ use std::io::prelude::*;
 use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
 
+static TMUX_ENV_VAR: &str = "TMUX";
+
 /// Using the provided project name, locate the path to that project file. It
 /// should be something similar to: `~/.muxed/my_project.yml`
 /// Read in the contents of the config (which should be Yaml), and parse the
@@ -56,7 +58,7 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
 /// Check to see how we want to open the project. Do we need to attach to a new
 /// tmux session or can we switch the client from a running session.
 pub fn open(project_name: &str) -> Commands {
-    if env::var_os("TMUX").is_some() {
+    if env::var_os(TMUX_ENV_VAR).is_some() {
         SwitchClient::new(&project_name).into()
     } else {
         Attach::new(&project_name, None).into()
