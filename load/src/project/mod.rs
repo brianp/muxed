@@ -111,4 +111,26 @@ mod test {
         let _ = fs::remove_file(&project_paths.project_file);
         assert!(result.is_ok());
     }
+
+    #[test]
+    fn open_returns_attach_in_bare_context() {
+        let attach_command = match open("muxed") {
+            Commands::Attach(_) => true,
+            _ => false,
+        };
+
+        assert!(attach_command);
+    }
+
+    #[test]
+    fn open_returns_switch_client_in_nested_context() {
+        let _ = env::set_var(TMUX_ENV_VAR, "somestring");
+        let switch_command = match open("muxed") {
+            Commands::SwitchClient(_) => true,
+            _ => false,
+        };
+        let _ = env::remove_var(TMUX_ENV_VAR);
+
+        assert!(switch_command);
+    }
 }
