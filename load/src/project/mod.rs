@@ -19,17 +19,35 @@ static TMUX_ENV_VAR: &str = "TMUX";
 /// Read in the contents of the config (which should be Yaml), and parse the
 /// contents as yaml.
 ///
+/// `project_name`: The name of the project, corresponding to the project config
+/// file.
+/// `project_paths`: The struct of paths
+///
 /// # Examples
 ///
 /// Given the project name "compiler" and a project file found at:
 /// `~/.muxed/compiler.yml`.
 ///
-/// ```
-/// let yaml: Result<Vec<Yaml>, String> = read("compiler".to_string());
-/// ```
+/// ```rust,no_run
+/// extern crate common;
+/// extern crate load;
+/// extern crate yaml_rust;
 ///
-/// `project_name`: The name of the project, corresponding to the project config
-/// file.
+/// use common::project_paths::ProjectPaths;
+/// use load::project::read;
+/// use std::path::PathBuf;
+/// use yaml_rust::{Yaml, YamlLoader};
+///
+/// let paths = ProjectPaths::new(
+///     PathBuf::from("/tmp"),
+///     PathBuf::from("/tmp/.muxed"),
+///     PathBuf::from("/tmp/.muxed/projectname.yml")
+/// );
+///
+/// let yaml: Result<Vec<Yaml>, String> = read("compiler", &paths);
+///
+/// assert!(yaml.is_ok());
+/// ```
 pub fn read(project_name: &str, project_paths: &ProjectPaths) -> Result<Vec<Yaml>, String> {
     check_first_run(&project_paths.project_directory)?;
 
@@ -57,6 +75,22 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
 
 /// Check to see how we want to open the project. Do we need to attach to a new
 /// tmux session or can we switch the client from a running session.
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate load;
+///
+/// use load::command::{Attach, Commands, Command};
+/// use load::project::open;
+///
+/// let correct_type = match open("muxed") {
+///     Commands::Attach(_) => true,
+///     _ => false,
+/// };
+///
+/// assert!(correct_type)
+/// ```
 pub fn open(project_name: &str) -> Commands {
     if env::var_os(TMUX_ENV_VAR).is_some() {
         SwitchClient::new(&project_name).into()

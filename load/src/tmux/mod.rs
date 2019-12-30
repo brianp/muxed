@@ -25,8 +25,12 @@ static TMUX_NAME: &str = "tmux";
 ///
 /// # Examples
 ///
-/// ```
-/// let _ = call(&["new-window", "-t", "muxed", "-c", "~/Projects/muxed/"]);
+/// ```rust
+/// extern crate load;
+/// use load::tmux::call;
+///
+/// let _ = call(&["new-window", "-t", "muxed-test", "-c", "~/Projects/muxed/"]);
+/// let _ = call(&["kill-session", "-t", "muxed-test"]);
 /// ```
 pub fn call(args: &[&str]) -> Result<Output, io::Error> {
     //println!("{:?}", &args);
@@ -35,14 +39,18 @@ pub fn call(args: &[&str]) -> Result<Output, io::Error> {
 
 /// Has session is used firgure out if a named session is already running.
 ///
+/// `target`: A string represented by the `{named_session}`
+///
 /// # Examples
 ///
-/// ```
-/// tmux::has_session("muxed".to_string());
-/// => ExitStatus
-/// ```
+/// ```rust
+/// extern crate load;
+/// use load::tmux;
 ///
-/// `target`: A string represented by the `{named_session}`
+/// let session = tmux::has_session("muxed");
+///
+/// assert!(!session.success());
+/// ```
 pub fn has_session(target: &str) -> ExitStatus {
     let output =
         call(&["has-session", "-t", target]).expect("failed to see if the session existed");
@@ -53,9 +61,11 @@ pub fn has_session(target: &str) -> ExitStatus {
 ///
 /// # Examples
 ///
-/// ```
+/// ```rust
+/// extern crate load;
+/// use load::tmux;
+///
 /// tmux::get_config();
-/// => "some-option false\npane-base-index 0"
 /// ```
 pub fn get_config() -> String {
     let output = call(&["start-server", ";", "show-options", "-g", ";", "show-options", "-g", "-w"])
@@ -69,11 +79,14 @@ pub fn get_config() -> String {
 ///
 /// # Examples
 ///
-/// ```
-/// let session_name = "muxed".to_string();
-/// tmux::attach(muxed);
-/// ```
 /// `session_name: The active tmux session name.
+///
+/// ```rust,no_run
+/// extern crate load;
+/// use load::tmux;
+///
+/// tmux::attach(&["muxed"]);
+/// ```
 pub fn attach(args: &[&str]) -> Result<Output, io::Error> {
     let arg_string = [&[TMUX_NAME], &args[..]].concat().join(" ");
     let system_call = CString::new(arg_string).unwrap();
