@@ -2,9 +2,11 @@ language: rust
 cache: cargo
 
 git:
-  depth: 3
+  depth: 1
 
 rust:
+  - stable
+  - beta
   - nightly
 
 script: cargo test --workspace
@@ -14,9 +16,34 @@ matrix:
     - env: TMUX_VERSION=master
     - env: TMUX_VERSION=2.9a
     - env: TMUX_VERSION=2.8
+    - rust: beta
+    - rust: nightly
   exclude:
     - os: osx
       env: TMUX_VERSION=2.9a
+    - os: osx
+      env: TMUX_VERSION=2.8
+    - os: osx
+      rust: nightly
+    - os: osx
+      rust: beta
+    - os: linux
+      rust: beta
+      env: TMUX_VERSION=master
+    - os: linux
+      rust: beta
+      env: TMUX_VERSION=2.9a
+    - os: linux
+      rust: beta
+      env: TMUX_VERSION=2.8
+    - os: linux
+      rust: nightly
+      env: TMUX_VERSION=master
+    - os: linux
+      rust: nightly
+      env: TMUX_VERSION=2.9a
+    - os: linux
+      rust: nightly
       env: TMUX_VERSION=2.8
 
 env:

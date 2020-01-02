@@ -53,7 +53,7 @@ $ make cargo cmd=test
 
 ### From source:
 
-Have rust stable (or nightly at the risk of it not working) installed.
+Have rust stable installed.
 Clone this repo. Then run cargo to build the source, and again use cargo to run the app.
 
 ```shell
