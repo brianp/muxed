@@ -1,3 +1,29 @@
+<a name="0.8.1"></a>
+### 0.8.1 The one that supports better session switching (2020-01-02)
+
+#### Fixes
+
+*   Fixup doctest and run them in load crate ([ae53ca38](https://github.com/brianp/muxed/commit/ae53ca38e38969f394952d77d67a2c465d75fa6e))
+*   Add unit test for project open ([7c830272](https://github.com/brianp/muxed/commit/7c83027260a23569224315025b194126c260a00a))
+
+#### Documentation
+
+*   Add docker usage to readme ([938d3a00](https://github.com/brianp/muxed/commit/938d3a00b65ca09a2a44a95884e7f3d9c567b32e))
+
+#### Refactor
+
+* **Docker:**  Reduce docker image sizes ([161ca7c8](https://github.com/brianp/muxed/commit/161ca7c850601c036c2e1794df2f1a5516817b6d))
+* **Readme:**  Update copyright for 2020 ([c36f2c40](https://github.com/brianp/muxed/commit/c36f2c40fba5fe5ad64ab6f98d18ae500b2c827b))
+* **Travisci:**  Run rust stable in travis ([33f707d4](https://github.com/brianp/muxed/commit/33f707d49ff392c603f72b56dea4750c2e1a4bb7))
+
+#### Improvements
+
+*   Support switching between sessions ([f544873b](https://github.com/brianp/muxed/commit/f544873b76676b7fa6d24768d073fd49f1fc73df), closes [#49](https://github.com/brianp/muxed/issues/49))
+
+#### Contributions
+
+*   Improper passing of subcommands as project from [@coreyja](https://github.com/coreyja) ([655b6fba](https://github.com/brianp/muxed/commit/655b6fba9ef9dd3e5257f150f174e740c26cc702), closes [#45](https://github.com/brianp/muxed/issues/45), and [#46](https://github.com/brianp/muxed/issues/46)
+
 <a name="0.8.0">The one that adds Edit and upgrades all the Dependencies</a>
 ## 0.8.0 (2019-12-14)
 

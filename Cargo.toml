@@ -1,6 +1,6 @@
 [package]
 name = "muxed"
-version = "0.8.1-development"
+version = "0.8.1"
 authors = ["Brian Pearce"]
 
 [[bin]]
