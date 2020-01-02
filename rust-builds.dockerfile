@@ -1,22 +1,23 @@
-FROM rustlang/rust:nightly
+FROM rust:latest
 
-ENV UNATTENDED 1
-ENV OSX_VERSION_MIN 10.15
-ENV PKG_FILE MacOSX10.15.sdk.tar.xz
-ENV PKG_CONFIG_ALLOW_CROSS 1
+ENV UNATTENDED=1 \
+    OSX_VERSION_MIN=10.15 \
+    PKG_FILE=MacOSX10.15.sdk.tar.xz \
+    PKG_CONFIG_ALLOW_CROSS=1
 
 WORKDIR /usr/src/
 
 RUN apt-get update && \
     apt-get install -qqy --no-install-recommends \
-      clang \
-      cmake \
-      g++ \
-      gcc \
-      libgmp-dev \
-      libmpc-dev \
-      libmpfr-dev \
-      zlib1g-dev
+    clang \
+    cmake \
+    g++ \
+    gcc \
+    libgmp-dev \
+    libmpc-dev \
+    libmpfr-dev \
+    zlib1g-dev; \
+    apt-get remove tmux
 
 RUN git clone https://github.com/tpoechtrager/osxcross.git --depth 1 /osxcross/
 COPY $PKG_FILE /osxcross/tarballs/
@@ -27,11 +28,17 @@ RUN cd /osxcross \
 
 ENV PATH /osxcross/target/bin:$PATH
 
-RUN rustup target add x86_64-apple-darwin
+RUN apt-get remove \
+    clang \
+    cmake \
+    g++ \
+    gcc \
+    libgmp-dev \
+    libmpc-dev \
+    libmpfr-dev \
+    zlib1g-dev; \
+    rm -rf /var/lib/apt/lists/*;
 
-RUN rustup component add rustfmt
-RUN rustup component add clippy --toolchain=nightly || cargo install --git https://github.com/rust-lang/rust-clippy/ --force clippy
-
-RUN rustup --version \
-    && rustc --version \
-    && cargo --version
+RUN rustup target add x86_64-apple-darwin; \
+    rustup component add rustfmt; \
+    cargo install clog-cli
