@@ -31,7 +31,7 @@ fmt:
 	${docker_exec} cargo fmt
 
 package:
-	${docker_exec} tar -cvzf muxed-$(shell git tag  | grep -E '^[0-9]' | sort -V | tail -1)-${target}.tar.gz -C ./target/${target}/release/ muxed
+	${docker_exec} tar -cvzf muxed-$(shell git tag  | grep -E '^[0-9]' | sort -V | tail -1)-${target}.tar.gz LICENSE README.md CHANGELOG.md -C ./target/${target}/release/ muxed
 
 release:
 	${docker_exec} cargo build --release --target ${target}
