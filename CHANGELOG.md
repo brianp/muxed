@@ -22,7 +22,7 @@
 
 #### Contributions
 
-*   Improper passing of subcommands as project from [@coreyja](https://github.com/coreyja) ([655b6fba](https://github.com/brianp/muxed/commit/655b6fba9ef9dd3e5257f150f174e740c26cc702), closes [#45](https://github.com/brianp/muxed/issues/45), and [#46](https://github.com/brianp/muxed/issues/46)
+*   Improper passing of subcommands as project from [@coreyja](https://github.com/coreyja) ([655b6fba](https://github.com/brianp/muxed/commit/655b6fba9ef9dd3e5257f150f174e740c26cc702), closes [#45](https://github.com/brianp/muxed/issues/45), and [#46](https://github.com/brianp/muxed/issues/46))
 
 <a name="0.8.0">The one that adds Edit and upgrades all the Dependencies</a>
 ## 0.8.0 (2019-12-14)
