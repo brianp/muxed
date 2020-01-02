@@ -1,7 +1,7 @@
 [clog]
 link-style = "github"
 changelog = "CHANGELOG.md"
-repository = "https://github.com/clog-tool/clog-cli"
+repository = "https://github.com/brianp/muxed"
 from-latest-tag = true
 
 [sections]
