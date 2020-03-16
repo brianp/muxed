@@ -14,12 +14,15 @@ script: cargo test --workspace
 matrix:
   allow_failures:
     - env: TMUX_VERSION=master
+    - env: TMUX_VERSION=3.0a
     - env: TMUX_VERSION=2.9a
     - env: TMUX_VERSION=2.8
     - rust: beta
     - rust: nightly
   exclude:
     - os: osx
+      env: TMUX_VERSION=3.0a
+    - os: osx
       env: TMUX_VERSION=2.9a
     - os: osx
       env: TMUX_VERSION=2.8
@@ -32,6 +35,9 @@ matrix:
       env: TMUX_VERSION=master
     - os: linux
       rust: beta
+      env: TMUX_VERSION=3.0a
+    - os: linux
+      rust: beta
       env: TMUX_VERSION=2.9a
     - os: linux
       rust: beta
@@ -39,6 +45,9 @@ matrix:
     - os: linux
       rust: nightly
       env: TMUX_VERSION=master
+    - os: linux
+      rust: nightly
+      env: TMUX_VERSION=3.0a
     - os: linux
       rust: nightly
       env: TMUX_VERSION=2.9a
@@ -48,6 +57,7 @@ matrix:
 
 env:
   - TMUX_VERSION=master
+  - TMUX_VERSION=3.1
   - TMUX_VERSION=3.0a
   - TMUX_VERSION=2.9a
   - TMUX_VERSION=2.8
