@@ -45,11 +45,13 @@ $ brew install muxed_bin
 Docker commands are long so I use a make file that points all the commands to a
 runing docker container.
 
+```shell
 $ git clone git@github.com:brianp/muxed.git
 $ export MUXED_ENV=nix
 $ make build
 $ make start
-$ make cargo cmd=test
+$ make cargo cmd='test --workspace --color=always'
+```
 
 ### From source:
 
@@ -60,7 +62,7 @@ Clone this repo. Then run cargo to build the source, and again use cargo to run 
 $ git clone git@github.com:brianp/muxed.git
 $ cargo build
 $ cargo run -- --help
-$ cargo run my_project
+$ cargo test --workspace --color=always
 ```
 
 ## Setup
