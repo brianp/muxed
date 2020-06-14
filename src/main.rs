@@ -2,6 +2,7 @@
 extern crate common;
 extern crate docopt;
 extern crate edit;
+extern crate list;
 extern crate load;
 extern crate new;
 extern crate snapshot;
@@ -28,6 +29,7 @@ static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 4] = ["new", "edit", "load", "
 
 static USAGE: &str = "
 Usage:
+    muxed list
     muxed [flags] [options] <project>
     muxed edit [options] <project>
     muxed load [flags] [options] <project>
@@ -55,6 +57,7 @@ Subcommands:
     load <project>                   Load the specified project, this is the default command
     new <project>                    To create a new project file
     snapshot -t <session> <project>  Capture a running session and create a config file for it
+    list                             List the availiable project configs
 ";
 
 /// The main execution method.
@@ -89,6 +92,8 @@ pub fn main() {
         exit(0);
     };
 
+    println!("{:?}", args);
+
     if args.cmd_edit {
         try_or_err!(edit::exec(args));
     } else if args.cmd_load {
@@ -97,6 +102,8 @@ pub fn main() {
         try_or_err!(new::exec(args));
     } else if args.cmd_snapshot {
         try_or_err!(snapshot::exec(args));
+    } else if args.cmd_list {
+        try_or_err!(list::exec(args));
     } else {
         if DISALLOWED_SHORTHAND_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
             println!(

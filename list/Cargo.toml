@@ -1,0 +1,11 @@
+[package]
+name = "list"
+version = "0.8.2-development"
+authors = ["Brian Pearce"]
+publish = false
+
+[lib]
+doctest = false
+
+[dependencies]
+common = { path = "../common" }

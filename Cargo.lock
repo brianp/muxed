@@ -207,6 +207,13 @@ version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 
 [[package]]
+name = "list"
+version = "0.8.2-development"
+dependencies = [
+ "common 0.8.2-development",
+]
+
+[[package]]
 name = "load"
 version = "0.8.2-development"
 dependencies = [
@@ -230,6 +237,7 @@ dependencies = [
  "common 0.8.2-development",
  "docopt 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "edit 0.8.2-development",
+ "list 0.8.2-development",
  "load 0.8.2-development",
  "new 0.8.2-development",
  "snapshot 0.8.2-development",
