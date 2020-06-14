@@ -31,6 +31,7 @@ pub struct Args {
     pub cmd_new: bool,
     pub cmd_snapshot: bool,
     pub cmd_list: bool,
+    pub cmd_ls: bool,
 }
 
 impl Default for Args {
@@ -44,6 +45,7 @@ impl Default for Args {
             cmd_new: true,
             cmd_snapshot: false,
             cmd_list: false,
+            cmd_ls: false,
             flag_d: true,
             flag_debug: false,
             flag_f: false,
