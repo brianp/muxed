@@ -53,11 +53,11 @@ Args:
     <project>           The name of your project to open
 
 Subcommands:
+    list                             List the availiable project configs
     edit <project>                   Edit an existing project file
     load <project>                   Load the specified project, this is the default command
     new <project>                    To create a new project file
     snapshot -t <session> <project>  Capture a running session and create a config file for it
-    list                             List the availiable project configs
 ";
 
 /// The main execution method.
@@ -91,8 +91,6 @@ pub fn main() {
         println!("Muxed {}", env!("CARGO_PKG_VERSION"));
         exit(0);
     };
-
-    println!("{:?}", args);
 
     if args.cmd_edit {
         try_or_err!(edit::exec(args));
