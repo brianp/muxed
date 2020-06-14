@@ -2,7 +2,7 @@ extern crate common;
 
 use common::args::Args;
 use common::first_run::check_first_run;
-use common::project_paths::project_paths;
+use common::project_paths::{project_paths, CONFIG_EXTENSION};
 
 use std::path::PathBuf;
 
@@ -17,7 +17,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         .filter_map(|path| path.ok())
         .map(|path| PathBuf::from(path.file_name()))
         .filter_map(|buf| match buf.extension().and_then(|x| x.to_str()) {
-            Some("yml") => buf
+            Some(CONFIG_EXTENSION) => buf
                 .file_stem()
                 .and_then(|x| x.to_str())
                 .map(|x| x.to_string()),

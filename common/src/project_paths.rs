@@ -3,7 +3,7 @@ use args::Args;
 use dirs::home_dir;
 use std::path::PathBuf;
 
-pub static CONFIG_EXTENSION: &str = "yml";
+pub const CONFIG_EXTENSION: &str = "yml";
 static MUXED_FOLDER: &str = ".muxed";
 
 pub struct ProjectPaths {
@@ -13,7 +13,11 @@ pub struct ProjectPaths {
 }
 
 impl ProjectPaths {
-    pub fn new(home_directory: PathBuf, project_directory: PathBuf, project_file: PathBuf) -> ProjectPaths {
+    pub fn new(
+        home_directory: PathBuf,
+        project_directory: PathBuf,
+        project_file: PathBuf,
+    ) -> ProjectPaths {
         ProjectPaths {
             home_directory,
             project_directory,
@@ -21,10 +25,16 @@ impl ProjectPaths {
         }
     }
 
-    pub fn from_strs(home_directory: &str, project_directory: &str, project_file: &str) -> ProjectPaths {
+    pub fn from_strs(
+        home_directory: &str,
+        project_directory: &str,
+        project_file: &str,
+    ) -> ProjectPaths {
         let home_directory = PathBuf::from(home_directory);
         let project_directory = home_directory.join(project_directory);
-        let project_file = project_directory.join(project_file).with_extension(CONFIG_EXTENSION);
+        let project_file = project_directory
+            .join(project_file)
+            .with_extension(CONFIG_EXTENSION);
 
         ProjectPaths {
             home_directory,
@@ -67,7 +77,10 @@ impl ProjectPaths {
 pub fn project_paths(args: &Args) -> ProjectPaths {
     let homedir = homedir().expect("We couldn't find your home directory.");
     let default_dir = homedir.join(MUXED_FOLDER);
-    let project_directory = args.flag_p.as_ref().map_or(default_dir, |p| PathBuf::from(p));
+    let project_directory = args
+        .flag_p
+        .as_ref()
+        .map_or(default_dir, |p| PathBuf::from(p));
 
     let project_filename = PathBuf::from(&args.arg_project).with_extension(CONFIG_EXTENSION);
     let project_fullpath = project_directory.join(project_filename);
@@ -105,7 +118,10 @@ mod test {
         let args: Args = Default::default();
         let project_paths = project_paths(&args);
 
-        assert_eq!(project_paths.project_directory, PathBuf::from("/tmp/.muxed"))
+        assert_eq!(
+            project_paths.project_directory,
+            PathBuf::from("/tmp/.muxed")
+        )
     }
 
     #[test]
@@ -127,6 +143,9 @@ mod test {
         };
         let project_paths = project_paths(&args);
 
-        assert_eq!(project_paths.project_file, PathBuf::from("/tmp/.muxed/projectname.yml"))
+        assert_eq!(
+            project_paths.project_file,
+            PathBuf::from("/tmp/.muxed/projectname.yml")
+        )
     }
 }
