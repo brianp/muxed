@@ -15,6 +15,7 @@ use serde::Deserialize;
 /// `cmd_load` if `true` run load command (This is also the default command)
 /// `cmd_new` if `true` run new command
 /// `cmd_snapshot` if `true` run snapshot command
+/// `cmd_list` if `true` run list command
 ///
 #[derive(Debug, Deserialize)]
 pub struct Args {
@@ -29,6 +30,7 @@ pub struct Args {
     pub cmd_load: bool,
     pub cmd_new: bool,
     pub cmd_snapshot: bool,
+    pub cmd_list: bool,
 }
 
 impl Default for Args {
@@ -41,6 +43,7 @@ impl Default for Args {
             cmd_load: false,
             cmd_new: true,
             cmd_snapshot: false,
+            cmd_list: false,
             flag_d: true,
             flag_debug: false,
             flag_f: false,
