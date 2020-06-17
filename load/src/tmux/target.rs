@@ -1,6 +1,7 @@
 //! The structures used to manage commands sent over to tmux.
 
 use std::fmt;
+use std::rc::Rc;
 use std::usize;
 
 /// A targeted pane for a tmux session
@@ -38,7 +39,7 @@ pub struct WindowTarget {
 }
 
 impl WindowTarget {
-    pub fn new(session: &str, window: &str) -> WindowTarget {
+    pub fn new(session: Rc<&str>, window: &str) -> WindowTarget {
         WindowTarget {
             session: session.to_string(),
             window: window.to_string(),
@@ -55,21 +56,21 @@ impl fmt::Display for WindowTarget {
 
 /// A targeted session for tmux
 #[derive(Debug, Clone)]
-pub struct SessionTarget<'a> {
-    pub session: &'a str,
-    pub arg_string: &'a str,
+pub struct SessionTarget {
+    pub session: Rc<String>,
+    pub arg_string: Rc<String>,
 }
 
-impl<'a> SessionTarget<'a> {
-    pub fn new(session: &'a str) -> SessionTarget<'a> {
+impl SessionTarget {
+    pub fn new(session: Rc<String>) -> SessionTarget {
         SessionTarget {
-            session,
-            arg_string: session,
+            session: Rc::clone(&session),
+            arg_string: Rc::clone(&session),
         }
     }
 }
 
-impl<'a> fmt::Display for SessionTarget<'a> {
+impl fmt::Display for SessionTarget {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.session)
     }

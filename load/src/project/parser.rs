@@ -21,8 +21,9 @@ pub fn call<'a>(
     project_name: &'a str,
     daemonize: bool,
     tmux_config: &Config,
-) -> Result<Vec<Commands<'a>>, String> {
+) -> Result<Vec<Commands>, String> {
     let mut commands: Vec<Commands> = vec![];
+    let project_name = Rc::new(project_name);
 
     // There should only be one doc but it's a vec so take the first.
     let doc = &yaml_string[0];
@@ -73,7 +74,7 @@ pub fn call<'a>(
                         );
 
                         let target = WindowTarget::new(
-                            project_name,
+                            Rc::clone(&project_name),
                             k.as_str().ok_or_else(|| "no target specified")?,
                         );
                         commands.append(&mut pane_matcher(
@@ -93,7 +94,7 @@ pub fn call<'a>(
                             root.clone()
                         ).into());
 
-                        let target = WindowTarget::new(project_name, k.as_str().unwrap());
+                        let target = WindowTarget::new(Rc::clone(&project_name), k.as_str().unwrap());
                         commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
 
                         // SendKeys for the exec command
@@ -115,7 +116,7 @@ pub fn call<'a>(
                 commands
                     .push(Window::new(&project_name, Rc::new(s.to_string()), root.clone()).into());
 
-                let target = WindowTarget::new(&project_name, &s);
+                let target = WindowTarget::new(Rc::clone(&project_name), &s);
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             Yaml::Integer(ref s) => {
@@ -123,7 +124,7 @@ pub fn call<'a>(
                     Window::new(&project_name, Rc::new(format!("{}", s)), root.clone()).into(),
                 );
 
-                let target = WindowTarget::new(&project_name, &s.to_string());
+                let target = WindowTarget::new(Rc::clone(&project_name), &s.to_string());
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             _ => panic!("Muxed config file formatting isn't recognized."),
@@ -143,14 +144,14 @@ pub fn call<'a>(
             remains.insert(
                 1,
                 SendKeys::new(
-                    Target::WindowTarget(WindowTarget::new(&project_name, &w.name)),
+                    Target::WindowTarget(WindowTarget::new(Rc::clone(&project_name), &w.name)),
                     format!("cd {}", path.display()),
                 )
                 .into(),
             );
         }
 
-        remains.push(SelectWindow::new(WindowTarget::new(&project_name, &w.name)).into());
+        remains.push(SelectWindow::new(WindowTarget::new(Rc::clone(&project_name), &w.name)).into());
         remains.push(
             SelectPane::new(PaneTarget::new(
                 &project_name,
@@ -187,9 +188,9 @@ fn pane_matcher<'a, T>(
     common_commands: T,
     tmux_config: &Config,
     inherited_path: Option<Rc<PathBuf>>,
-) -> Result<Vec<Commands<'a>>, String>
+) -> Result<Vec<Commands>, String>
 where
-    T: Fn(Target) -> Vec<Commands<'a>>,
+    T: Fn(Target) -> Vec<Commands>,
 {
     let mut commands = vec![];
     let panes = window["panes"]

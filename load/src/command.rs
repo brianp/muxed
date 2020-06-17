@@ -25,16 +25,16 @@ pub trait Command {
 /// `window_name`: The Name of the first window.
 /// `root_path`: The root directory for the tmux session.
 #[derive(Debug, Clone)]
-pub struct Session<'a> {
-    pub target: SessionTarget<'a>,
+pub struct Session {
+    pub target: SessionTarget,
     pub window_name: Rc<String>,
     pub root_path: Option<Rc<PathBuf>>,
 }
 
-impl<'a> Session<'a> {
-    pub fn new(name: &'a str, window_name: Rc<String>, root_path: Option<Rc<PathBuf>>) -> Session<'a> {
+impl Session {
+    pub fn new(name: &str, window_name: Rc<String>, root_path: Option<Rc<PathBuf>>) -> Session {
         Session {
-            target: SessionTarget::new(name),
+            target: SessionTarget::new(Rc::new(name.to_string())),
             window_name,
             root_path,
         }
@@ -42,7 +42,7 @@ impl<'a> Session<'a> {
 }
 
 // TODO: Real logic exists here. Test it!
-impl<'a> Command for Session<'a> {
+impl Command for Session {
     fn args(&self) -> Vec<&str> {
         let args: Vec<&str> = vec!["new", "-d", "-s", &self.target.arg_string, "-n", &self.window_name];
 
@@ -64,30 +64,28 @@ impl<'a> Command for Session<'a> {
 /// the mutated value ':' in the SessionTarget. Convert SessionTarget from &str
 /// to Rc<String>.
 #[derive(Debug, Clone)]
-pub struct Window<'a> {
-    pub session_name: &'a str,
+pub struct Window {
     pub name: Rc<String>,
     pub path: Option<Rc<PathBuf>>,
-    pub session_name_arg: String,
+    pub session_target: SessionTarget,
 }
 
-impl<'a> Window<'a> {
-    pub fn new(session_name: &'a str, name: Rc<String>, path: Option<Rc<PathBuf>>) -> Window<'a> {
+impl Window {
+    pub fn new(session_name: &str, name: Rc<String>, path: Option<Rc<PathBuf>>) -> Window {
         let mut name_arg: String = String::from(session_name);
         name_arg.push(':');
 
         Window {
-            session_name,
             name,
             path,
-            session_name_arg: name_arg,
+            session_target: SessionTarget::new(Rc::new(name_arg)),
         }
     }
 }
 
-impl<'a> Command for Window<'a> {
+impl Command for Window {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["new-window", "-t", &self.session_name_arg, "-n", &self.name];
+        let args: Vec<&str> = vec!["new-window", "-t", &self.session_target.arg_string, "-n", &self.name];
 
         match self.path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
@@ -174,21 +172,21 @@ impl Command for SendKeys {
 /// `path`: An `Option<PathBuf>` containing a possible root directory passed to the
 /// `-c` arguement.
 #[derive(Debug, Clone)]
-pub struct Attach<'a> {
-    pub name: SessionTarget<'a>,
+pub struct Attach {
+    pub name: SessionTarget,
     pub root_path: Option<Rc<PathBuf>>,
 }
 
-impl<'a> Attach<'a> {
-    pub fn new(name: &'a str, root_path: Option<Rc<PathBuf>>) -> Attach<'a> {
+impl Attach {
+    pub fn new(name: &str, root_path: Option<Rc<PathBuf>>) -> Attach {
         Attach {
-            name: SessionTarget::new(name),
+            name: SessionTarget::new(Rc::new(name.to_string())),
             root_path,
         }
     }
 }
 
-impl<'a> Command for Attach<'a> {
+impl Command for Attach {
     fn args(&self) -> Vec<&str> {
         let args: Vec<&str> = vec!["attach", "-t", &self.name.arg_string];
 
@@ -250,19 +248,19 @@ impl Command for SelectPane {
 /// Used to switch to a daemonized session when already within a tmux session.
 /// name: The named session to switch to.
 #[derive(Debug, Clone)]
-pub struct SwitchClient<'a> {
-    pub name: SessionTarget<'a>,
+pub struct SwitchClient {
+    pub name: SessionTarget,
 }
 
-impl<'a> SwitchClient<'a> {
-    pub fn new(name: &'a str) -> SwitchClient<'a> {
+impl SwitchClient {
+    pub fn new(name: &str) -> SwitchClient {
         SwitchClient {
-            name: SessionTarget::new(name),
+            name: SessionTarget::new(Rc::new(name.to_string())),
         }
     }
 }
 
-impl<'a> Command for SwitchClient<'a> {
+impl Command for SwitchClient {
     fn args(&self) -> Vec<&str> {
         vec!["switch-client", "-t", &self.name.arg_string]
     }
@@ -307,20 +305,20 @@ impl Command for Pre {
 /// containing all the commands that require running in a single Vec. This
 /// allows a simple process of first in, first out command execution.
 #[derive(Debug, Clone)]
-pub enum Commands<'a> {
-    Attach(Attach<'a>),
+pub enum Commands {
+    Attach(Attach),
     Layout(Layout),
     Pre(Pre),
     SelectPane(SelectPane),
     SelectWindow(SelectWindow),
     SendKeys(SendKeys),
-    Session(Session<'a>),
+    Session(Session),
     Split(Split),
-    SwitchClient(SwitchClient<'a>),
-    Window(Window<'a>),
+    SwitchClient(SwitchClient),
+    Window(Window),
 }
 
-impl<'a> Commands<'a> {
+impl Commands {
     pub fn as_trait(&self) -> &dyn Command {
         match self {
             Commands::Attach(c) => c,
@@ -337,62 +335,62 @@ impl<'a> Commands<'a> {
     }
 }
 
-impl<'a> From<Attach<'a>> for Commands<'a> {
-    fn from(command: Attach<'a>) -> Self {
+impl From<Attach> for Commands {
+    fn from(command: Attach) -> Self {
         Commands::Attach(command)
     }
 }
 
-impl<'a> From<Layout> for Commands<'a> {
+impl From<Layout> for Commands {
     fn from(command: Layout) -> Self {
         Commands::Layout(command)
     }
 }
 
-impl<'a> From<Pre> for Commands<'a> {
+impl From<Pre> for Commands {
     fn from(command: Pre) -> Self {
         Commands::Pre(command)
     }
 }
 
-impl<'a> From<SelectPane> for Commands<'a> {
+impl From<SelectPane> for Commands {
     fn from(command: SelectPane) -> Self {
         Commands::SelectPane(command)
     }
 }
 
-impl<'a> From<SelectWindow> for Commands<'a> {
+impl From<SelectWindow> for Commands {
     fn from(command: SelectWindow) -> Self {
         Commands::SelectWindow(command)
     }
 }
 
-impl<'a> From<SendKeys> for Commands<'a> {
+impl From<SendKeys> for Commands {
     fn from(command: SendKeys) -> Self {
         Commands::SendKeys(command)
     }
 }
 
-impl<'a> From<Session<'a>> for Commands<'a> {
-    fn from(command: Session<'a>) -> Self {
+impl From<Session> for Commands {
+    fn from(command: Session) -> Self {
         Commands::Session(command)
     }
 }
 
-impl<'a> From<Split> for Commands<'a> {
+impl From<Split> for Commands {
     fn from(command: Split) -> Self {
         Commands::Split(command)
     }
 }
 
-impl<'a> From<SwitchClient<'a>> for Commands<'a> {
-    fn from(command: SwitchClient<'a>) -> Self {
+impl From<SwitchClient> for Commands {
+    fn from(command: SwitchClient) -> Self {
         Commands::SwitchClient(command)
     }
 }
 
-impl<'a> From<Window<'a>> for Commands<'a> {
-    fn from(command: Window<'a>) -> Self {
+impl From<Window> for Commands {
+    fn from(command: Window) -> Self {
         Commands::Window(command)
     }
 }
