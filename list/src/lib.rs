@@ -10,7 +10,7 @@ pub fn exec(args: Args) -> Result<(), String> {
     let project_paths = project_paths(&args);
     check_first_run(&project_paths.project_directory)?;
 
-    let projects: Vec<String> = project_paths
+    let mut projects: Vec<String> = project_paths
         .project_directory
         .read_dir()
         .map_err(|_| "Could not read the dir")?
@@ -25,7 +25,9 @@ pub fn exec(args: Args) -> Result<(), String> {
         })
         .collect();
 
-    println!("{}", projects.join(" "));
+    &projects.sort();
+
+    println!("{}", &projects.join("\t\t"));
 
     Ok(())
 }
