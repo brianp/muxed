@@ -1,6 +1,6 @@
 [package]
 name = "list"
-version = "0.8.2-development"
+version = "0.8.2"
 authors = ["Brian Pearce"]
 publish = false
 

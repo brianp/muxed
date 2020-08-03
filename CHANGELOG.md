@@ -1,3 +1,20 @@
+<a name="0.8.2"></a>
+### 0.8.2 The one that lists projects (2020-08-03)
+
+#### Features
+
+*   The list and ls subcommand from [@coreyja](https://github.com/coreyja) ([78ec7068](https://github.com/brianp/muxed/commit/78ec70681e852e6734c2a2680ab9fb9d47992ff7))
+
+#### Documentation
+
+* **README:**  Update usage for list and ls ([039ccb96](https://github.com/brianp/muxed/commit/039ccb965fb9523117b51fa1ceb1e4ffd174d513))
+
+#### Refactor
+
+*   Replace string slices in favor of Rc strings ([0bfad6ec](https://github.com/brianp/muxed/commit/0bfad6ec84e01c696024955c179ac21d71f4a1fe))
+* **Dockerfiles:**  Rename stable to nix ([f46a3ecf](https://github.com/brianp/muxed/commit/f46a3ecf1ca0e6ceef4bbaee073b6d5dff5a6bb6))
+* **Packaging:**  Include license, changlog, and readme files ([c729dee0](https://github.com/brianp/muxed/commit/c729dee057c0f20e69c3de12270f18cb7ecb1143))
+
 <a name="0.8.1"></a>
 ### 0.8.1 The one that supports better session switching (2020-01-02)
 
