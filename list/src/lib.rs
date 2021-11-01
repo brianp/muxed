@@ -25,9 +25,11 @@ pub fn exec(args: Args) -> Result<(), String> {
         })
         .collect();
 
-    &projects.sort();
+    projects.sort();
 
-    println!("{}", &projects.join("\t\t"));
+    let delimeter = if args.flag_1 { "\n" } else { "\t\t" };
+
+    println!("{}", &projects.join(delimeter));
 
     Ok(())
 }
