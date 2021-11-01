@@ -25,9 +25,15 @@ pub fn exec(args: Args) -> Result<(), String> {
         })
         .collect();
 
-    &projects.sort();
+    projects.sort();
 
-    println!("{}", &projects.join("\t\t"));
+    let delimiter = if !atty::is(atty::Stream::Stdout) || args.flag_1 {
+        "\n"
+    } else {
+        "\t\t"
+    };
+
+    println!("{}", &projects.join(delimiter));
 
     Ok(())
 }

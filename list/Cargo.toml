@@ -8,4 +8,5 @@ publish = false
 doctest = false
 
 [dependencies]
+atty = "0.2.14"
 common = { path = "../common" }

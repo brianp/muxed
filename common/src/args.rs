@@ -9,6 +9,7 @@ use serde::Deserialize;
 /// `flag_f` to force overwrite of a file
 /// `flag_p` the project directory to read or write to
 /// `flag_t` the session to read from
+/// `flag_1` wether to use new-lines for list command
 /// `flag_debug` run inline print statements for debugging
 /// `arg_project` the project file to read
 /// `cmd_edit` if `true` run edit command
@@ -25,6 +26,7 @@ pub struct Args {
     pub flag_p: Option<String>,
     pub flag_t: Option<String>,
     pub flag_v: bool,
+    pub flag_1: bool,
     pub arg_project: String,
     pub cmd_edit: bool,
     pub cmd_load: bool,
@@ -52,6 +54,7 @@ impl Default for Args {
             flag_p: None,
             flag_t: None,
             flag_v: false,
+            flag_1: false,
         }
     }
 }
