@@ -27,9 +27,11 @@ pub fn exec(args: Args) -> Result<(), String> {
 
     projects.sort();
 
-    let use_new_lines = !atty::is(atty::Stream::Stdout) || args.flag_1;
-
-    let delimiter = if use_new_lines { "\n" } else { "\t\t" };
+    let delimiter = if !atty::is(atty::Stream::Stdout) || args.flag_1 {
+        "\n"
+    } else {
+        "\t\t"
+    };
 
     println!("{}", &projects.join(delimiter));
 
