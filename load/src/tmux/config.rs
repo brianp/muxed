@@ -55,7 +55,8 @@ fn expect_missing_base_index_0() {
 
 #[test]
 fn expect_pane_base_index_0() {
-    let output = "some-stuff false\npane-base-index 0\nother-thing true".to_string();
+    let output =
+        "some-stuff false\npane-base-index 0\nother-thing true\nvalue-less-option".to_string();
     let config = Config::from_string(output);
     assert_eq!(config.pane_base_index, 0)
 }
