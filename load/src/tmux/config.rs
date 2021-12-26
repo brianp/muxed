@@ -21,7 +21,7 @@ impl Config {
 
         for line in lines {
             let opt: Vec<&str> = line.split(' ').collect();
-            config.insert(opt[0], opt[1]);
+            config.insert(opt[0], opt.get(1).unwrap_or(&""));
         }
 
         Config {
