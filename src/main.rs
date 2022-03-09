@@ -29,7 +29,7 @@ static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 4] = ["new", "edit", "load", "
 
 static USAGE: &str = "
 Usage:
-    muxed (list | ls)
+    muxed (list | ls) [-1]
     muxed [flags] [options] <project>
     muxed edit [options] <project>
     muxed load [flags] [options] <project>
