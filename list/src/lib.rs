@@ -4,6 +4,7 @@ use common::args::Args;
 use common::first_run::check_first_run;
 use common::project_paths::{project_paths, CONFIG_EXTENSION};
 
+use std::cmp::Reverse;
 use std::path::PathBuf;
 
 pub fn exec(args: Args) -> Result<(), String> {
@@ -27,7 +28,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         })
         .collect();
 
-    project_names.sort();
+    project_names.sort_by_key(|name| (Reverse(tmux_session.get_last_attached(name)), name.clone()));
 
     let project_displays: Vec<String> = project_names
         .into_iter()

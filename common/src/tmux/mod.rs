@@ -108,6 +108,13 @@ impl SessionList {
             .iter()
             .any(|s| s.name == name && s.client_attached > 0)
     }
+
+    pub fn get_last_attached(&self, name: &str) -> Option<u64> {
+        self.sessions
+            .iter()
+            .find(|s| s.name == name)
+            .map(|s| s.last_attached)
+    }
 }
 
 impl Session {
