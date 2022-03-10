@@ -107,7 +107,7 @@ mod test {
 
     #[test]
     fn missing_file_returns_err() {
-        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "");
+        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "", "");
         let result = read(&String::from("not_a_file"), &project_paths);
         assert!(result.is_err())
     }
@@ -115,7 +115,7 @@ mod test {
     #[test]
     fn poorly_formatted_file_returns_err() {
         let name = rand_names::project_file_name();
-        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
+        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name, "");
 
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();
@@ -130,7 +130,7 @@ mod test {
     #[test]
     fn good_file_returns_ok() {
         let name = rand_names::project_file_name();
-        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name);
+        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name, "");
 
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();

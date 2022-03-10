@@ -15,6 +15,7 @@ pub fn exec(args: Args) -> Result<(), String> {
         .read_dir()
         .map_err(|_| "Could not read the dir")?
         .filter_map(|path| path.ok())
+        .filter(|path| path.path() != project_paths.template_file)
         .map(|path| PathBuf::from(path.file_name()))
         .filter_map(|buf| match buf.extension().and_then(|x| x.to_str()) {
             Some(CONFIG_EXTENSION) => buf
