@@ -2,12 +2,12 @@
 //! processed later.
 
 use command::*;
+use common::tmux::config::Config;
+use common::tmux::target::*;
 use dirs::home_dir;
 use project;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use tmux::config::Config;
-use tmux::target::*;
 use yaml_rust::Yaml;
 
 /// Here was pass in the parsed yaml and project name. The purpose of this call
@@ -85,16 +85,23 @@ pub fn call<'a>(
                             path.clone(),
                         )?);
                     } else {
-                        commands.push(Window::new(
-                            &project_name,
-                            Rc::new(k.as_str().ok_or_else(|| {
-                                "Windows require being named in your config."
-                            })?
-                            .to_string()),
-                            root.clone()
-                        ).into());
+                        commands.push(
+                            Window::new(
+                                &project_name,
+                                Rc::new(
+                                    k.as_str()
+                                        .ok_or_else(|| {
+                                            "Windows require being named in your config."
+                                        })?
+                                        .to_string(),
+                                ),
+                                root.clone(),
+                            )
+                            .into(),
+                        );
 
-                        let target = WindowTarget::new(Rc::clone(&project_name), k.as_str().unwrap());
+                        let target =
+                            WindowTarget::new(Rc::clone(&project_name), k.as_str().unwrap());
                         commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
 
                         // SendKeys for the exec command
@@ -151,7 +158,8 @@ pub fn call<'a>(
             );
         }
 
-        remains.push(SelectWindow::new(WindowTarget::new(Rc::clone(&project_name), &w.name)).into());
+        remains
+            .push(SelectWindow::new(WindowTarget::new(Rc::clone(&project_name), &w.name)).into());
         remains.push(
             SelectPane::new(PaneTarget::new(
                 &project_name,

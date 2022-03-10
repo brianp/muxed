@@ -4,7 +4,6 @@ extern crate common;
 extern crate snapshot;
 
 extern crate dirs;
-extern crate libc;
 extern crate load;
 extern crate rand;
 extern crate yaml_rust;
@@ -127,9 +126,13 @@ windows:
             let _ = fs::remove_dir(dir);
             // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
             // resulting in `pane_current_path` being `/private/tmp/Direct…`
-            assert!(pane.path.to_str().unwrap().contains("/tmp/Directory With Spaces"));
+            assert!(pane
+                .path
+                .to_str()
+                .unwrap()
+                .contains("/tmp/Directory With Spaces"));
         }
-    
+
         #[test]
         fn expect_home_var_to_open_in_home_dir() {
             let contents = b"---

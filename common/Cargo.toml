@@ -8,3 +8,4 @@ publish = false
 dirs  = "2.0.2"
 rand  = "0.7.2"
 serde = { version = "1.0.103", features = ["derive"] }
+libc  = "0.2.66"
