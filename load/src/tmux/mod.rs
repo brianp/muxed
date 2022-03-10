@@ -19,7 +19,7 @@ static TMUX_NAME: &str = "tmux";
 /// The gateway to calling any functions on tmux. Most public functions in this
 /// module will be fed through this `call` function. This safely creates a new
 /// thread to execute the command on. We say "Most" public functions will use
-/// this as `attach` specificaly does not use it.
+/// this as `attach` specifically does not use it.
 ///
 /// args: The command we will send to tmux on the host system for execution.
 ///
@@ -37,7 +37,7 @@ pub fn call(args: &[&str]) -> Result<Output, io::Error> {
     Command::new(TMUX_NAME).args(args).output()
 }
 
-/// Has session is used firgure out if a named session is already running.
+/// Has session is used figure out if a named session is already running.
 ///
 /// `target`: A string represented by the `{named_session}`
 ///
@@ -68,9 +68,75 @@ pub fn has_session(target: &str) -> ExitStatus {
 /// tmux::get_config();
 /// ```
 pub fn get_config() -> String {
-    let output = call(&["start-server", ";", "show-options", "-g", ";", "show-options", "-g", "-w"])
-      .expect("couldn't get tmux options");
+    let output = call(&[
+        "start-server",
+        ";",
+        "show-options",
+        "-g",
+        ";",
+        "show-options",
+        "-g",
+        "-w",
+    ])
+    .expect("couldn't get tmux options");
     String::from_utf8_lossy(&output.stdout).to_string()
+}
+
+pub struct Session {
+    pub name: String,
+    pub id: String,
+    pub client_attached: usize,
+    pub created_at: u64,
+    pub last_attached: u64,
+}
+
+pub struct SessionList {
+    pub sessions: Vec<Session>,
+}
+
+impl Session {
+    pub fn from_formatted_str(formatted: &str) -> Session {
+        let mut split = formatted.split(' ');
+        let name = split.next().unwrap().to_string();
+        let id = split.next().unwrap().to_string();
+        let client_attached = split.next().unwrap().parse::<usize>().unwrap();
+        let created_at = split.next().unwrap().parse::<u64>().unwrap();
+        let last_attached = split.next().unwrap().parse::<u64>().unwrap();
+
+        Session {
+            name,
+            id,
+            client_attached,
+            created_at,
+            last_attached,
+        }
+    }
+}
+
+/// Read the current tmux sessoins from the server
+///
+/// # Examples
+///
+/// ```rust
+/// extern crate load;
+/// use load::tmux;
+///
+/// let _: tmux::SessionList = tmux::get_sessions();
+/// ```
+pub fn get_sessions() -> SessionList {
+    let output = call(&[
+        "list-sessions",
+        "-F",
+        "\"#{session_name} #{session_id} #{session_attached} #{session_created} #{session_last_attached}\"",
+    ])
+    .expect("couldn't get tmux sessions");
+    let sessions = String::from_utf8_lossy(&output.stdout).to_string();
+    let sessions = sessions
+        .split('\n')
+        .map(Session::from_formatted_str)
+        .collect::<Vec<_>>();
+
+    SessionList { sessions }
 }
 
 /// Attach is called as the last function in a set of commands. After the tmux
