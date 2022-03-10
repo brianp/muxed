@@ -94,14 +94,42 @@ pub struct SessionList {
     pub sessions: Vec<Session>,
 }
 
+impl SessionList {
+    pub fn new(sessions: Vec<Session>) -> SessionList {
+        SessionList { sessions }
+    }
+
+    pub fn has_session(&self, name: &str) -> bool {
+        self.sessions.iter().any(|s| s.name == name)
+    }
+
+    pub fn is_attached(&self, name: &str) -> bool {
+        self.sessions
+            .iter()
+            .any(|s| s.name == name && s.client_attached > 0)
+    }
+}
+
 impl Session {
     pub fn from_formatted_str(formatted: &str) -> Session {
         let mut split = formatted.split(' ');
         let name = split.next().unwrap().to_string();
         let id = split.next().unwrap().to_string();
-        let client_attached = split.next().unwrap().parse::<usize>().unwrap();
-        let created_at = split.next().unwrap().parse::<u64>().unwrap();
-        let last_attached = split.next().unwrap().parse::<u64>().unwrap();
+        let client_attached = split
+            .next()
+            .unwrap()
+            .parse::<usize>()
+            .expect("Bad client_attached");
+        let created_at = split
+            .next()
+            .unwrap()
+            .parse::<u64>()
+            .expect("Bad created_at");
+        let last_attached = split
+            .next()
+            .unwrap()
+            .parse::<u64>()
+            .expect("Bad last_attached");
 
         Session {
             name,
@@ -127,11 +155,12 @@ pub fn get_sessions() -> SessionList {
     let output = call(&[
         "list-sessions",
         "-F",
-        "\"#{session_name} #{session_id} #{session_attached} #{session_created} #{session_last_attached}\"",
+        "#{session_name} #{session_id} #{session_attached} #{session_created} #{session_last_attached}",
     ])
     .expect("couldn't get tmux sessions");
     let sessions = String::from_utf8_lossy(&output.stdout).to_string();
     let sessions = sessions
+        .trim()
         .split('\n')
         .map(Session::from_formatted_str)
         .collect::<Vec<_>>();
