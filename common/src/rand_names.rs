@@ -6,6 +6,10 @@ pub fn project_path_name() -> String {
     format!("/tmp/.muxed-test-{}/", random::<u16>())
 }
 
+pub fn template_path_name() -> String {
+    format!("muxed-test-template-{}", random::<u16>())
+}
+
 pub fn project_path() -> PathBuf {
     PathBuf::from(project_path_name())
 }
@@ -21,6 +25,11 @@ pub fn project_file_path() -> PathBuf {
 
 pub fn project_file_path_with_name(name: &str) -> PathBuf {
     let project_file = PathBuf::from(name).with_extension(CONFIG_EXTENSION);
+    project_path().join(project_file)
+}
+
+pub fn project_template_file_path() -> PathBuf {
+    let project_file = PathBuf::from(template_path_name()).with_extension(CONFIG_EXTENSION);
     project_path().join(project_file)
 }
 

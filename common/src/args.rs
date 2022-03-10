@@ -24,6 +24,7 @@ pub struct Args {
     pub flag_f: bool,
     pub flag_p: Option<String>,
     pub flag_t: Option<String>,
+    pub flag_template: Option<String>,
     pub flag_v: bool,
     pub arg_project: String,
     pub cmd_edit: bool,
@@ -51,6 +52,7 @@ impl Default for Args {
             flag_f: false,
             flag_p: None,
             flag_t: None,
+            flag_template: None,
             flag_v: false,
         }
     }
