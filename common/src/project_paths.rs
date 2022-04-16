@@ -4,6 +4,7 @@ use dirs::home_dir;
 use std::path::PathBuf;
 
 pub const CONFIG_EXTENSION: &str = "yml";
+pub const DEFAULT_TEMPLATE_FILE: &str = ".template";
 static MUXED_FOLDER: &str = ".muxed";
 
 pub struct ProjectPaths {
@@ -94,7 +95,10 @@ pub fn project_paths(args: &Args) -> ProjectPaths {
     let project_filename = PathBuf::from(&args.arg_project).with_extension(CONFIG_EXTENSION);
     let project_fullpath = project_directory.join(project_filename);
 
-    let template_filename: &str = args.flag_template.as_deref().unwrap_or(".template");
+    let template_filename: &str = args
+        .flag_template
+        .as_deref()
+        .unwrap_or(DEFAULT_TEMPLATE_FILE);
     let template_filename = PathBuf::from(template_filename).with_extension(CONFIG_EXTENSION);
     let template_fullpath = project_directory.join(template_filename);
 
