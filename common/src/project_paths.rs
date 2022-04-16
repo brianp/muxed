@@ -75,7 +75,8 @@ impl ProjectPaths {
 /// let paths = ProjectPaths::new(
 ///     PathBuf::from("/tmp"),
 ///     PathBuf::from("/tmp/.muxed"),
-///     PathBuf::from("/tmp/.muxed/projectname.yml")
+///     PathBuf::from("/tmp/.muxed/projectname.yml"),
+///     PathBuf::from("/tmp/.muxed/.template.yml"),
 /// );
 ///
 /// assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"));
@@ -181,6 +182,20 @@ mod test {
     fn expects_template_as_yml_file() {
         let args = Args {
             flag_template: Some("custom_template".to_string()),
+            ..Default::default()
+        };
+        let project_paths = project_paths(&args);
+
+        assert_eq!(
+            project_paths.template_file,
+            PathBuf::from("/tmp/.muxed/custom_template.yml")
+        )
+    }
+
+    #[test]
+    fn expects_template_with_extension_as_yml_file() {
+        let args = Args {
+            flag_template: Some("custom_template.json".to_string()),
             ..Default::default()
         };
         let project_paths = project_paths(&args);
