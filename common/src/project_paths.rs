@@ -4,12 +4,14 @@ use dirs::home_dir;
 use std::path::PathBuf;
 
 pub const CONFIG_EXTENSION: &str = "yml";
+pub const DEFAULT_TEMPLATE_FILE: &str = ".template";
 static MUXED_FOLDER: &str = ".muxed";
 
 pub struct ProjectPaths {
     pub home_directory: PathBuf,
     pub project_directory: PathBuf,
     pub project_file: PathBuf,
+    pub template_file: PathBuf,
 }
 
 impl ProjectPaths {
@@ -17,11 +19,13 @@ impl ProjectPaths {
         home_directory: PathBuf,
         project_directory: PathBuf,
         project_file: PathBuf,
+        template_file: PathBuf,
     ) -> ProjectPaths {
         ProjectPaths {
             home_directory,
             project_directory,
             project_file,
+            template_file,
         }
     }
 
@@ -29,17 +33,22 @@ impl ProjectPaths {
         home_directory: &str,
         project_directory: &str,
         project_file: &str,
+        template_file: &str,
     ) -> ProjectPaths {
         let home_directory = PathBuf::from(home_directory);
         let project_directory = home_directory.join(project_directory);
         let project_file = project_directory
             .join(project_file)
             .with_extension(CONFIG_EXTENSION);
+        let template_file = project_directory
+            .join(template_file)
+            .with_extension(CONFIG_EXTENSION);
 
         ProjectPaths {
             home_directory,
             project_directory,
             project_file,
+            template_file,
         }
     }
 }
@@ -67,7 +76,8 @@ impl ProjectPaths {
 /// let paths = ProjectPaths::new(
 ///     PathBuf::from("/tmp"),
 ///     PathBuf::from("/tmp/.muxed"),
-///     PathBuf::from("/tmp/.muxed/projectname.yml")
+///     PathBuf::from("/tmp/.muxed/projectname.yml"),
+///     PathBuf::from("/tmp/.muxed/.template.yml"),
 /// );
 ///
 /// assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"));
@@ -85,7 +95,19 @@ pub fn project_paths(args: &Args) -> ProjectPaths {
     let project_filename = PathBuf::from(&args.arg_project).with_extension(CONFIG_EXTENSION);
     let project_fullpath = project_directory.join(project_filename);
 
-    ProjectPaths::new(homedir, project_directory, project_fullpath)
+    let template_filename: &str = args
+        .flag_template
+        .as_deref()
+        .unwrap_or(DEFAULT_TEMPLATE_FILE);
+    let template_filename = PathBuf::from(template_filename).with_extension(CONFIG_EXTENSION);
+    let template_fullpath = project_directory.join(template_filename);
+
+    ProjectPaths::new(
+        homedir,
+        project_directory,
+        project_fullpath,
+        template_fullpath,
+    )
 }
 
 /// A Thin wrapper around the home_dir crate. This is so we can swap the default
@@ -125,6 +147,17 @@ mod test {
     }
 
     #[test]
+    fn expects_template_as_default_template_filename() {
+        let args: Args = Default::default();
+        let project_paths = project_paths(&args);
+
+        assert_eq!(
+            project_paths.template_file,
+            PathBuf::from("/tmp/.muxed/.template.yml")
+        )
+    }
+
+    #[test]
     fn expects_spacey_as_project_dir() {
         let args = Args {
             flag_p: Some("/spacey".to_string()),
@@ -146,6 +179,34 @@ mod test {
         assert_eq!(
             project_paths.project_file,
             PathBuf::from("/tmp/.muxed/projectname.yml")
+        )
+    }
+
+    #[test]
+    fn expects_template_as_yml_file() {
+        let args = Args {
+            flag_template: Some("custom_template".to_string()),
+            ..Default::default()
+        };
+        let project_paths = project_paths(&args);
+
+        assert_eq!(
+            project_paths.template_file,
+            PathBuf::from("/tmp/.muxed/custom_template.yml")
+        )
+    }
+
+    #[test]
+    fn expects_template_with_extension_as_yml_file() {
+        let args = Args {
+            flag_template: Some("custom_template.json".to_string()),
+            ..Default::default()
+        };
+        let project_paths = project_paths(&args);
+
+        assert_eq!(
+            project_paths.template_file,
+            PathBuf::from("/tmp/.muxed/custom_template.yml")
         )
     }
 }

@@ -46,8 +46,10 @@ Flags:
     -v, --version       Prints version information
 
 Options:
-    -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
-    -t <session>        The name of the running TMUX session to codify
+    -p <project_dir>              The directory your project config files live in. Defaults to ~/.muxed/
+    -t <session>                  The name of the running TMUX session to codify
+    --template <template_path>    The name of the template to use for new projects. We look for a file with this name in the project directory.
+                                  Defaults to `.template`
 
 Args:
     <project>           The name of your project to open
