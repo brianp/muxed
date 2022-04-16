@@ -75,11 +75,11 @@ fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
 }
 
 fn kill_session(target: &str) {
-    let _ = load::tmux::call(&["kill-session", "-t", target]);
+    let _ = common::tmux::call(&["kill-session", "-t", target]);
 }
 
 fn send_keys(target: &str, exec: &str) {
-    let _ = load::tmux::call(&["send-keys", "-t", target, exec, "KPEnter"]);
+    let _ = common::tmux::call(&["send-keys", "-t", target, exec, "KPEnter"]);
 }
 
 fn wait_on(file: &PathBuf) {

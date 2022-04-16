@@ -5,11 +5,11 @@ pub mod parser;
 
 use command::{Attach, Commands, SwitchClient};
 use common::project_paths::ProjectPaths;
+use common::tmux::has_session;
 use first_run::check_first_run;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
 
 static TMUX_ENV_VAR: &str = "TMUX";

@@ -16,7 +16,7 @@ mod test {
         fn make_files() -> PathBuf {
             let dir_name = rand_names::project_path_name();
             let dir = PathBuf::from(&dir_name);
-            
+
             dbg!(&dir);
             if !&dir.exists() {
                 println!("{:?}", fs::create_dir(&dir))
@@ -24,8 +24,9 @@ mod test {
 
             let configs = ["foo.yml", "bar.yml", "muxed.yml"];
             for config in &configs {
-              let path = PathBuf::from(&dir_name).join(config);
-              let _ = File::create(&path).expect("Muxed list test failed to create test config files.");
+                let path = PathBuf::from(&dir_name).join(config);
+                let _ = File::create(&path)
+                    .expect("Muxed list test failed to create test config files.");
             }
 
             dir
