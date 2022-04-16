@@ -148,7 +148,7 @@ impl Session {
     }
 }
 
-/// Read the current tmux sessoins from the server
+/// Read the current tmux sessions from the server
 ///
 /// # Examples
 ///
