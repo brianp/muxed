@@ -1,6 +1,6 @@
 Muxed - “Another TMUX project manager”
 =====
-[![Build Status](https://travis-ci.org/brianp/muxed.png?branch=master)](https://travis-ci.org/brianp/muxed)
+<a href="https://github.com/brianp/muxed/actions"><img src="https://github.com/brianp/muxed/workflows/test/badge.svg" alt="Build Status"></a>
 
 Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
