@@ -44,7 +44,14 @@ impl Session {
 // TODO: Real logic exists here. Test it!
 impl Command for Session {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["new", "-d", "-s", &self.target.arg_string, "-n", &self.window_name];
+        let args: Vec<&str> = vec![
+            "new",
+            "-d",
+            "-s",
+            &self.target.arg_string,
+            "-n",
+            &self.window_name,
+        ];
 
         match self.root_path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
@@ -85,7 +92,13 @@ impl Window {
 
 impl Command for Window {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["new-window", "-t", &self.session_target.arg_string, "-n", &self.name];
+        let args: Vec<&str> = vec![
+            "new-window",
+            "-t",
+            &self.session_target.arg_string,
+            "-n",
+            &self.name,
+        ];
 
         match self.path.as_ref() {
             Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
@@ -163,7 +176,13 @@ impl SendKeys {
 
 impl Command for SendKeys {
     fn args(&self) -> Vec<&str> {
-        vec!["send-keys", "-t", &self.target.arg_string(), &self.exec, "KPEnter"]
+        vec![
+            "send-keys",
+            "-t",
+            &self.target.arg_string(),
+            &self.exec,
+            "KPEnter",
+        ]
     }
 }
 

@@ -177,7 +177,6 @@ name = "edit"
 version = "0.8.2"
 dependencies = [
  "common",
- "dirs",
  "libc",
 ]
 
