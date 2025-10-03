@@ -7,8 +7,8 @@ extern crate dirs;
 extern crate libc;
 extern crate load;
 extern crate rand;
-extern crate yaml_rust;
 extern crate retry_test;
+extern crate yaml_rust;
 
 mod helpers;
 
@@ -18,11 +18,11 @@ mod test {
         use common::rand_names;
         use dirs::home_dir;
         use helpers::test_with_contents;
+        use retry_test::retry_test;
         use std::fs;
         use std::fs::File;
         use std::io::prelude::*;
         use std::path::PathBuf;
-        use retry_test::retry_test;
 
         #[test]
         fn opens_3_windows_from_array() {
@@ -129,9 +129,13 @@ windows:
             let _ = fs::remove_dir(dir);
             // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
             // resulting in `pane_current_path` being `/private/tmp/Direct…`
-            assert!(pane.path.to_str().unwrap().contains("/tmp/Directory With Spaces"));
+            assert!(pane
+                .path
+                .to_str()
+                .unwrap()
+                .contains("/tmp/Directory With Spaces"));
         }
-    
+
         #[test]
         #[retry_test(3, 10)]
         fn expect_home_var_to_open_in_home_dir() {

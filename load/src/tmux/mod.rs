@@ -68,8 +68,17 @@ pub fn has_session(target: &str) -> ExitStatus {
 /// tmux::get_config();
 /// ```
 pub fn get_config() -> String {
-    let output = call(&["start-server", ";", "show-options", "-g", ";", "show-options", "-g", "-w"])
-      .expect("couldn't get tmux options");
+    let output = call(&[
+        "start-server",
+        ";",
+        "show-options",
+        "-g",
+        ";",
+        "show-options",
+        "-g",
+        "-w",
+    ])
+    .expect("couldn't get tmux options");
     String::from_utf8_lossy(&output.stdout).to_string()
 }
 
