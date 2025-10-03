@@ -13,6 +13,7 @@ members = [
     "edit",
     "load",
     "new",
+    "retry_test",
     "snapshot"
 ]
 
