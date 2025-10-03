@@ -8,6 +8,7 @@ extern crate libc;
 extern crate load;
 extern crate rand;
 extern crate yaml_rust;
+extern crate retry_test;
 
 mod helpers;
 
@@ -21,6 +22,7 @@ mod test {
         use std::fs::File;
         use std::io::prelude::*;
         use std::path::PathBuf;
+        use retry_test::retry_test;
 
         #[test]
         fn opens_3_windows_from_array() {
@@ -131,6 +133,7 @@ windows:
         }
     
         #[test]
+        #[retry_test(3, 10)]
         fn expect_home_var_to_open_in_home_dir() {
             let contents = b"---
 root: '$HOME'

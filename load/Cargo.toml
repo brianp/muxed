@@ -13,3 +13,4 @@ yaml-rust = { version = "0.4.5", default-features = false }
 [dev-dependencies]
 rand      = "0.7.2"
 snapshot  = { path = "../snapshot" }
+retry_test = { path = "../retry_test" }
