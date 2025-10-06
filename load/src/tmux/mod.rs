@@ -97,7 +97,7 @@ pub fn get_config() -> String {
 /// tmux::attach(&["muxed"]);
 /// ```
 pub fn attach(args: &[&str]) -> Result<Output, io::Error> {
-    let arg_string = [&[TMUX_NAME], &args[..]].concat().join(" ");
+    let arg_string = [&[TMUX_NAME], args].concat().join(" ");
     let system_call = CString::new(arg_string).unwrap();
     // println!("{:?}", arg_string.clone());
     unsafe {

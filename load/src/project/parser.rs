@@ -1,13 +1,13 @@
 //! The YAML parser. Here is where we convert the yaml in to commands to be
 //! processed later.
 
-use command::*;
+use crate::command::*;
+use crate::project;
+use crate::tmux::config::Config;
+use crate::tmux::target::*;
 use dirs::home_dir;
-use project;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use tmux::config::Config;
-use tmux::target::*;
 use yaml_rust::Yaml;
 
 /// Here was pass in the parsed yaml and project name. The purpose of this call
@@ -75,13 +75,13 @@ pub fn call<'a>(
 
                         let target = WindowTarget::new(
                             Rc::clone(&project_name),
-                            k.as_str().ok_or_else(|| "no target specified")?,
+                            k.as_str().ok_or("no target specified")?,
                         );
                         commands.append(&mut pane_matcher(
                             v,
                             &target,
-                            &common_commands,
-                            &tmux_config,
+                            common_commands,
+                            tmux_config,
                             path.clone(),
                         )?);
                     } else {
@@ -90,9 +90,7 @@ pub fn call<'a>(
                                 &project_name,
                                 Rc::new(
                                     k.as_str()
-                                        .ok_or_else(|| {
-                                            "Windows require being named in your config."
-                                        })?
+                                        .ok_or("Windows require being named in your config.")?
                                         .to_string(),
                                 ),
                                 root.clone(),
@@ -105,17 +103,17 @@ pub fn call<'a>(
                         commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
 
                         // SendKeys for the exec command
-                        if let Some(ex) = v.as_str() {
-                            if !ex.is_empty() {
-                                commands.push(
-                                    SendKeys::new(
-                                        Target::WindowTarget(target.clone()),
-                                        v.as_str().unwrap().to_string(),
-                                    )
-                                    .into(),
-                                );
-                            };
-                        }
+                        if let Some(ex) = v.as_str()
+                            && !ex.is_empty()
+                        {
+                            commands.push(
+                                SendKeys::new(
+                                    Target::WindowTarget(target.clone()),
+                                    v.as_str().unwrap().to_string(),
+                                )
+                                .into(),
+                            );
+                        };
                     }
                 }
             }
@@ -123,7 +121,7 @@ pub fn call<'a>(
                 commands
                     .push(Window::new(&project_name, Rc::new(s.to_string()), root.clone()).into());
 
-                let target = WindowTarget::new(Rc::clone(&project_name), &s);
+                let target = WindowTarget::new(Rc::clone(&project_name), s);
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
             Yaml::Integer(ref s) => {
@@ -141,7 +139,7 @@ pub fn call<'a>(
     let (first, commands1) = commands.split_first().unwrap();
     let mut remains = commands1.to_vec();
 
-    if let Commands::Window(ref w) = &first {
+    if let Commands::Window(w) = &first {
         remains.insert(
             0,
             Session::new(&project_name, Rc::clone(&w.name), root.clone()).into(),
@@ -182,7 +180,7 @@ pub fn call<'a>(
     };
 
     if !daemonize {
-        remains.push(project::open(&project_name).into());
+        remains.push(project::open(&project_name));
     };
 
     Ok(remains)
@@ -190,8 +188,8 @@ pub fn call<'a>(
 
 /// Pane matcher is for breaking apart the panes. Splitting windows when needed
 /// and executing commands as needed.
-fn pane_matcher<'a, T>(
-    window: &'a Yaml,
+fn pane_matcher<T>(
+    window: &Yaml,
     target: &WindowTarget,
     common_commands: T,
     tmux_config: &Config,
@@ -228,10 +226,10 @@ where
 
         // Execute given commands in each new pane after all splits are
         // complete.
-        if let Some(p) = pane.as_str() {
-            if !p.is_empty() {
-                commands.push(SendKeys::new(Target::PaneTarget(pt.clone()), p.to_string()).into());
-            };
+        if let Some(p) = pane.as_str()
+            && !p.is_empty()
+        {
+            commands.push(SendKeys::new(Target::PaneTarget(pt.clone()), p.to_string()).into());
         };
     }
 
@@ -266,16 +264,15 @@ fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
 }
 
 fn expand_path(node: &Yaml) -> Option<Rc<PathBuf>> {
-    match node.as_str() {
-        Some(string) => Some(if string.contains("~/") {
+    node.as_str().map(|string| {
+        if string.contains("~/") {
             let home = home_dir().expect("Home dir could not be expanded");
             let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
             Rc::new(path)
         } else {
             Rc::new(PathBuf::from(string))
-        }),
-        None => None,
-    }
+        }
+    })
 }
 
 #[cfg(test)]

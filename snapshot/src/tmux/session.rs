@@ -1,5 +1,5 @@
+use crate::tmux::window::Window;
 use serde::{Deserialize, Serialize};
-use tmux::window::Window;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Session {

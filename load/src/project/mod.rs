@@ -3,13 +3,13 @@
 //! configs in.
 pub mod parser;
 
-use command::{Attach, Commands, SwitchClient};
+use crate::command::{Attach, Commands, SwitchClient};
+use crate::first_run::check_first_run;
+use crate::tmux::has_session;
 use common::project_paths::ProjectPaths;
-use first_run::check_first_run;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-use tmux::has_session;
 use yaml_rust::{Yaml, YamlLoader};
 
 static TMUX_ENV_VAR: &str = "TMUX";
@@ -41,7 +41,8 @@ static TMUX_ENV_VAR: &str = "TMUX";
 /// let paths = ProjectPaths::new(
 ///     PathBuf::from("/tmp"),
 ///     PathBuf::from("/tmp/.muxed"),
-///     PathBuf::from("/tmp/.muxed/projectname.yml")
+///     PathBuf::from("/tmp/.muxed/projectname.yml"),
+///     PathBuf::from("/tmp/.muxed/.template.yml")
 /// );
 ///
 /// let yaml: Result<Vec<Yaml>, String> = read("compiler", &paths);
@@ -51,7 +52,7 @@ static TMUX_ENV_VAR: &str = "TMUX";
 pub fn read(project_name: &str, project_paths: &ProjectPaths) -> Result<Vec<Yaml>, String> {
     check_first_run(&project_paths.project_directory)?;
 
-    let mut file = File::open(&project_paths.project_file).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e.to_string()))?;
+    let mut file = File::open(&project_paths.project_file).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e))?;
     let mut contents = String::new();
 
     file.read_to_string(&mut contents)
@@ -93,9 +94,9 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
 /// ```
 pub fn open(project_name: &str) -> Commands {
     if env::var_os(TMUX_ENV_VAR).is_some() {
-        SwitchClient::new(&project_name).into()
+        SwitchClient::new(project_name).into()
     } else {
-        Attach::new(&project_name, None).into()
+        Attach::new(project_name, None).into()
     }
 }
 
@@ -158,12 +159,12 @@ mod test {
 
     #[test]
     fn open_returns_switch_client_in_nested_context() {
-        let _ = env::set_var(TMUX_ENV_VAR, "somestring");
+        let _ = unsafe { env::set_var(TMUX_ENV_VAR, "somestring") };
         let switch_command = match open("muxed") {
             Commands::SwitchClient(_) => true,
             _ => false,
         };
-        let _ = env::remove_var(TMUX_ENV_VAR);
+        let _ = unsafe { env::remove_var(TMUX_ENV_VAR) };
 
         assert!(switch_command);
     }

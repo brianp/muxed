@@ -1,9 +1,9 @@
-use capture::retrieve_capture;
+use crate::capture::retrieve_capture;
+use crate::tmux::pane::Pane;
 use serde::ser::SerializeMap;
 use serde::{Deserialize, Serialize, Serializer};
 use std::io;
 use std::process::{Command, Output};
-use tmux::pane::Pane;
 
 // Come back and question the accuracy of windows without names
 // that have active, or previous window designations.
@@ -48,23 +48,15 @@ impl Window {
 
     pub fn from_line(line: &str) -> Option<Window> {
         let active = retrieve_capture(line, ACTIVE_REGEX).is_some();
-
-        let layout = match retrieve_capture(line, LAYOUT_REGEX) {
-            Some(x) => x,
-            None => return None,
-        };
-
-        let name = match retrieve_capture(line, NAME_REGEX) {
-            Some(x) => x,
-            None => return None,
-        };
+        let layout = retrieve_capture(line, LAYOUT_REGEX)?;
+        let name = retrieve_capture(line, NAME_REGEX)?;
 
         Some(Window::new(active, layout, name, vec![]))
     }
 
     pub fn window_list(target: &str) -> Result<Output, io::Error> {
         Command::new("tmux")
-            .args(&["list-windows", "-t", target, "-F", LIST_FORMAT])
+            .args(["list-windows", "-t", target, "-F", LIST_FORMAT])
             .output()
     }
 }

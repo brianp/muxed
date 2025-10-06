@@ -108,7 +108,7 @@ mod test {
 
     static DEFAULT_TEMPLATE: &str = "file: {file}\nproject: {project}";
 
-    fn file_replacement(path: &Path) -> Replacement {
+    fn file_replacement(path: &Path) -> Replacement<'_, '_> {
         ("{file}", path.to_str().unwrap())
     }
 

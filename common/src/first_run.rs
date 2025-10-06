@@ -27,7 +27,10 @@ use std::path::Path;
 pub fn check_first_run(muxed_dir: &Path) -> Result<(), String> {
     if !muxed_dir.exists() {
         create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir.display(), e))?;
-        println!("Looks like this is your first time here. Muxed could't find the configuration directory: `{}`", muxed_dir.display());
+        println!(
+            "Looks like this is your first time here. Muxed could't find the configuration directory: `{}`",
+            muxed_dir.display()
+        );
         println!("Creating that now \u{1F44C}\n")
     };
 
@@ -37,7 +40,7 @@ pub fn check_first_run(muxed_dir: &Path) -> Result<(), String> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use rand_names;
+    use crate::rand_names;
     use std::fs::remove_dir;
 
     #[test]

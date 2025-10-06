@@ -1,12 +1,12 @@
 //! The structures used to manage commands sent over to tmux.
 
+use crate::tmux;
+use crate::tmux::target::*;
 use std::io;
 use std::path::PathBuf;
 use std::process::Output;
 use std::rc::Rc;
 use std::{process, str};
-use tmux;
-use tmux::target::*;
 
 pub trait Command {
     fn call(&self, debug: bool) -> Result<Output, io::Error> {

@@ -2,7 +2,6 @@
 
 use std::fmt;
 use std::rc::Rc;
-use std::usize;
 
 /// A targeted pane for a tmux session
 #[derive(Debug, Clone)]

@@ -15,9 +15,9 @@ mod helpers;
 #[cfg(test)]
 mod test {
     mod load {
+        use crate::helpers::test_with_contents;
         use common::rand_names;
         use dirs::home_dir;
-        use helpers::test_with_contents;
         use retry_test::retry_test;
         use std::fs;
         use std::fs::File;
@@ -129,11 +129,12 @@ windows:
             let _ = fs::remove_dir(dir);
             // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
             // resulting in `pane_current_path` being `/private/tmp/Direct…`
-            assert!(pane
-                .path
-                .to_str()
-                .unwrap()
-                .contains("/tmp/Directory With Spaces"));
+            assert!(
+                pane.path
+                    .to_str()
+                    .unwrap()
+                    .contains("/tmp/Directory With Spaces")
+            );
         }
 
         #[test]

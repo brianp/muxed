@@ -7,11 +7,7 @@ use self::session::Session;
 use self::window::Window;
 
 pub fn inspect(name: &str) -> Result<Session, String> {
-    let windows = match windows_for(name) {
-        Ok(x) => x,
-        Err(e) => return Err(e),
-    };
-
+    let windows = windows_for(name)?;
     let windows = windows
         .into_iter()
         .map(|w| Window::from_window(panes_for(name, &w).unwrap(), w))
@@ -26,7 +22,7 @@ fn windows_for(target: &str) -> Result<Vec<Window>, String> {
 
     let windows = String::from_utf8_lossy(&output.stdout)
         .lines()
-        .filter_map(|line| Window::from_line(line))
+        .filter_map(Window::from_line)
         .collect::<Vec<_>>();
 
     if windows.is_empty() {
@@ -43,7 +39,7 @@ fn panes_for(session_name: &str, w: &Window) -> Result<Vec<Pane>, String> {
 
     let panes = String::from_utf8_lossy(&output.stdout)
         .lines()
-        .filter_map(|line| Pane::from_line(line))
+        .filter_map(Pane::from_line)
         .collect::<Vec<_>>();
 
     Ok(panes)

@@ -2,7 +2,7 @@ extern crate common;
 
 use common::args::Args;
 use common::first_run::check_first_run;
-use common::project_paths::{project_paths, CONFIG_EXTENSION};
+use common::project_paths::{CONFIG_EXTENSION, project_paths};
 
 use std::path::PathBuf;
 

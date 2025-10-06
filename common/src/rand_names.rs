@@ -1,4 +1,4 @@
-use project_paths::CONFIG_EXTENSION;
+use crate::project_paths::CONFIG_EXTENSION;
 use rand::random;
 use std::path::PathBuf;
 

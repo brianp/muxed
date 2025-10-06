@@ -36,7 +36,7 @@ pub fn exec(args: Args) -> Result<(), String> {
 
     check_first_run(&project_paths.project_directory)?;
 
-    let session = tmux::inspect(&session_name).unwrap();
+    let session = tmux::inspect(session_name).unwrap();
     let s = serde_yaml::to_string(&session).unwrap();
 
     write_config(s, &project_paths.project_file, args.flag_f).unwrap();

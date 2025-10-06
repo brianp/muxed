@@ -1,4 +1,4 @@
-use args::Args;
+use crate::args::Args;
 #[cfg(not(any(test, doctest)))]
 use dirs::home_dir;
 use std::path::PathBuf;
@@ -75,7 +75,8 @@ impl ProjectPaths {
 /// let paths = ProjectPaths::new(
 ///     PathBuf::from("/tmp"),
 ///     PathBuf::from("/tmp/.muxed"),
-///     PathBuf::from("/tmp/.muxed/projectname.yml")
+///     PathBuf::from("/tmp/.muxed/projectname.yml"),
+///     PathBuf::from("/tmp/.muxed/.template.yml")
 /// );
 ///
 /// assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"));
@@ -85,10 +86,7 @@ impl ProjectPaths {
 pub fn project_paths(args: &Args) -> ProjectPaths {
     let homedir = homedir().expect("We couldn't find your home directory.");
     let default_dir = homedir.join(MUXED_FOLDER);
-    let project_directory = args
-        .flag_p
-        .as_ref()
-        .map_or(default_dir, |p| PathBuf::from(p));
+    let project_directory = args.flag_p.as_ref().map_or(default_dir, PathBuf::from);
 
     let project_filename = PathBuf::from(&args.arg_project).with_extension(CONFIG_EXTENSION);
     let project_fullpath = project_directory.join(project_filename);

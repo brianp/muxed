@@ -25,15 +25,14 @@ pub fn exec(args: Args) -> Result<(), String> {
         .unwrap_or(&args.arg_project)
         .to_string();
 
-    let commands: Vec<Commands>;
-    match project::session_exists(project_name) {
+    let commands: Vec<Commands> = match project::session_exists(project_name) {
         Some(c) => {
-            commands = vec![c];
+            vec![c]
         }
         None => {
             let config = Config::from_string(tmux::get_config());
-            commands = parser::call(&yaml, project_name, args.flag_d, &config)
-                .expect("Couldn't parse commands");
+            parser::call(&yaml, project_name, args.flag_d, &config)
+                .expect("Couldn't parse commands")
         }
     };
 

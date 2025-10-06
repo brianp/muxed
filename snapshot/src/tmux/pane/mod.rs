@@ -1,6 +1,6 @@
 //use std::path::PathBuf;
 //use tmux::window::Window;
-use capture::retrieve_capture;
+use crate::capture::retrieve_capture;
 use serde::{Deserialize, Serialize, Serializer};
 use std::io;
 use std::path::PathBuf;
@@ -58,7 +58,7 @@ impl Pane {
 
     pub fn pane_list(target: &str) -> Result<Output, io::Error> {
         Command::new("tmux")
-            .args(&["list-panes", "-t", target, "-F", LIST_FORMAT])
+            .args(["list-panes", "-t", target, "-F", LIST_FORMAT])
             .output()
     }
 }
