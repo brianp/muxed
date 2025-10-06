@@ -1,6 +1,6 @@
 Muxed - “Another TMUX project manager”
 =====
-<a href="https://github.com/brianp/muxed/actions"><img src="https://github.com/brianp/muxed/workflows/test/badge.svg" alt="Build Status"></a>
+<a href="https://github.com/brianp/muxed/actions"><img src="https://github.com/brianp/muxed/workflows/tests/badge.svg" alt="Build Status"></a>
 
 Drop muxed in to your `$PATH` and take it for a spin. Happy to receive feature requests or bug reports!
 
