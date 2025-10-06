@@ -3,6 +3,7 @@ name = "list"
 version = "0.8.2"
 authors = ["Brian Pearce"]
 publish = false
+edition = "2024"
 
 [lib]
 doctest = false
