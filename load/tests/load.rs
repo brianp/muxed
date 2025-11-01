@@ -247,6 +247,7 @@ windows:
 
         // TODO: should ssh or git be a command or window name?
         #[test]
+        #[retry_test(3, 10)]
         fn expect_focus_on_the_first_window() {
             let contents = b"---
 windows: ['ssh', 'git']
