@@ -71,7 +71,7 @@ fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
         ..Default::default()
     };
 
-    load::exec(args)
+    load::load(args).map_err(|e| format!("Open error {}", e))
 }
 
 fn kill_session(target: &str) {

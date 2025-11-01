@@ -94,15 +94,15 @@ pub fn main() {
     };
 
     if args.cmd_edit {
-        try_or_err!(edit::exec(args));
+        try_or_err!(edit::edit(args));
     } else if args.cmd_load {
-        try_or_err!(load::exec(args));
+        try_or_err!(load::load(args));
     } else if args.cmd_new {
-        try_or_err!(new::exec(args));
+        try_or_err!(new::new(args));
     } else if args.cmd_snapshot {
-        try_or_err!(snapshot::exec(args));
+        try_or_err!(snapshot::snapshot(args));
     } else if args.cmd_list || args.cmd_ls {
-        try_or_err!(list::exec(args));
+        try_or_err!(list::list(args));
     } else {
         if DISALLOWED_SHORTHAND_PROJECT_NAMES.contains(&args.arg_project.as_ref()) {
             println!(
@@ -112,6 +112,6 @@ pub fn main() {
             exit(1);
         }
 
-        try_or_err!(load::exec(args));
+        try_or_err!(load::load(args));
     }
 }

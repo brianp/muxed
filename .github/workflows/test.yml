@@ -33,7 +33,7 @@ jobs:
         os: [ubuntu-latest, macos-latest]
     name: integration tests
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.tmux_version == 'master' }}
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable

@@ -50,7 +50,7 @@ mod test {
                 ..Default::default()
             };
 
-            assert!(list::exec(args).is_ok());
+            assert!(list::list(args).is_ok());
 
             cleanup(project_dir);
         }

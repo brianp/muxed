@@ -1,9 +1,9 @@
 //! The project module takes care of muxed related initialization. Locating the
 //! users home directory. Finding the desired config files, and reading the
 //! configs in.
-pub mod parser;
 
 use crate::command::{Attach, Commands, SwitchClient};
+use crate::error::LoadError;
 use crate::first_run::check_first_run;
 use crate::tmux::has_session;
 use common::project_paths::ProjectPaths;
@@ -13,6 +13,29 @@ use std::io::prelude::*;
 use yaml_rust::{Yaml, YamlLoader};
 
 static TMUX_ENV_VAR: &str = "TMUX";
+
+pub struct Project {
+    name: String,
+    paths: ProjectPaths,
+    yaml: Vec<Yaml>,
+}
+
+impl Project {
+    pub fn name(&self) -> String {
+        self.yaml[0]["name"]
+            .as_str()
+            .unwrap_or(&self.name)
+            .to_string()
+    }
+
+    pub fn paths(&self) -> &ProjectPaths {
+        &self.paths
+    }
+
+    pub fn yaml(&self) -> &Vec<Yaml> {
+        &self.yaml
+    }
+}
 
 /// Using the provided project name, locate the path to that project file. It
 /// should be something similar to: `~/.muxed/my_project.yml`
@@ -35,6 +58,8 @@ static TMUX_ENV_VAR: &str = "TMUX";
 ///
 /// use common::project_paths::ProjectPaths;
 /// use load::project::read;
+/// use load::project::Project;
+/// use load::error::LoadError;
 /// use std::path::PathBuf;
 /// use yaml_rust::{Yaml, YamlLoader};
 ///
@@ -45,33 +70,35 @@ static TMUX_ENV_VAR: &str = "TMUX";
 ///     PathBuf::from("/tmp/.muxed/.template.yml")
 /// );
 ///
-/// let yaml: Result<Vec<Yaml>, String> = read("compiler", &paths);
+/// let yaml: Result<Project, LoadError> = read("compiler", paths);
 ///
 /// assert!(yaml.is_ok());
 /// ```
-pub fn read(project_name: &str, project_paths: &ProjectPaths) -> Result<Vec<Yaml>, String> {
+pub fn read(project_name: &str, project_paths: ProjectPaths) -> Result<Project, LoadError> {
     check_first_run(&project_paths.project_directory)?;
 
-    let mut file = File::open(&project_paths.project_file).map_err(|e| format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e))?;
+    let mut file = File::open(&project_paths.project_file).map_err(|e| LoadError::Read(format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e)))?;
     let mut contents = String::new();
 
-    file.read_to_string(&mut contents)
-        .map_err(|e| e.to_string())?;
+    file.read_to_string(&mut contents).map_err(LoadError::Io)?;
 
-    let parsed_yaml = YamlLoader::load_from_str(&contents).map_err(|e| e.to_string())?;
+    let parsed_yaml = YamlLoader::load_from_str(&contents)?;
 
-    Ok(parsed_yaml)
+    let project = Project {
+        name: project_name.to_string(),
+        paths: project_paths,
+        yaml: parsed_yaml,
+    };
+
+    Ok(project)
 }
 
 /// Find out if a tmux session is already active with this name. If it is active
 /// return `Some<Commands::Attach>` with a command to attach to the session. If a
 /// session is not active return None and let the app carry on.
+// TODO: It's convenient but it's such a dumb idea. We shouldn't return actionable data when we're asking if something exists
 pub fn session_exists(project_name: &str) -> Option<Commands> {
-    if has_session(project_name).success() {
-        Some(open(project_name))
-    } else {
-        None
-    }
+    has_session(project_name).then(|| open(project_name))
 }
 
 /// Check to see how we want to open the project. Do we need to attach to a new
@@ -109,7 +136,7 @@ mod test {
     #[test]
     fn missing_file_returns_err() {
         let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "", "");
-        let result = read(&String::from("not_a_file"), &project_paths);
+        let result = read(&String::from("not_a_file"), project_paths);
         assert!(result.is_err())
     }
 
@@ -122,9 +149,10 @@ mod test {
         let mut buffer = File::create(&project_paths.project_file).unwrap();
         let _ = buffer.write(b"mix: [1,2,3]: muxed");
         let _ = buffer.sync_all();
+        let remove_file = &project_paths.project_file.clone();
 
-        let result = read(&name, &project_paths);
-        let _ = fs::remove_file(&project_paths.project_file);
+        let result = read(&name, project_paths);
+        let _ = fs::remove_file(remove_file);
         assert!(result.is_err());
     }
 
@@ -142,8 +170,9 @@ mod test {
         );
         let _ = buffer.sync_all();
 
-        let result = read(&name, &project_paths);
-        let _ = fs::remove_file(&project_paths.project_file);
+        let remove_file = &project_paths.project_file.clone();
+        let result = read(&name, project_paths);
+        let _ = fs::remove_file(remove_file);
         assert!(result.is_ok());
     }
 

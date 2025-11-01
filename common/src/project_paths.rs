@@ -1,4 +1,5 @@
 use crate::args::Args;
+use crate::error::CommonError;
 #[cfg(not(any(test, doctest)))]
 use dirs::home_dir;
 use std::path::PathBuf;
@@ -61,46 +62,53 @@ impl ProjectPaths {
 ///
 /// #cfg(doctest) isn't working. This results in different home dirs
 /// ```rust,no_run
-/// use common::project_paths::{ProjectPaths, project_paths};
-/// use common::args::Args;
-/// use std::path::PathBuf;
+/// {
+///     use common::project_paths::ProjectPaths;
+///     use common::args::Args;
+///     use std::path::PathBuf;
 ///
-/// let args = Args {
-///     arg_project: "projectname".to_string(),
-///     ..Default::default()
-/// };
+///     let args = Args {
+///         arg_project: "projectname".to_string(),
+///         ..Default::default()
+///     };
 ///
-/// let project_paths = project_paths(&args);
+///     let project_paths =  ProjectPaths::try_from(&args).expect("the paths to parse");
 ///
-/// let paths = ProjectPaths::new(
-///     PathBuf::from("/tmp"),
-///     PathBuf::from("/tmp/.muxed"),
-///     PathBuf::from("/tmp/.muxed/projectname.yml"),
-///     PathBuf::from("/tmp/.muxed/.template.yml")
-/// );
+///     let paths = ProjectPaths::from_strs(
+///         "/tmp",
+///         "/tmp/.muxed",
+///         "/tmp/.muxed/projectname.yml",
+///         "/tmp/.muxed/.template.yml"
+///     );
 ///
-/// assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"));
-/// assert_eq!(project_paths.project_directory, PathBuf::from("/tmp/.muxed"));
-/// assert_eq!(project_paths.project_file, PathBuf::from("/tmp/.muxed/projectname.yml"))
+///     assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"));
+///     assert_eq!(project_paths.project_directory, PathBuf::from("/tmp/.muxed"));
+///     assert_eq!(project_paths.project_file, PathBuf::from("/tmp/.muxed/projectname.yml"));
+///     assert_eq!(project_paths.template_file, PathBuf::from("/tmp/.muxed/.template.yml"));
+/// }
 /// ```
-pub fn project_paths(args: &Args) -> ProjectPaths {
-    let homedir = homedir().expect("We couldn't find your home directory.");
-    let default_dir = homedir.join(MUXED_FOLDER);
-    let project_directory = args.flag_p.as_ref().map_or(default_dir, PathBuf::from);
+impl TryFrom<&Args> for ProjectPaths {
+    type Error = CommonError;
+    fn try_from(args: &Args) -> Result<ProjectPaths, CommonError> {
+        let homedir =
+            homedir().ok_or(CommonError::ProjectPaths("homedir not found".to_string()))?;
+        let default_dir = homedir.join(MUXED_FOLDER);
+        let project_directory = args.flag_p.as_ref().map_or(default_dir, PathBuf::from);
 
-    let project_filename = PathBuf::from(&args.arg_project).with_extension(CONFIG_EXTENSION);
-    let project_fullpath = project_directory.join(project_filename);
+        let project_filename = PathBuf::from(&args.arg_project).with_extension(CONFIG_EXTENSION);
+        let project_fullpath = project_directory.join(project_filename);
 
-    let template_filename: &str = args.flag_template.as_deref().unwrap_or(".template");
-    let template_filename = PathBuf::from(template_filename).with_extension(CONFIG_EXTENSION);
-    let template_fullpath = project_directory.join(template_filename);
+        let template_filename: &str = args.flag_template.as_deref().unwrap_or(".template");
+        let template_filename = PathBuf::from(template_filename).with_extension(CONFIG_EXTENSION);
+        let template_fullpath = project_directory.join(template_filename);
 
-    ProjectPaths::new(
-        homedir,
-        project_directory,
-        project_fullpath,
-        template_fullpath,
-    )
+        Ok(ProjectPaths::new(
+            homedir,
+            project_directory,
+            project_fullpath,
+            template_fullpath,
+        ))
+    }
 }
 
 /// A Thin wrapper around the home_dir crate. This is so we can swap the default
@@ -123,7 +131,7 @@ mod test {
     #[test]
     fn expects_tmp_as_default_homedir() {
         let args: Args = Default::default();
-        let project_paths = project_paths(&args);
+        let project_paths = ProjectPaths::try_from(&args).unwrap();
 
         assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"))
     }
@@ -131,7 +139,7 @@ mod test {
     #[test]
     fn expects_muxed_as_default_project_dir() {
         let args: Args = Default::default();
-        let project_paths = project_paths(&args);
+        let project_paths = ProjectPaths::try_from(&args).unwrap();
 
         assert_eq!(
             project_paths.project_directory,
@@ -142,7 +150,7 @@ mod test {
     #[test]
     fn expects_template_as_default_template_filename() {
         let args: Args = Default::default();
-        let project_paths = project_paths(&args);
+        let project_paths = ProjectPaths::try_from(&args).unwrap();
 
         assert_eq!(
             project_paths.template_file,
@@ -156,7 +164,7 @@ mod test {
             flag_p: Some("/spacey".to_string()),
             ..Default::default()
         };
-        let project_paths = project_paths(&args);
+        let project_paths = ProjectPaths::try_from(&args).unwrap();
 
         assert_eq!(project_paths.project_directory, PathBuf::from("/spacey"))
     }
@@ -167,7 +175,7 @@ mod test {
             arg_project: "projectname".to_string(),
             ..Default::default()
         };
-        let project_paths = project_paths(&args);
+        let project_paths = ProjectPaths::try_from(&args).unwrap();
 
         assert_eq!(
             project_paths.project_file,
@@ -181,7 +189,7 @@ mod test {
             flag_template: Some("custom_template".to_string()),
             ..Default::default()
         };
-        let project_paths = project_paths(&args);
+        let project_paths = ProjectPaths::try_from(&args).unwrap();
 
         assert_eq!(
             project_paths.template_file,

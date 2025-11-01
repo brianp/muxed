@@ -4,12 +4,12 @@ use serde::Deserialize;
 
 /// The args struct for taking arguments passed in from the command line
 /// and making it easier to pass around.
-/// `flag_d` is whether the session should be daemonzied
+/// `flag_d` is whether the session should be daemonized
 /// `flag_v` to print the version
 /// `flag_f` to force overwrite of a file
 /// `flag_p` the project directory to read or write to
 /// `flag_t` the session to read from
-/// `flag_1` wether to use new-lines for list command
+/// `flag_1` whether to use new-lines for list command
 /// `flag_debug` run inline print statements for debugging
 /// `arg_project` the project file to read
 /// `cmd_edit` if `true` run edit command

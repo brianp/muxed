@@ -1,15 +1,15 @@
 //! The structures used to manage commands sent over to tmux.
 
 use crate::tmux;
+use crate::tmux::error::TmuxError;
 use crate::tmux::target::*;
-use std::io;
 use std::path::PathBuf;
 use std::process::Output;
 use std::rc::Rc;
 use std::{process, str};
 
 pub trait Command {
-    fn call(&self, debug: bool) -> Result<Output, io::Error> {
+    fn call(&self, debug: bool) -> Result<Output, TmuxError> {
         if debug {
             println!("{:?}", &self.args());
         };
@@ -217,7 +217,7 @@ impl Command for Attach {
         [&args[..], &[">/dev/null"]].concat()
     }
 
-    fn call(&self, debug: bool) -> Result<Output, io::Error> {
+    fn call(&self, debug: bool) -> Result<Output, TmuxError> {
         if debug {
             println!("{:?}", &self.args());
         };
@@ -305,17 +305,15 @@ impl Command for Pre {
         vec![]
     }
 
-    fn call(&self, debug: bool) -> Result<Output, io::Error> {
+    fn call(&self, debug: bool) -> Result<Output, TmuxError> {
         if debug {
             println!("{:?}", &self.exec);
         };
 
         let cmd_array: Vec<&str> = self.exec.split(' ').collect();
-        let (program, args) = cmd_array
-            .split_first()
-            .expect("Couldn't find args for pre option");
+        let (program, args) = cmd_array.split_first().ok_or(TmuxError::Pre)?;
 
-        process::Command::new(program).args(args).output()
+        Ok(process::Command::new(program).args(args).output()?)
     }
 }
 
