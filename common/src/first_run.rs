@@ -1,3 +1,4 @@
+use crate::error::CommonError;
 use std::fs::create_dir;
 use std::path::Path;
 
@@ -24,9 +25,9 @@ use std::path::Path;
 ///
 /// let _ = remove_dir(path);
 /// ```
-pub fn check_first_run(muxed_dir: &Path) -> Result<(), String> {
+pub fn check_first_run(muxed_dir: &Path) -> Result<(), CommonError> {
     if !muxed_dir.exists() {
-        create_dir(muxed_dir).map_err(|e| format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir.display(), e))?;
+        create_dir(muxed_dir).map_err(|e| CommonError::FirstRunError(format!("We noticed the configuration directory: `{}` didn't exist so we tried to create it, but something went wrong: {}", muxed_dir.display(), e)))?;
         println!(
             "Looks like this is your first time here. Muxed could't find the configuration directory: `{}`",
             muxed_dir.display()

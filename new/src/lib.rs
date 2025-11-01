@@ -1,9 +1,13 @@
 //! Muxednew. A Muxed project Template Generator
+
+mod error;
+
 extern crate common;
 
+use crate::error::NewError;
 use common::args::Args;
 use common::first_run::check_first_run;
-use common::project_paths::project_paths;
+use common::project_paths::ProjectPaths;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::PathBuf;
@@ -27,13 +31,13 @@ static DEFAULT_TEMPLATE: &str = include_str!("template.yml");
 /// ```
 /// $ ./muxednew -p ~/.some_other_dir/ projectName
 /// ```
-pub fn exec(args: Args) -> Result<(), String> {
-    let project_paths = project_paths(&args);
+pub fn new(args: Args) -> Result<(), NewError> {
+    let project_paths = ProjectPaths::try_from(&args)?;
 
     check_first_run(&project_paths.project_directory)?;
 
     let template = if project_paths.template_file.exists() {
-        std::fs::read_to_string(project_paths.template_file).map_err(|e| e.to_string())?
+        std::fs::read_to_string(project_paths.template_file)?
     } else {
         DEFAULT_TEMPLATE.to_string()
     };
@@ -44,7 +48,10 @@ pub fn exec(args: Args) -> Result<(), String> {
             project_paths
                 .project_file
                 .to_str()
-                .expect("Couldn't convert the {:?} path into a String to write into the new file"),
+                .ok_or(NewError::Template(format!(
+                    "Couldn't convert the {:?} path into a String to write into the new file",
+                    project_paths.project_file
+                )))?,
         ),
         ("{project}", &args.arg_project),
     ];
@@ -72,28 +79,35 @@ fn modified_template(template: &str, replacements: &[Replacement]) -> String {
     template
 }
 
-pub fn write_template<S>(template: S, path: &PathBuf, force: bool) -> Result<(), String>
+pub fn write_template<S>(template: S, path: &PathBuf, force: bool) -> Result<(), NewError>
 where
     S: Into<String>,
 {
-    let path_str = path.to_str().expect("Path could not be opened");
+    let path_str = path
+        .to_str()
+        .ok_or(NewError::Write("Path could not be opened".to_string()))?;
     let mut file = OpenOptions::new()
         .write(true)
         .truncate(force)
         .create(force)
         .create_new(!force)
         .open(path)
-        .map_err(|e| format!("Could not create the file {}. Error: {}", &path_str, e))?;
+        .map_err(|e| {
+            NewError::Write(format!(
+                "Could not create the file {}. Error: {}",
+                &path_str, e
+            ))
+        })?;
 
     file.write_all(template.into().as_bytes()).map_err(|e| {
-        format!(
+        NewError::Write(format!(
             "Could not write contents of template to the file {}. Error {}",
             &path_str, e
-        )
+        ))
     })?;
 
     file.sync_all()
-        .map_err(|e| format!("Could not sync OS data post-write. Error: {}", e))?;
+        .map_err(|e| NewError::Write(format!("Could not sync OS data post-write. Error: {}", e)))?;
 
     Ok(())
 }
@@ -231,5 +245,38 @@ mod test {
 
         assert!(result.is_err());
         let _ = fs::remove_file(&path);
+    }
+
+    #[test]
+    fn expect_error_on_invalid_path() {
+        use std::os::unix::ffi::OsStrExt;
+        // Create an invalid UTF-8 path
+        let invalid = std::ffi::OsStr::from_bytes(&[0xff, 0xfe, 0xfd]);
+        let path = PathBuf::from(invalid);
+        let result = write_template("abc", &path, false);
+        match result {
+            Err(NewError::Write(msg)) => assert!(msg.contains("Path could not be opened")),
+            _ => panic!("Expected NewError::Write"),
+        }
+    }
+
+    #[test]
+    fn expect_error_when_path_is_directory() {
+        let dir = std::env::temp_dir(); // This directory always exists
+        let result = write_template("abc", &dir, false);
+        match result {
+            Err(NewError::Write(msg)) => assert!(msg.starts_with("Could not create the file")),
+            _ => panic!("Expected NewError::Write"),
+        }
+    }
+
+    #[test]
+    fn expect_error_on_permission_denied() {
+        let path = PathBuf::from("/root/forbidden_file");
+        let result = write_template("abc", &path, false);
+        match result {
+            Err(NewError::Write(msg)) => assert!(msg.starts_with("Could not create the file")),
+            _ => panic!("Expected NewError::Write"),
+        }
     }
 }

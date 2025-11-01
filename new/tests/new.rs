@@ -33,7 +33,7 @@ mod test {
                 ..Default::default()
             };
 
-            assert!(new::exec(args).is_ok());
+            assert!(new::new(args).is_ok());
             assert!(&project_path.exists());
 
             cleanup(&project_path);
@@ -65,7 +65,7 @@ mod test {
                 ..Default::default()
             };
 
-            assert!(new::exec(args).is_ok());
+            assert!(new::new(args).is_ok());
             assert!(&project_path.exists());
 
             let new_contents = fs::read_to_string(&project_path).unwrap();
@@ -100,7 +100,7 @@ mod test {
                 ..Default::default()
             };
 
-            assert!(new::exec(args).is_ok());
+            assert!(new::new(args).is_ok());
 
             let contents = fs::read_to_string(&project_path).unwrap();
 
@@ -128,7 +128,7 @@ mod test {
                 ..Default::default()
             };
 
-            assert!(new::exec(args).is_err());
+            assert!(new::new(args).is_err());
 
             cleanup(&project_path);
         }

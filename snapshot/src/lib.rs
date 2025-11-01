@@ -6,11 +6,13 @@ extern crate serde;
 extern crate serde_yaml;
 
 mod capture;
+mod error;
 pub mod tmux;
 
+use crate::error::SnapshotError;
 use common::args::Args;
 use common::first_run::check_first_run;
-use common::project_paths::project_paths;
+use common::project_paths::ProjectPaths;
 use new::write_template as write_config;
 
 /// The main execution method.
@@ -30,9 +32,12 @@ use new::write_template as write_config;
 /// ```
 /// $ ./muxed snapshot -n jasper -t 1
 /// ```
-pub fn exec(args: Args) -> Result<(), String> {
-    let session_name = &args.flag_t.as_ref().expect("No TMUX session running");
-    let project_paths = project_paths(&args);
+pub fn snapshot(args: Args) -> Result<(), SnapshotError> {
+    let session_name = args
+        .flag_t
+        .as_ref()
+        .ok_or(SnapshotError::NoSessionRunning)?;
+    let project_paths = ProjectPaths::try_from(&args)?;
 
     check_first_run(&project_paths.project_directory)?;
 

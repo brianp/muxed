@@ -5,13 +5,16 @@
 /// call. All functions go through this `call` function as a common gateway to
 /// system calls and can all be easily logged there.
 pub mod config;
+pub mod error;
 pub mod target;
 
+use crate::tmux::error::TmuxError;
 use libc::system;
 use std::ffi::CString;
-use std::io;
 use std::os::unix::process::ExitStatusExt;
 use std::process::{Command, ExitStatus, Output};
+
+type Result<T> = std::result::Result<T, TmuxError>;
 
 /// The program to call commands on.
 static TMUX_NAME: &str = "tmux";
@@ -32,9 +35,12 @@ static TMUX_NAME: &str = "tmux";
 /// let _ = call(&["new-window", "-t", "muxed-test", "-c", "~/Projects/muxed/"]);
 /// let _ = call(&["kill-session", "-t", "muxed-test"]);
 /// ```
-pub fn call(args: &[&str]) -> Result<Output, io::Error> {
+pub fn call(args: &[&str]) -> Result<Output> {
     //println!("{:?}", &args);
-    Command::new(TMUX_NAME).args(args).output()
+    Command::new(TMUX_NAME)
+        .args(args)
+        .output()
+        .map_err(TmuxError::Io)
 }
 
 /// Has session is used firgure out if a named session is already running.
@@ -49,12 +55,13 @@ pub fn call(args: &[&str]) -> Result<Output, io::Error> {
 ///
 /// let session = tmux::has_session("muxed");
 ///
-/// assert!(!session.success());
+/// assert!(!session);
 /// ```
-pub fn has_session(target: &str) -> ExitStatus {
-    let output =
-        call(&["has-session", "-t", target]).expect("failed to see if the session existed");
-    output.status
+pub fn has_session(target: &str) -> bool {
+    match call(&["has-session", "-t", target]) {
+        Ok(output) => output.status.success(),
+        _ => false,
+    }
 }
 
 /// Read the tmux config and return a config object
@@ -67,7 +74,7 @@ pub fn has_session(target: &str) -> ExitStatus {
 ///
 /// tmux::get_config();
 /// ```
-pub fn get_config() -> String {
+pub fn get_config() -> Result<String> {
     let output = call(&[
         "start-server",
         ";",
@@ -78,8 +85,9 @@ pub fn get_config() -> String {
         "-g",
         "-w",
     ])
-    .expect("couldn't get tmux options");
-    String::from_utf8_lossy(&output.stdout).to_string()
+    .map_err(|_| TmuxError::Config)?;
+
+    Ok(String::from_utf8_lossy(&output.stdout).to_string())
 }
 
 /// Attach is called as the last function in a set of commands. After the tmux
@@ -96,9 +104,9 @@ pub fn get_config() -> String {
 ///
 /// tmux::attach(&["muxed"]);
 /// ```
-pub fn attach(args: &[&str]) -> Result<Output, io::Error> {
+pub fn attach(args: &[&str]) -> Result<Output> {
     let arg_string = [&[TMUX_NAME], args].concat().join(" ");
-    let system_call = CString::new(arg_string).unwrap();
+    let system_call = CString::new(arg_string).map_err(TmuxError::Attach)?;
     // println!("{:?}", arg_string.clone());
     unsafe {
         let output = system(system_call.as_ptr());
