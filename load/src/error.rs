@@ -1,3 +1,4 @@
+use crate::parser::error::ParseError;
 use crate::tmux::error::TmuxError;
 use common::error::CommonError;
 use std::{fmt, io};
@@ -6,7 +7,7 @@ use yaml_rust;
 #[derive(Debug)]
 pub enum LoadError {
     Io(io::Error),
-    Parse(String),
+    Parse(ParseError),
     YamlParse(yaml_rust::ScanError),
     Read(String),
     Common(CommonError),
@@ -17,7 +18,7 @@ impl fmt::Display for LoadError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             LoadError::Io(e) => write!(f, "IO error: {}", e),
-            LoadError::Parse(msg) => write!(f, "Parse error: {}", msg),
+            LoadError::Parse(e) => write!(f, "Parse error: {}", e),
             LoadError::YamlParse(msg) => write!(f, "YAML Parse error: {}", msg),
             LoadError::Read(msg) => write!(f, "Read error: {}", msg),
             LoadError::Common(e) => write!(f, "{}", e),

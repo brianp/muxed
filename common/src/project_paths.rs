@@ -114,13 +114,13 @@ impl TryFrom<&Args> for ProjectPaths {
 /// A Thin wrapper around the home_dir crate. This is so we can swap the default
 /// dir out during testing.
 #[cfg(not(any(test, doctest)))]
-fn homedir() -> Option<PathBuf> {
+pub fn homedir() -> Option<PathBuf> {
     home_dir()
 }
 
 /// Return the temp dir as the users home dir during testing.
 #[cfg(any(test, doctest))]
-fn homedir() -> Option<PathBuf> {
+pub fn homedir() -> Option<PathBuf> {
     Some(PathBuf::from("/tmp"))
 }
 

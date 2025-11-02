@@ -5,10 +5,15 @@ use crate::command::*;
 use crate::project;
 use crate::tmux::config::Config;
 use crate::tmux::target::*;
-use dirs::home_dir;
-use std::path::{Path, PathBuf};
+use common::project_paths::homedir;
+use error::ParseError;
+use std::path::PathBuf;
 use std::rc::Rc;
 use yaml_rust::Yaml;
+
+pub mod error;
+
+type Result<T> = std::result::Result<T, ParseError>;
 
 /// Here was pass in the parsed yaml and project name. The purpose of this call
 /// loop is to build the stack of commands that are run to setup a users tmux
@@ -21,18 +26,18 @@ pub fn call<'a>(
     project_name: &'a str,
     daemonize: bool,
     tmux_config: &Config,
-) -> Result<Vec<Commands>, String> {
+) -> Result<Vec<Commands>> {
     let mut commands: Vec<Commands> = vec![];
     let project_name = Rc::new(project_name);
 
     // There should only be one doc but it's a vec so take the first.
-    let doc = &yaml_string[0];
+    let doc = &yaml_string.first().ok_or(ParseError::NoDocFound)?;
 
-    let root = expand_path(&doc["root"]);
+    let root = expand_path(&doc["root"])?;
     let pre_window = pre_matcher(&doc["pre_window"]);
 
-    // A clojure used to capture the current local root and pre Options.
-    // This way we can call the clojure to create common SendKeys command
+    // A closure used to capture the current local root and pre Options.
+    // This way we can call the closure to create common SendKeys command
     // like changing the directory or executing a system command from the
     // `pre_window` option.
     let common_commands = |target: Target| -> Vec<Commands> {
@@ -50,33 +55,25 @@ pub fn call<'a>(
         commands2
     };
 
-    let windows = doc["windows"]
-        .as_vec()
-        .expect("No Windows have been defined.");
+    let windows = doc["windows"].as_vec().ok_or(ParseError::NoWindows)?;
 
     for window in windows.iter() {
         match *window {
             Yaml::Hash(ref h) => {
                 for (k, v) in h {
+                    let key = k.as_str().ok_or(ParseError::WindowNameRequired)?;
                     if v.as_hash().is_some() {
                         let path = match expand_path(&v["path"]) {
-                            Some(x) => Some(x),
-                            None => root.clone(),
+                            Ok(x) => x,
+                            Err(_) => root.clone(),
                         };
 
                         commands.push(
-                            Window::new(
-                                &project_name,
-                                Rc::new(k.as_str().expect("window should have a name").to_string()),
-                                path.clone(),
-                            )
-                            .into(),
+                            Window::new(&project_name, Rc::new(key.to_string()), path.clone())
+                                .into(),
                         );
 
-                        let target = WindowTarget::new(
-                            Rc::clone(&project_name),
-                            k.as_str().ok_or("no target specified")?,
-                        );
+                        let target = WindowTarget::new(Rc::clone(&project_name), key);
                         commands.append(&mut pane_matcher(
                             v,
                             &target,
@@ -86,30 +83,24 @@ pub fn call<'a>(
                         )?);
                     } else {
                         commands.push(
-                            Window::new(
-                                &project_name,
-                                Rc::new(
-                                    k.as_str()
-                                        .ok_or("Windows require being named in your config.")?
-                                        .to_string(),
-                                ),
-                                root.clone(),
-                            )
-                            .into(),
+                            Window::new(&project_name, Rc::new(key.to_string()), root.clone())
+                                .into(),
                         );
 
-                        let target =
-                            WindowTarget::new(Rc::clone(&project_name), k.as_str().unwrap());
+                        let target = WindowTarget::new(
+                            Rc::clone(&project_name),
+                            k.as_str().ok_or(ParseError::WindowTargetRequired)?,
+                        );
                         commands.append(&mut common_commands(Target::WindowTarget(target.clone())));
 
-                        // SendKeys for the exec command
-                        if let Some(ex) = v.as_str()
-                            && !ex.is_empty()
+                        // SendKeys for the exec command if not empty
+                        if let Some(exec) = v.as_str()
+                            && !exec.is_empty()
                         {
                             commands.push(
                                 SendKeys::new(
                                     Target::WindowTarget(target.clone()),
-                                    v.as_str().unwrap().to_string(),
+                                    exec.to_string(),
                                 )
                                 .into(),
                             );
@@ -132,11 +123,11 @@ pub fn call<'a>(
                 let target = WindowTarget::new(Rc::clone(&project_name), &s.to_string());
                 commands.append(&mut common_commands(Target::WindowTarget(target)));
             }
-            _ => panic!("Muxed config file formatting isn't recognized."),
+            _ => return Err(ParseError::FormatNotRecognized),
         };
     }
 
-    let (first, commands1) = commands.split_first().unwrap();
+    let (first, commands1) = commands.split_first().ok_or(ParseError::BadCommandSplit)?;
     let mut remains = commands1.to_vec();
 
     if let Commands::Window(w) = &first {
@@ -194,19 +185,16 @@ fn pane_matcher<T>(
     common_commands: T,
     tmux_config: &Config,
     inherited_path: Option<Rc<PathBuf>>,
-) -> Result<Vec<Commands>, String>
+) -> Result<Vec<Commands>>
 where
     T: Fn(Target) -> Vec<Commands>,
 {
     let mut commands = vec![];
     let panes = window["panes"]
         .as_vec()
-        .expect("Something is wrong with panes.");
+        .ok_or(ParseError::PanesConversion)?;
 
-    let path = match expand_path(&window["path"]) {
-        Some(x) => Some(x),
-        None => inherited_path,
-    };
+    let path = expand_path(&window["path"]).unwrap_or(inherited_path);
 
     for (i, pane) in panes.iter().enumerate() {
         let pt = PaneTarget::new(
@@ -220,7 +208,7 @@ where
             commands.push(Split::new(pt.clone(), path.clone()).into());
         };
 
-        // Call the common_commands clojure to execute `cd` and `pre_window` options in
+        // Call the common_commands closure to execute `cd` and `pre_window` options in
         // pane splits.
         commands.append(&mut common_commands(Target::PaneTarget(pt.clone())));
 
@@ -234,14 +222,9 @@ where
     }
 
     // After all panes are split select the layout for the window
-    if window["layout"].as_str().is_some() {
-        let err = format!(
-            "A problem with the specified layout for the window: {}",
-            target
-        );
-        let layout = window["layout"].as_str().expect(&err);
+    if let Some(layout) = window["layout"].as_str() {
         commands.push(Layout::new(target.clone(), layout.to_string()).into());
-    };
+    }
 
     Ok(commands)
 }
@@ -263,21 +246,27 @@ fn pre_matcher(node: &Yaml) -> Option<Vec<Option<String>>> {
     }
 }
 
-fn expand_path(node: &Yaml) -> Option<Rc<PathBuf>> {
-    node.as_str().map(|string| {
-        if string.contains("~/") {
-            let home = home_dir().expect("Home dir could not be expanded");
-            let path = home.join(Path::new(string).strip_prefix("~/").unwrap());
-            Rc::new(path)
-        } else {
-            Rc::new(PathBuf::from(string))
+fn expand_path(node: &Yaml) -> Result<Option<Rc<PathBuf>>> {
+    let s = match node.as_str() {
+        Some(s) => s,
+        None => return Ok(None),
+    };
+
+    let expanded = if let Some(stripped) = s.strip_prefix("~/") {
+        match homedir() {
+            Some(home) => Rc::new(home.join(stripped)),
+            None => return Err(ParseError::FormatNotRecognized),
         }
-    })
+    } else {
+        Rc::new(PathBuf::from(s))
+    };
+    Ok(Some(expanded))
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::path::Path;
     use yaml_rust::YamlLoader;
 
     #[test]
@@ -900,5 +889,35 @@ mod test {
         let yaml = YamlLoader::load_from_str(s).unwrap();
         let pre = pre_matcher(&yaml[0]["pre"]);
         assert!(pre.is_none())
+    }
+
+    #[test]
+    fn expand_path_none_if_input_not_str() {
+        // Yaml::Integer is not a string type
+        let yaml = Yaml::Integer(123);
+        let r = expand_path(&yaml).unwrap();
+        assert_eq!(r, None);
+    }
+
+    #[test]
+    fn expand_path_plain_abs_path() {
+        let yaml = Yaml::String("/tmp/foo".into());
+        let r = expand_path(&yaml).unwrap().unwrap();
+        assert_eq!(&*r, Path::new("/tmp/foo"));
+    }
+
+    #[test]
+    fn expand_path_plain_rel_path() {
+        let yaml = Yaml::String("foo/bar".into());
+        let r = expand_path(&yaml).unwrap().unwrap();
+        assert_eq!(&*r, Path::new("foo/bar"));
+    }
+
+    #[test]
+    fn expand_path_home_expansion() {
+        let yaml = Yaml::String("~/testdir".into());
+        let r = expand_path(&yaml).unwrap().unwrap();
+        let home = dirs::home_dir().unwrap();
+        assert_eq!(*r, home.join("testdir"));
     }
 }
