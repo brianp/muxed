@@ -19,7 +19,7 @@ use syn::{ItemFn, LitInt, Token, parse_macro_input, punctuated::Punctuated};
 ///
 /// # Example
 ///
-/// ```
+/// ```no_run
 /// #[test]
 /// #[retry_test(3, 5)]
 /// fn my_unstable_test() {

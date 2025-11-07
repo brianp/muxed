@@ -16,7 +16,7 @@ use command::Commands;
 
 use common::project_paths::ProjectPaths;
 use common::tmux::Config;
-use common::{args, first_run};
+use common::{DEBUG, args, first_run};
 
 type Result<T> = std::result::Result<T, LoadError>;
 
@@ -25,6 +25,11 @@ pub fn load(args: Args) -> Result<()> {
 
     let mut project = project::read(&args.arg_project, project_paths)?;
     let name = project.name().to_string();
+
+    if DEBUG.load() {
+        println!("Session in canonical form:");
+        dbg!(project.session());
+    }
 
     let commands: Vec<Commands> = match project::session_exists(project.name()) {
         Some(c) => {
@@ -37,12 +42,16 @@ pub fn load(args: Args) -> Result<()> {
         }
     };
 
-    if args.flag_debug {
-        println!("{:?}", &commands);
+    if DEBUG.load() {
+        println!("Session after enrichment:");
+        dbg!(project.session());
+
+        println!("Commands after planning:");
+        dbg!(&commands);
     };
 
     for command in &commands {
-        command.as_trait().call(args.flag_debug)?;
+        command.as_trait().call()?;
     }
 
     Ok(())
