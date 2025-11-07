@@ -204,7 +204,7 @@ windows:
             let window = session.find_window("editor").unwrap();
             let pane = &window.panes[0];
 
-            assert_eq!(home_dir().unwrap(), pane.path);
+            assert_eq!(homedir().unwrap(), pane.path);
         }
 
         //    #[test]
