@@ -27,7 +27,6 @@ struct PaneInner {
     path: Option<PathBuf>,
 }
 
-
 impl<'de> Deserialize<'de> for Pane {
     /// Custom deserialization implementation for the `Pane` struct.
     ///
