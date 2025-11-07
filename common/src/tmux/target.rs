@@ -1,6 +1,29 @@
 use crate::error::CommonError;
 use serde::Deserialize;
 
+/// Represents a tmux target, which may include a session, window, and pane,
+/// and provides a combined string representation suitable for tmux commands.
+///
+/// # Fields
+/// - `session`: The tmux session name.
+/// - `window`: An optional window index within the session.
+/// - `pane`: An optional pane index within the window.
+/// - `combined`: A string representation in the form `session`, `session:window`,
+///   or `session:window.pane` as appropriate.
+///
+/// # Examples
+/// Creating targets for different granularities:
+/// ```
+/// let session = Target::new("mysession", None, None); // "mysession"
+/// let window = Target::new("mysession", Some(2), None); // "mysession:2"
+/// let pane = Target::new("mysession", Some(2), Some(1)); // "mysession:2.1"
+/// ```
+///
+/// You can also extend a session-only target to include window or pane:
+/// ```
+/// let t = Target::new("s", None, None);
+/// let t = t.extend(1)?; // Now session "s", window 1
+/// ```
 #[derive(Debug, Deserialize, Clone)]
 pub struct Target {
     pub session: String,
