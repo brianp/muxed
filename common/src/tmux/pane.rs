@@ -27,7 +27,30 @@ struct PaneInner {
     path: Option<PathBuf>,
 }
 
+
 impl<'de> Deserialize<'de> for Pane {
+    /// Custom deserialization implementation for the `Pane` struct.
+    ///
+    /// This method allows a `Pane` to be deserialized from either a string or a map in YAML.
+    /// When a string is encountered, it is interpreted as the `command` for the pane, and the
+    /// `active`, `path`, and `target` fields are set to their default values (`active = false`,
+    /// `path = None`, `target = None`). When a map is encountered, the method attempts to
+    /// deserialize its fields into the corresponding `Pane` fields, defaulting missing fields
+    /// as necessary. The `target` field is always set to `None` during deserialization.
+    ///
+    /// # Examples (YAML)
+    ///
+    /// As a string:
+    /// ```
+    /// "htop"
+    /// ```
+    ///
+    /// As a map:
+    /// ```
+    /// active: true
+    /// command: ls
+    /// path: /tmp
+    /// ```
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
