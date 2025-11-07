@@ -1,11 +1,10 @@
 //! The structures used to manage commands sent over to tmux.
 
+use crate::common::tmux::Target;
 use crate::tmux;
 use crate::tmux::error::TmuxError;
-use crate::tmux::target::*;
 use std::path::PathBuf;
 use std::process::Output;
-use std::rc::Rc;
 use std::{process, str};
 
 pub trait Command {
@@ -26,16 +25,20 @@ pub trait Command {
 /// `root_path`: The root directory for the tmux session.
 #[derive(Debug, Clone)]
 pub struct Session {
-    pub target: SessionTarget,
-    pub window_name: Rc<String>,
-    pub root_path: Option<Rc<PathBuf>>,
+    pub target: Target,
+    pub window_name: String,
+    pub root_path: Option<PathBuf>,
 }
 
 impl Session {
-    pub fn new(name: &str, window_name: Rc<String>, root_path: Option<Rc<PathBuf>>) -> Session {
+    pub fn new<S: AsRef<str> + Into<String>>(
+        name: S,
+        window_name: S,
+        root_path: Option<PathBuf>,
+    ) -> Session {
         Session {
-            target: SessionTarget::new(Rc::new(name.to_string())),
-            window_name,
+            target: Target::new(name.into(), None, None),
+            window_name: window_name.into(),
             root_path,
         }
     }
@@ -48,13 +51,13 @@ impl Command for Session {
             "new",
             "-d",
             "-s",
-            &self.target.arg_string,
+            &self.target.combined,
             "-n",
             &self.window_name,
         ];
 
-        match self.root_path.as_ref() {
-            Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
+        match self.root_path.as_ref().and_then(|p| p.to_str()) {
+            Some(path) => [&args[..], &["-c", path]].concat(),
             None => args,
         }
     }
@@ -72,36 +75,31 @@ impl Command for Session {
 /// to Rc<String>.
 #[derive(Debug, Clone)]
 pub struct Window {
-    pub name: Rc<String>,
-    pub path: Option<Rc<PathBuf>>,
-    pub session_target: SessionTarget,
+    pub name: String,
+    pub path: Option<PathBuf>,
+    pub target: Target,
 }
 
 impl Window {
-    pub fn new(session_name: &str, name: Rc<String>, path: Option<Rc<PathBuf>>) -> Window {
-        let mut name_arg: String = String::from(session_name);
-        name_arg.push(':');
-
+    pub fn new<S: AsRef<str> + Into<String>>(
+        name: S,
+        target: Target,
+        path: Option<PathBuf>,
+    ) -> Window {
         Window {
-            name,
+            name: name.into(),
             path,
-            session_target: SessionTarget::new(Rc::new(name_arg)),
+            target,
         }
     }
 }
 
 impl Command for Window {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec![
-            "new-window",
-            "-t",
-            &self.session_target.arg_string,
-            "-n",
-            &self.name,
-        ];
+        let args: Vec<&str> = vec!["new-window", "-t", &self.target.combined, "-n", &self.name];
 
-        match self.path.as_ref() {
-            Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
+        match self.path.as_ref().and_then(|p| p.to_str()) {
+            Some(path) => [&args[..], &["-c", path]].concat(),
             None => args,
         }
     }
@@ -114,22 +112,22 @@ impl Command for Window {
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Split {
-    pub target: PaneTarget,
-    pub path: Option<Rc<PathBuf>>,
+    pub target: Target,
+    pub path: Option<PathBuf>,
 }
 
 impl Split {
-    pub fn new(target: PaneTarget, path: Option<Rc<PathBuf>>) -> Split {
+    pub fn new(target: Target, path: Option<PathBuf>) -> Split {
         Split { target, path }
     }
 }
 
 impl Command for Split {
     fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["split-window", "-t", &self.target.arg_string];
+        let args: Vec<&str> = vec!["split-window", "-t", &self.target.combined];
 
-        match self.path.as_ref() {
-            Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
+        match self.path.as_ref().and_then(|p| p.to_str()) {
+            Some(path) => [&args[..], &["-c", path]].concat(),
             None => args,
         }
     }
@@ -141,19 +139,19 @@ impl Command for Split {
 /// `layout`: The type of layout. ex `main-horizontal`.
 #[derive(Debug, Clone)]
 pub struct Layout {
-    pub target: WindowTarget,
+    pub target: Target,
     pub layout: String,
 }
 
 impl Layout {
-    pub fn new(target: WindowTarget, layout: String) -> Layout {
+    pub fn new(target: Target, layout: String) -> Layout {
         Layout { target, layout }
     }
 }
 
 impl Command for Layout {
     fn args(&self) -> Vec<&str> {
-        vec!["select-layout", "-t", &self.target.arg_string, &self.layout]
+        vec!["select-layout", "-t", &self.target.combined, &self.layout]
     }
 }
 
@@ -179,7 +177,7 @@ impl Command for SendKeys {
         vec![
             "send-keys",
             "-t",
-            &self.target.arg_string(),
+            &self.target.combined,
             &self.exec,
             "KPEnter",
         ]
@@ -192,31 +190,17 @@ impl Command for SendKeys {
 /// `-c` arguement.
 #[derive(Debug, Clone)]
 pub struct Attach {
-    pub name: SessionTarget,
-    pub root_path: Option<Rc<PathBuf>>,
+    pub target: Target,
+    pub root_path: Option<PathBuf>,
 }
 
 impl Attach {
-    pub fn new(name: &str, root_path: Option<Rc<PathBuf>>) -> Attach {
-        Attach {
-            name: SessionTarget::new(Rc::new(name.to_string())),
-            root_path,
-        }
+    pub fn new(target: Target, root_path: Option<PathBuf>) -> Attach {
+        Attach { target, root_path }
     }
 }
 
 impl Command for Attach {
-    fn args(&self) -> Vec<&str> {
-        let args: Vec<&str> = vec!["attach", "-t", &self.name.arg_string];
-
-        let args = match self.root_path.as_ref() {
-            Some(path) => [&args[..], &["-c", path.to_str().unwrap()]].concat(),
-            None => args,
-        };
-
-        [&args[..], &[">/dev/null"]].concat()
-    }
-
     fn call(&self, debug: bool) -> Result<Output, TmuxError> {
         if debug {
             println!("{:?}", &self.args());
@@ -224,24 +208,35 @@ impl Command for Attach {
 
         tmux::attach(&self.args())
     }
+
+    fn args(&self) -> Vec<&str> {
+        let args: Vec<&str> = vec!["attach", "-t", &self.target.combined];
+
+        let args = match self.root_path.as_ref().and_then(|p| p.to_str()) {
+            Some(path) => [&args[..], &["-c", path]].concat(),
+            None => args,
+        };
+
+        [&args[..], &[">/dev/null"]].concat()
+    }
 }
 
 /// Used to move focus back to the first window.
 /// target: The target window. In the format `{session}:{window}`.
 #[derive(Debug, Clone)]
 pub struct SelectWindow {
-    pub target: WindowTarget,
+    pub target: Target,
 }
 
 impl SelectWindow {
-    pub fn new(target: WindowTarget) -> SelectWindow {
+    pub fn new(target: Target) -> SelectWindow {
         SelectWindow { target }
     }
 }
 
 impl Command for SelectWindow {
     fn args(&self) -> Vec<&str> {
-        vec!["select-window", "-t", &self.target.arg_string]
+        vec!["select-window", "-t", &self.target.combined]
     }
 }
 
@@ -249,18 +244,18 @@ impl Command for SelectWindow {
 /// target: The target pane. In the format `{session}:{window}.{pane-target}`.
 #[derive(Debug, Clone)]
 pub struct SelectPane {
-    pub target: PaneTarget,
+    pub target: Target,
 }
 
 impl SelectPane {
-    pub fn new(target: PaneTarget) -> SelectPane {
+    pub fn new(target: Target) -> SelectPane {
         SelectPane { target }
     }
 }
 
 impl Command for SelectPane {
     fn args(&self) -> Vec<&str> {
-        vec!["select-pane", "-t", &self.target.arg_string]
+        vec!["select-pane", "-t", &self.target.combined]
     }
 }
 
@@ -268,20 +263,20 @@ impl Command for SelectPane {
 /// name: The named session to switch to.
 #[derive(Debug, Clone)]
 pub struct SwitchClient {
-    pub name: SessionTarget,
+    pub name: Target,
 }
 
 impl SwitchClient {
     pub fn new(name: &str) -> SwitchClient {
         SwitchClient {
-            name: SessionTarget::new(Rc::new(name.to_string())),
+            name: Target::new(name.to_string(), None, None),
         }
     }
 }
 
 impl Command for SwitchClient {
     fn args(&self) -> Vec<&str> {
-        vec!["switch-client", "-t", &self.name.arg_string]
+        vec!["switch-client", "-t", &self.name.combined]
     }
 }
 

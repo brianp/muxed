@@ -29,7 +29,7 @@ fn setup(contents: &[u8]) -> (String, PathBuf) {
 
     let muxed_path = project_path.parent().unwrap();
     if !muxed_path.exists() {
-        println!("{:?}", fs::create_dir(muxed_path))
+        fs::create_dir(muxed_path).unwrap();
     };
 
     let mut buffer = File::create(&project_path).unwrap();
@@ -68,6 +68,7 @@ fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
     let args = Args {
         arg_project: project.to_string(),
         flag_p: Some(format!("{}", project_root.display())),
+        flag_debug: false,
         ..Default::default()
     };
 

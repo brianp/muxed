@@ -114,8 +114,8 @@ $ muxed my_project
 ## Usage Options
 
 ```shell
-Usage:
-    muxed (list | ls)
+iUsage:
+    muxed (list | ls) [-1]
     muxed [flags] [options] <project>
     muxed edit [options] <project>
     muxed load [flags] [options] <project>
@@ -132,8 +132,9 @@ Flags:
     -v, --version       Prints version information
 
 Options:
-    -p <project_dir>    The directory your project config files live in. Defaults to ~/.muxed/
-    -t <session>        The name of the running TMUX session to codify
+    -p <project_dir>              The directory your project config files live in. Defaults to ~/.muxed/
+    -t <session>                  The name of the running TMUX session to codify
+    --template <template_path>    The path to the template file to use for the new project
 
 Args:
     <project>           The name of your project to open
@@ -150,4 +151,4 @@ Subcommands:
 This project has been inspired by the work done on the [tmuxinator](https://github.com/tmuxinator/tmuxinator) project. Check it out for a `ruby` based tmux session management solution.
 
 ## Copyright
-Copyright (c) 2014-2020 Brian Pearce. See [LICENSE](https://github.com/brianp/muxed/blob/master/LICENSE) for further details.
+Copyright (c) 2014-2025 Brian Pearce. See [LICENSE](https://github.com/brianp/muxed/blob/master/LICENSE) for further details.

@@ -7,33 +7,35 @@ use crate::error::LoadError;
 use crate::first_run::check_first_run;
 use crate::tmux::has_session;
 use common::project_paths::ProjectPaths;
+use common::tmux::Target;
+use common::tmux::session::Session;
 use std::env;
 use std::fs::File;
 use std::io::prelude::*;
-use yaml_rust::{Yaml, YamlLoader};
 
 static TMUX_ENV_VAR: &str = "TMUX";
 
 pub struct Project {
     name: String,
     paths: ProjectPaths,
-    yaml: Vec<Yaml>,
+    session: Session,
 }
 
 impl Project {
-    pub fn name(&self) -> String {
-        self.yaml[0]["name"]
-            .as_str()
-            .unwrap_or(&self.name)
-            .to_string()
+    pub fn name(&self) -> &str {
+        self.session.name.as_ref().unwrap_or(&self.name)
     }
 
     pub fn paths(&self) -> &ProjectPaths {
         &self.paths
     }
 
-    pub fn yaml(&self) -> &Vec<Yaml> {
-        &self.yaml
+    pub fn session(&self) -> &Session {
+        &self.session
+    }
+
+    pub fn session_mut(&mut self) -> &mut Session {
+        &mut self.session
     }
 }
 
@@ -77,17 +79,22 @@ impl Project {
 pub fn read(project_name: &str, project_paths: ProjectPaths) -> Result<Project, LoadError> {
     check_first_run(&project_paths.project_directory)?;
 
-    let mut file = File::open(&project_paths.project_file).map_err(|e| LoadError::Read(format!("No project configuration file was found with the name `{}` in the directory `{}`. Received error: {}", project_name, &project_paths.project_directory.display(), e)))?;
+    let mut file = File::open(&project_paths.project_file).map_err(|e| {
+        LoadError::Read(
+            project_name.to_string(),
+            project_paths.project_directory.clone(),
+            e,
+        )
+    })?;
     let mut contents = String::new();
 
-    file.read_to_string(&mut contents).map_err(LoadError::Io)?;
-
-    let parsed_yaml = YamlLoader::load_from_str(&contents)?;
+    file.read_to_string(&mut contents)?;
+    let session = serde_saphyr::from_str(&contents)?;
 
     let project = Project {
         name: project_name.to_string(),
         paths: project_paths,
-        yaml: parsed_yaml,
+        session,
     };
 
     Ok(project)
@@ -123,7 +130,8 @@ pub fn open(project_name: &str) -> Commands {
     if env::var_os(TMUX_ENV_VAR).is_some() {
         SwitchClient::new(project_name).into()
     } else {
-        Attach::new(project_name, None).into()
+        let target = Target::new(project_name, None, None);
+        Attach::new(target, None).into()
     }
 }
 

@@ -174,7 +174,6 @@ mod test {
         let path = rand_names::project_file_with_dir("/tmp");
         let result = write_template(&"test template".to_string(), &path, false);
         let _ = fs::remove_file(path);
-        println!("{:?}", result);
         assert!(result.is_ok());
     }
 

@@ -2,6 +2,30 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{ItemFn, LitInt, Token, parse_macro_input, punctuated::Punctuated};
 
+/// Attribute macro for retrying a test function in case of failure or panic.
+///
+/// # Usage
+///
+/// Place `#[retry_test]` above a test function to run it multiple times on failure or timeout.
+///
+/// Optionally, provide parameters to specify the number of retry attempts and a timeout (in seconds) for each attempt:
+///
+/// - `#[retry_test(N)]` - Retries the test up to `N` times (default: 1).
+/// - `#[retry_test(N, T)]` - Retries the test up to `N` times with a timeout of `T` seconds per attempt (default: 10s).
+///
+/// If the test does not succeed within the specified attempts or time, it panics with an error message.
+///
+/// This macro can be used alongside other attributes like `#[test]`.
+///
+/// # Example
+///
+/// ```
+/// #[test]
+/// #[retry_test(3, 5)]
+/// fn my_unstable_test() {
+///     // test code that might intermittently fail
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn retry_test(attr: TokenStream, item: TokenStream) -> TokenStream {
     // Parse as `1` or `1, 2`
