@@ -7,6 +7,7 @@ extern crate load;
 extern crate new;
 extern crate snapshot;
 
+use common::DEBUG;
 use common::args::Args;
 use docopt::Docopt;
 use std::env;
@@ -54,7 +55,7 @@ Args:
     <project>           The name of your project to open
 
 Subcommands:
-    list                             List the availiable project configs
+    list                             List the available project configs
     edit <project>                   Edit an existing project file
     load <project>                   Load the specified project, this is the default command
     new <project>                    To create a new project file
@@ -87,6 +88,10 @@ pub fn main() {
     let args: Args = Docopt::new(USAGE)
         .and_then(|d| d.deserialize())
         .unwrap_or_else(|e| e.exit());
+
+    if args.flag_debug {
+        DEBUG.swap(true);
+    }
 
     if args.flag_v {
         println!("Muxed {}", env!("CARGO_PKG_VERSION"));

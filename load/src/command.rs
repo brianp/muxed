@@ -3,13 +3,14 @@
 use crate::common::tmux::Target;
 use crate::tmux;
 use crate::tmux::error::TmuxError;
+use common::DEBUG;
 use std::path::PathBuf;
 use std::process::Output;
 use std::{process, str};
 
 pub trait Command {
-    fn call(&self, debug: bool) -> Result<Output, TmuxError> {
-        if debug {
+    fn call(&self) -> Result<Output, TmuxError> {
+        if DEBUG.load() {
             println!("{:?}", &self.args());
         };
 
@@ -201,8 +202,8 @@ impl Attach {
 }
 
 impl Command for Attach {
-    fn call(&self, debug: bool) -> Result<Output, TmuxError> {
-        if debug {
+    fn call(&self) -> Result<Output, TmuxError> {
+        if DEBUG.load() {
             println!("{:?}", &self.args());
         };
 
@@ -300,8 +301,8 @@ impl Command for Pre {
         vec![]
     }
 
-    fn call(&self, debug: bool) -> Result<Output, TmuxError> {
-        if debug {
+    fn call(&self) -> Result<Output, TmuxError> {
+        if DEBUG.load() {
             println!("{:?}", &self.exec);
         };
 
