@@ -57,6 +57,39 @@ struct Inner {
 }
 
 impl<'de> Deserialize<'de> for Window {
+    /// Custom deserializer for the `Window` struct, supporting multiple YAML representations.
+    ///
+    /// This implementation allows a `Window` to be deserialized from:
+    /// - A string (used as both the window name and the command)
+    /// - An integer (used as the window name, with no command)
+    /// - A single-key map, where the key is the window name and the value is either:
+    ///   - A string (used as the command)
+    ///   - An object with fields `layout`, `panes`, `active`, `path`, and/or `command`
+    ///
+    /// Examples of supported YAML representations:
+    /// ```
+    /// # As a string:
+    /// windows: [vim]
+    ///
+    /// # As a number:
+    /// windows: [1]
+    ///
+    /// # As a map with a command string:
+    /// windows:
+    ///   - edit: vim
+    ///
+    /// # As a map with a detailed object:
+    /// windows:
+    ///   - term:
+    ///       layout: even-horizontal
+    ///       panes: [htop, ranger]
+    ///       active: true
+    ///       command: mycmd
+    ///       path: /tmp
+    /// ```
+    ///
+    /// - If the map contains more than one key or an empty key, an error is returned.
+    /// - If parsing as a string or integer, defaults are filled for missing fields.
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
