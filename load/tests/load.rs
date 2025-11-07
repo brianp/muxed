@@ -16,6 +16,7 @@ mod helpers;
 mod test {
     mod load {
         use crate::helpers::test_with_contents;
+        use common::project_paths::homedir;
         use common::rand_names;
         use dirs::home_dir;
         use retry_test::retry_test;
@@ -115,7 +116,7 @@ windows:
         fn expect_to_open_in_directory_containing_spaces() {
             let dir = PathBuf::from("/tmp/Directory With Spaces/");
             if !dir.exists() {
-                println!("{:?}", fs::create_dir(&dir))
+                fs::create_dir(&dir).unwrap();
             };
             let contents = b"---
 root: /tmp/Directory With Spaces/
@@ -148,7 +149,7 @@ windows:
             let session = test_with_contents(contents);
             let window = session.find_window("editor").unwrap();
             let pane = &window.panes[0];
-            assert_eq!(pane.path, home_dir().unwrap());
+            assert_eq!(pane.path, homedir().unwrap());
         }
 
         #[test]
@@ -163,91 +164,81 @@ windows:
             let pane = &window.panes[0];
             assert_eq!(pane.path, home_dir().unwrap());
         }
+
+        //    #[test]
+        //    #[retry_test(3, 10)]
+        //    fn expect_window_path_to_take_priority() {
+        //        let dir = PathBuf::from("/tmp/special/");
+        //        if !dir.exists() {
+        //            println!("{:?}", fs::create_dir(&dir))
+        //        };
+        //        let contents = b"---
+        //root: ~/
+        //windows:
+        //  - editor:
+        //      panes:
+        //        - ls
+        //      path: /tmp/special/
+        //";
+        //        let session = test_with_contents(contents);
+        //        let window = session.find_window("editor").unwrap();
+        //        let pane = &window.panes[0];
         //
-        //        // TODO: Figure out why these hang in travis
-        //        //    #[test]
-        //        //    fn expect_window_path_to_take_priority() {
-        //        //        let dir = PathBuf::from("/tmp/special/");
-        //        //        if !dir.exists() {
-        //        //            println!("{:?}", fs::create_dir(&dir))
-        //        //        };
-        //        //        let contents = b"---
-        //        //root: ~/
-        //        //windows:
-        //        //  - editor:
-        //        //      panes:
-        //        //        - vi
-        //        //      path: /tmp/special/
-        //        //";
-        //        //        let session = test_with_contents(contents);
-        //        //        let pane_current_path = session.windows["editor"]
-        //        //            .pane_current_path
-        //        //            .as_str()
-        //        //            .unwrap();
-        //        //
-        //        //        assert_eq!(
-        //        //            PathBuf::from("/tmp/special/"),
-        //        //            PathBuf::from(pane_current_path)
-        //        //        );
-        //        //    }
-        //        //
-        //        //    #[test]
-        //        //    fn expect_root_path_on_default_session_window_when_not_specified() {
-        //        //        let contents = b"---
-        //        //root: ~/
-        //        //windows:
-        //        //  - editor:
-        //        //      panes:
-        //        //        - vi
-        //        //";
-        //        //        let session = test_with_contents(contents);
-        //        //        let pane_current_path = session.windows["editor"]
-        //        //            .pane_current_path
-        //        //            .as_str()
-        //        //            .unwrap();
-        //        //
-        //        //        assert_eq!(
-        //        //            home_dir(),
-        //        //            Some(PathBuf::from(pane_current_path))
-        //        //        );
-        //        //    }
-        //        //
-        //        //    #[test]
-        //        //    fn first_window_path_shouldnt_be_default_path() {
-        //        //        let contents = b"---
-        //        //root: ~/
-        //        //windows:
-        //        //  - editor:
-        //        //      panes:
-        //        //        - vi
-        //        //      path: /tmp/
-        //        //  - other: pwd
-        //        //";
-        //        //        let session = test_with_contents(contents);
-        //        //        let editor_current_path = session.windows["editor"]
-        //        //            .pane_current_path
-        //        //            .as_str()
-        //        //            .unwrap();
-        //        //
-        //        //        assert_eq!(
-        //        //            PathBuf::from("/var/log"),
-        //        //            PathBuf::from(editor_current_path)
-        //        //        );
-        //        //
-        //        //        let other_current_path = session.windows["other"]
-        //        //            .pane_current_path
-        //        //            .as_str()
-        //        //            .unwrap();
-        //        //
-        //        //        assert_eq!(
-        //        //            home_dir(),
-        //        //            Some(PathBuf::from(other_current_path))
-        //        //        );
-        //        //    }
+        //        assert_eq!(
+        //            PathBuf::from("/tmp/special/"),
+        //            pane.path
+        //        );
+        //    }
+
+        #[test]
+        #[retry_test(3, 10)]
+        fn expect_root_path_on_default_session_window_when_not_specified() {
+            let contents = b"---
+root: ~/
+windows:
+  - editor:
+      panes:
+        - ls
+";
+            let session = test_with_contents(contents);
+            let window = session.find_window("editor").unwrap();
+            let pane = &window.panes[0];
+
+            assert_eq!(home_dir().unwrap(), pane.path);
+        }
+
+        //    #[test]
+        //    #[retry_test(3, 10)]
+        //    fn first_window_path_shouldnt_be_default_path() {
+        //        let contents = b"---
+        //root: ~/
+        //windows:
+        //  - editor:
+        //      panes:
+        //        - ls
+        //      path: /tmp/
+        //  - other: pwd
+        //";
+        //        let session = test_with_contents(contents);
+        //        let window = session.find_window("editor").unwrap();
+        //        let pane = &window.panes[0];
+        //
+        //        assert_eq!(
+        //            PathBuf::from("/tmp/"),
+        //            pane.path
+        //        );
+        //
+        //        let window = session.find_window("other").unwrap();
+        //        let pane = &window.panes[0];
+        //
+        //        assert_eq!(
+        //            home_dir().unwrap(),
+        //            pane.path
+        //        );
+        //    }
 
         // TODO: should ssh or git be a command or window name?
         #[test]
-        #[retry_test(3, 10)]
         fn expect_focus_on_the_first_window() {
             let contents = b"---
 windows: ['ssh', 'git']
@@ -303,7 +294,7 @@ windows: ['ssh', 'git']
             let file = rand_names::project_file_with_dir("/tmp");
             let contents = format!(
                 "---
-pre_window: echo 'pre_window' >> {}
+pre_window: \"echo 'pre_window' >> {}\"
 windows: ['ssh', 'git']
 ",
                 file.display()

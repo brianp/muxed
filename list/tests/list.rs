@@ -17,9 +17,8 @@ mod test {
             let dir_name = rand_names::project_path_name();
             let dir = PathBuf::from(&dir_name);
 
-            dbg!(&dir);
             if !&dir.exists() {
-                println!("{:?}", fs::create_dir(&dir))
+                fs::create_dir(&dir).unwrap()
             };
 
             let configs = ["foo.yml", "bar.yml", "muxed.yml"];

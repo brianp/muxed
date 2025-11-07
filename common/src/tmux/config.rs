@@ -1,4 +1,5 @@
 //! The tmux config data we want
+use serde::Deserialize;
 /// This assists in the parsing and accessibility of a users tmux configuration
 /// options. Once the data is parsed we move it into a config struct for easy
 /// access.
@@ -6,7 +7,7 @@ use std::collections::HashMap;
 use std::str::FromStr;
 
 /// A simple struct for accessing parsed config options we want to know about.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default, Deserialize, PartialEq)]
 pub struct Config {
     pub base_index: usize,
     pub pane_base_index: usize,

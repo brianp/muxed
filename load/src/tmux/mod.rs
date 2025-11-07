@@ -4,7 +4,6 @@
 /// call. The private call converts them to `CStrings` and makes an "unsafe" system
 /// call. All functions go through this `call` function as a common gateway to
 /// system calls and can all be easily logged there.
-pub mod config;
 pub mod error;
 pub mod target;
 
