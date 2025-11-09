@@ -35,6 +35,7 @@ pub struct Args {
     pub cmd_snapshot: bool,
     pub cmd_list: bool,
     pub cmd_ls: bool,
+    pub cmd_autocomplete: bool,
 }
 
 impl Default for Args {
@@ -49,6 +50,7 @@ impl Default for Args {
             cmd_snapshot: false,
             cmd_list: false,
             cmd_ls: false,
+            cmd_autocomplete: false,
             flag_d: true,
             flag_debug: false,
             flag_f: false,

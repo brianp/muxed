@@ -35,6 +35,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08606f8c3cbf4ce6ec8e28fb0014a2c086708fe954eaa885384a6165172e7e8"
 
 [[package]]
+name = "autocomplete"
+version = "0.8.2"
+dependencies = [
+ "common",
+]
+
+[[package]]
 name = "base64"
 version = "0.22.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -248,6 +255,7 @@ checksum = "f52b00d39961fc5b2736ea853c9cc86238e165017a493d1d5c8eac6bdc4cc273"
 name = "muxed"
 version = "0.8.2"
 dependencies = [
+ "autocomplete",
  "common",
  "docopt",
  "edit",

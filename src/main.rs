@@ -1,4 +1,5 @@
 //! Muxed. A tmux project manager with no runtime dependencies.
+extern crate autocomplete;
 extern crate common;
 extern crate docopt;
 extern crate edit;
@@ -26,10 +27,12 @@ macro_rules! try_or_err (
     })
 );
 
-static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 4] = ["new", "edit", "load", "snapshot"];
+static DISALLOWED_SHORTHAND_PROJECT_NAMES: [&str; 5] =
+    ["autocomplete", "new", "edit", "load", "snapshot"];
 
 static USAGE: &str = "
 Usage:
+    muxed autocomplete
     muxed (list | ls) [-1]
     muxed [flags] [options] <project>
     muxed edit [options] <project>
@@ -55,6 +58,7 @@ Args:
     <project>           The name of your project to open
 
 Subcommands:
+    autocomplete                     Create autocompletions for bash, fish, or zsh
     list                             List the available project configs
     edit <project>                   Edit an existing project file
     load <project>                   Load the specified project, this is the default command
@@ -106,6 +110,8 @@ pub fn main() {
         try_or_err!(new::new(args));
     } else if args.cmd_snapshot {
         try_or_err!(snapshot::snapshot(args));
+    } else if args.cmd_autocomplete {
+        try_or_err!(autocomplete::autocomplete(args))
     } else if args.cmd_list || args.cmd_ls {
         try_or_err!(list::list(args));
     } else {
