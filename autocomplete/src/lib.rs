@@ -34,7 +34,6 @@ pub fn autocomplete(_args: Args) -> Result<()> {
         _ => return Err(AutocompleteError::ShellNotSupported),
     }
 
-
     Ok(())
 }
 
