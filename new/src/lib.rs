@@ -114,6 +114,7 @@ where
 
 #[cfg(test)]
 mod test {
+    use std::env::temp_dir;
     use super::*;
     use common::rand_names;
     use std::fs;
@@ -171,7 +172,8 @@ mod test {
 
     #[test]
     fn expect_ok_result_when_path_exists() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
+
         let result = write_template(&"test template".to_string(), &path, false);
         let _ = fs::remove_file(path);
         assert!(result.is_ok());
@@ -186,7 +188,7 @@ mod test {
 
     #[test]
     fn expect_new_file_to_exist() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let _ = write_template(&"test template".to_string(), &path, false);
         let result = &path.exists();
         let _ = fs::remove_file(&path);
@@ -203,7 +205,7 @@ mod test {
     #[test]
     fn expect_no_truncation_or_overwrite() {
         // Write a file with content
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
@@ -220,7 +222,7 @@ mod test {
     #[test]
     fn expect_truncation_or_overwrite() {
         // Write a file with content
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
@@ -236,7 +238,7 @@ mod test {
 
     #[test]
     fn expect_err_when_file_exists() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
