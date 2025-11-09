@@ -10,19 +10,21 @@ test = false
 
 [workspace]
 members = [
+    "autocomplete",
     "common",
     "edit",
     "load",
     "new",
     "retry_test",
-    "snapshot"
+    "snapshot",
 ]
 
 [dependencies]
-common   = { path = "./common" }
-docopt   = "1.1.0"
-edit     = { path = "./edit" }
-load     = { path = "./load" }
-new      = { path = "./new" }
-snapshot = { path = "./snapshot" }
-list = { path = "./list" }
+autocomplete = { path = "./autocomplete" }
+common       = { path = "./common" }
+docopt       = "1.1.0"
+edit         = { path = "./edit" }
+load         = { path = "./load" }
+new          = { path = "./new" }
+snapshot     = { path = "./snapshot" }
+list         = { path = "./list" }
