@@ -13,16 +13,25 @@ use serde::Deserialize;
 ///
 /// # Examples
 /// Creating targets for different granularities:
-/// ```
+/// ```rust
+/// use common::tmux::Target;
+///
 /// let session = Target::new("mysession", None, None); // "mysession"
 /// let window = Target::new("mysession", Some(2), None); // "mysession:2"
 /// let pane = Target::new("mysession", Some(2), Some(1)); // "mysession:2.1"
 /// ```
 ///
 /// You can also extend a session-only target to include window or pane:
-/// ```
+/// ```rust
+/// use common::tmux::Target;
+///
 /// let t = Target::new("s", None, None);
-/// let t = t.extend(1)?; // Now session "s", window 1
+/// let t = t.extend(1).unwrap(); // Now session "s", window 1
+/// assert_eq!(t.combined, "s:1");
+///
+/// let t = t.extend(2).unwrap(); // Now session "s", window 1, pane 2
+/// assert_eq!(t.combined, "s:1.2");
+///
 /// ```
 #[derive(Debug, Deserialize, Clone)]
 pub struct Target {

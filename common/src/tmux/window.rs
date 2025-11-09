@@ -67,7 +67,7 @@ impl<'de> Deserialize<'de> for Window {
     ///   - An object with fields `layout`, `panes`, `active`, `path`, and/or `command`
     ///
     /// Examples of supported YAML representations:
-    /// ```
+    /// ```yaml
     /// # As a string:
     /// windows: [vim]
     ///
