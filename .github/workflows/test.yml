@@ -26,6 +26,9 @@ jobs:
       - name: unit tests
         run: cargo test --all --lib
 
+      - name: doc tests
+        run: cargo test --all --doc
+
   integration-tests:
     strategy:
       matrix:
