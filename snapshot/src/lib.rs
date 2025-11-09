@@ -51,6 +51,7 @@ pub fn snapshot(args: Args) -> Result<(), SnapshotError> {
 
 #[cfg(test)]
 mod test {
+    use std::env::temp_dir;
     use super::write_config;
     use common::rand_names;
     use std::fs;
@@ -59,7 +60,7 @@ mod test {
 
     #[test]
     fn expect_ok_result() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let result = write_config("test template", &path, false);
         let _ = fs::remove_file(path);
         assert!(result.is_ok());
@@ -67,14 +68,14 @@ mod test {
 
     #[test]
     fn expect_err_result() {
-        let path = rand_names::project_file_with_dir("/tmp/non_existent/");
+        let path = rand_names::project_file_with_dir("/non_existent/");
         let result = write_config("test template", &path, false);
         assert!(result.is_err());
     }
 
     #[test]
     fn expect_file_to_exist() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let _ = write_config("test template", &path, false);
         let result = &path.exists();
         let _ = fs::remove_file(&path);
@@ -83,7 +84,7 @@ mod test {
 
     #[test]
     fn expect_file_not_to_exist() {
-        let path = rand_names::project_file_with_dir("/tmp/non_existent/");
+        let path = rand_names::project_file_with_dir("/non_existent/");
         let _ = write_config("test template", &path, false);
         assert!(!path.exists());
     }
@@ -91,7 +92,7 @@ mod test {
     #[test]
     fn expect_no_truncation_or_overwrite() {
         // Write a file with content
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
@@ -110,7 +111,11 @@ mod test {
 
     #[test]
     fn expect_err_when_file_exists() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_path();
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).unwrap();
+        }
+        println!("{:?}", path);
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
@@ -122,7 +127,7 @@ mod test {
 
     #[test]
     fn expect_ok_when_file_exists_using_force() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
@@ -135,7 +140,7 @@ mod test {
     #[test]
     fn expect_truncation_or_overwrite_using_force() {
         // Write a file with content
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let mut buffer = File::create(&path).unwrap();
         let _ = buffer.write(b"original content");
         let _ = buffer.sync_all();
@@ -154,14 +159,14 @@ mod test {
 
     #[test]
     fn expect_file_not_to_exist_using_force_with_bad_dir() {
-        let path = rand_names::project_file_with_dir("/tmp/non_existent_path/");
+        let path = rand_names::project_file_with_dir("/non_existent_path/");
         let _ = write_config("test template", &path, true);
         assert!(!path.exists());
     }
 
     #[test]
     fn expect_ok_result_using_force_when_file_doesnt_exist() {
-        let path = rand_names::project_file_with_dir("/tmp");
+        let path = rand_names::project_file_in_tmp_dir();
         let result = write_config("test template", &path, true);
         let _ = fs::remove_file(path);
         assert!(result.is_ok());

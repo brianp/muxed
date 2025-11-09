@@ -15,6 +15,7 @@ mod helpers;
 #[cfg(test)]
 mod test {
     mod load {
+        use std::env::temp_dir;
         use crate::helpers::test_with_contents;
         use common::project_paths::homedir;
         use common::rand_names;
@@ -253,7 +254,7 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_to_create_file() {
-            let file = rand_names::project_file_with_dir("/tmp");
+            let file = rand_names::project_file_in_tmp_dir();
             let contents = format!(
                 "---
 pre: touch {}
@@ -269,8 +270,8 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_to_create_two_files() {
-            let file1 = rand_names::project_file_with_dir("/tmp");
-            let file2 = rand_names::project_file_with_dir("/tmp");
+            let file1 = rand_names::project_file_in_tmp_dir();
+            let file2 = rand_names::project_file_in_tmp_dir();
             let contents = format!(
                 "---
 pre:
@@ -291,7 +292,7 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_window_to_be_called_for_each_window() {
-            let file = rand_names::project_file_with_dir("/tmp");
+            let file = rand_names::project_file_in_tmp_dir();
             let contents = format!(
                 "---
 pre_window: \"echo 'pre_window' >> {}\"
@@ -309,7 +310,7 @@ windows: ['ssh', 'git']
 
         #[test]
         fn expect_pre_window_to_be_called_twice_for_each_window() {
-            let file = rand_names::project_file_with_dir("/tmp");
+            let file = rand_names::project_file_in_tmp_dir();
             let contents = format!(
                 "---
 pre_window:
@@ -354,5 +355,17 @@ windows: ['ssh', 'git']
         //        let session = test_with_contents(contents);
         //        assert_eq!(session.pane_active, "ssh.0")
         //    }
+
+
+        #[test]
+        fn expect_attach_to_session_with_space_in_name() {
+            let contents = "---
+name: name with spaces
+windows: ['ls']
+".to_string();
+            let session = test_with_contents(contents.as_bytes());
+            assert_eq!(session.name, "name with spaces");
+        }
     }
+
 }

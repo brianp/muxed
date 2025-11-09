@@ -121,19 +121,20 @@ pub fn homedir() -> Option<PathBuf> {
 /// Return the temp dir as the users home dir during testing.
 #[cfg(any(test, doctest))]
 pub fn homedir() -> Option<PathBuf> {
-    Some(PathBuf::from("/tmp"))
+    Some(std::env::temp_dir())
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+    use std::env::temp_dir;
 
     #[test]
     fn expects_tmp_as_default_homedir() {
         let args: Args = Default::default();
         let project_paths = ProjectPaths::try_from(&args).unwrap();
 
-        assert_eq!(project_paths.home_directory, PathBuf::from("/tmp"))
+        assert_eq!(project_paths.home_directory, temp_dir())
     }
 
     #[test]
@@ -143,7 +144,7 @@ mod test {
 
         assert_eq!(
             project_paths.project_directory,
-            PathBuf::from("/tmp/.muxed")
+            temp_dir().join(".muxed")
         )
     }
 
@@ -154,7 +155,7 @@ mod test {
 
         assert_eq!(
             project_paths.template_file,
-            PathBuf::from("/tmp/.muxed/.template.yml")
+            temp_dir().join(".muxed/.template.yml")
         )
     }
 
@@ -179,7 +180,7 @@ mod test {
 
         assert_eq!(
             project_paths.project_file,
-            PathBuf::from("/tmp/.muxed/projectname.yml")
+            temp_dir().join(".muxed/projectname.yml")
         )
     }
 
@@ -193,7 +194,7 @@ mod test {
 
         assert_eq!(
             project_paths.template_file,
-            PathBuf::from("/tmp/.muxed/custom_template.yml")
+            temp_dir().join(".muxed/custom_template.yml")
         )
     }
 }

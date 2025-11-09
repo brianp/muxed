@@ -64,12 +64,13 @@ impl Project {
 /// use load::error::LoadError;
 /// use std::path::PathBuf;
 /// use yaml_rust::{Yaml, YamlLoader};
+/// use std::env::temp_dir;
 ///
 /// let paths = ProjectPaths::new(
-///     PathBuf::from("/tmp"),
-///     PathBuf::from("/tmp/.muxed"),
-///     PathBuf::from("/tmp/.muxed/projectname.yml"),
-///     PathBuf::from("/tmp/.muxed/.template.yml")
+///     temp_dir(),
+///     temp_dir().join(".muxed"),
+///     temp_dir().join(".muxed/projectname.yml"),
+///     temp_dir().join(".muxed/.template.yml")
 /// );
 ///
 /// let yaml: Result<Project, LoadError> = read("compiler", paths);
@@ -137,13 +138,14 @@ pub fn open(project_name: &str) -> Commands {
 
 #[cfg(test)]
 mod test {
+    use std::env::temp_dir;
     use super::*;
     use common::rand_names;
     use std::fs;
 
     #[test]
     fn missing_file_returns_err() {
-        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", "", "");
+        let project_paths = ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", "", "");
         let result = read(&String::from("not_a_file"), project_paths);
         assert!(result.is_err())
     }
@@ -151,7 +153,7 @@ mod test {
     #[test]
     fn poorly_formatted_file_returns_err() {
         let name = rand_names::project_file_name();
-        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name, "");
+        let project_paths = ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", &name, "");
 
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();
@@ -167,7 +169,7 @@ mod test {
     #[test]
     fn good_file_returns_ok() {
         let name = rand_names::project_file_name();
-        let project_paths = ProjectPaths::from_strs("/tmp", ".muxed", &name, "");
+        let project_paths = ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", &name, "");
 
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();

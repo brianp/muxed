@@ -1,9 +1,11 @@
+use std::env::temp_dir;
 use crate::project_paths::CONFIG_EXTENSION;
 use rand::random;
 use std::path::PathBuf;
 
 pub fn project_path_name() -> String {
-    format!("/tmp/.muxed-test-{}/", random::<u16>())
+    let tmp = std::env::temp_dir().join(format!(".muxed-test-{}", random::<u16>()));
+    tmp.to_str().unwrap().to_string()
 }
 
 pub fn template_path_name() -> String {
@@ -36,4 +38,9 @@ pub fn project_template_file_path() -> PathBuf {
 pub fn project_file_with_dir(dir: &str) -> PathBuf {
     let project_file = PathBuf::from(project_file_name()).with_extension(CONFIG_EXTENSION);
     PathBuf::from(dir).join(project_file)
+}
+
+pub fn project_file_in_tmp_dir() -> PathBuf {
+    let project_file = PathBuf::from(project_file_name()).with_extension(CONFIG_EXTENSION);
+    temp_dir().join(project_file)
 }
