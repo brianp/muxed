@@ -23,13 +23,13 @@ use new::write_template as write_config;
 ///
 /// You can run the command:
 ///
-/// ```
+/// ```console
 /// $ ./muxedsnapshot -n my_new_project -t existing_sesion
 /// ```
 ///
 /// or
 ///
-/// ```
+/// ```console
 /// $ ./muxed snapshot -n jasper -t 1
 /// ```
 pub fn snapshot(args: Args) -> Result<(), SnapshotError> {

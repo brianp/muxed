@@ -22,13 +22,13 @@ static DEFAULT_TEMPLATE: &str = include_str!("template.yml");
 ///
 /// You can run the command:
 ///
-/// ```
+/// ```console
 /// $ ./muxednew projectName
 /// ```
 ///
 /// or specify the directory target of the file:
 ///
-/// ```
+/// ```console
 /// $ ./muxednew -p ~/.some_other_dir/ projectName
 /// ```
 pub fn new(args: Args) -> Result<(), NewError> {
