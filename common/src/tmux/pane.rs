@@ -40,12 +40,12 @@ impl<'de> Deserialize<'de> for Pane {
     /// # Examples (YAML)
     ///
     /// As a string:
-    /// ```
+    /// ```yaml
     /// "htop"
     /// ```
     ///
     /// As a map:
-    /// ```
+    /// ```yaml
     /// active: true
     /// command: ls
     /// path: /tmp
