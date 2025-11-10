@@ -138,9 +138,9 @@ pub fn open(project_name: &str) -> Commands {
 
 #[cfg(test)]
 mod test {
-    use std::env::temp_dir;
     use super::*;
     use common::rand_names;
+    use std::env::temp_dir;
     use std::fs;
 
     #[test]
@@ -153,7 +153,8 @@ mod test {
     #[test]
     fn poorly_formatted_file_returns_err() {
         let name = rand_names::project_file_name();
-        let project_paths = ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", &name, "");
+        let project_paths =
+            ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", &name, "");
 
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();
@@ -169,7 +170,8 @@ mod test {
     #[test]
     fn good_file_returns_ok() {
         let name = rand_names::project_file_name();
-        let project_paths = ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", &name, "");
+        let project_paths =
+            ProjectPaths::from_strs(temp_dir().to_str().unwrap(), ".muxed", &name, "");
 
         let _ = fs::create_dir(&project_paths.project_directory);
         let mut buffer = File::create(&project_paths.project_file).unwrap();

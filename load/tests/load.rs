@@ -15,12 +15,13 @@ mod helpers;
 #[cfg(test)]
 mod test {
     mod load {
-        use std::env::temp_dir;
         use crate::helpers::test_with_contents;
         use common::project_paths::homedir;
         use common::rand_names;
+        use common::tmux::Session;
         use dirs::home_dir;
         use retry_test::retry_test;
+        use std::env::temp_dir;
         use std::fs;
         use std::fs::File;
         use std::io::prelude::*;
@@ -208,35 +209,37 @@ windows:
             assert_eq!(homedir().unwrap(), pane.path);
         }
 
-        //    #[test]
-        //    #[retry_test(3, 10)]
-        //    fn first_window_path_shouldnt_be_default_path() {
-        //        let contents = b"---
-        //root: ~/
-        //windows:
-        //  - editor:
-        //      panes:
-        //        - ls
-        //      path: /tmp/
-        //  - other: pwd
-        //";
-        //        let session = test_with_contents(contents);
-        //        let window = session.find_window("editor").unwrap();
-        //        let pane = &window.panes[0];
-        //
-        //        assert_eq!(
-        //            PathBuf::from("/tmp/"),
-        //            pane.path
-        //        );
-        //
-        //        let window = session.find_window("other").unwrap();
-        //        let pane = &window.panes[0];
-        //
-        //        assert_eq!(
-        //            home_dir().unwrap(),
-        //            pane.path
-        //        );
-        //    }
+        #[test]
+        #[retry_test(3, 10)]
+        fn first_window_path_shouldnt_be_default_path() {
+            let file = rand_names::project_file_in_tmp_dir();
+            let window_path = file.parent().unwrap();
+            let contents = format!(
+                "---
+root: ~/
+windows:
+  - editor:
+      panes:
+        - ls
+      path: {}
+  - other: pwd
+",
+                window_path.display()
+            );
+            let session = test_with_contents(contents.as_bytes());
+            let window = session.find_window("editor").unwrap();
+            let pane = &window.panes[0];
+
+            assert_eq!(
+                temp_dir().canonicalize().unwrap(),
+                pane.path.canonicalize().unwrap()
+            );
+
+            let window = session.find_window("other").unwrap();
+            let pane = &window.panes[0];
+
+            assert_eq!(home_dir().unwrap(), pane.path);
+        }
 
         // TODO: should ssh or git be a command or window name?
         #[test]
@@ -356,16 +359,15 @@ windows: ['ssh', 'git']
         //        assert_eq!(session.pane_active, "ssh.0")
         //    }
 
-
         #[test]
         fn expect_attach_to_session_with_space_in_name() {
             let contents = "---
 name: name with spaces
 windows: ['ls']
-".to_string();
+"
+            .to_string();
             let session = test_with_contents(contents.as_bytes());
             assert_eq!(session.name, "name with spaces");
         }
     }
-
 }

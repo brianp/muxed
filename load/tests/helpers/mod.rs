@@ -2,6 +2,7 @@
 
 use common::args::Args;
 use common::rand_names;
+use common::tmux::Session;
 use rand::random;
 use snapshot::tmux;
 use std::fs;
@@ -11,13 +12,12 @@ use std::path::{Path, PathBuf};
 use std::str;
 use std::thread::sleep;
 use std::time::Duration;
-use yaml_rust::YamlLoader;
 
 fn project_name(contents: &[u8]) -> String {
     let string_content = str::from_utf8(contents).unwrap();
-    let yaml = YamlLoader::load_from_str(string_content).unwrap();
+    let session: Session = serde_saphyr::from_str(string_content).unwrap();
 
-    match yaml[0]["name"].as_str() {
+    match session.name {
         Some(x) => x.to_string(),
         None => rand_names::project_file_name(),
     }
@@ -68,7 +68,7 @@ fn open_muxed(project: &str, project_root: &Path) -> Result<(), String> {
     let args = Args {
         arg_project: project.to_string(),
         flag_p: Some(format!("{}", project_root.display())),
-        flag_debug: false,
+        flag_debug: true,
         ..Default::default()
     };
 

@@ -134,6 +134,7 @@ pub enum NodeMut<'a> {
         window_index: usize,
         pane_index: usize,
         pane: &'a mut Pane,
+        window_path: Option<PathBuf>,
     },
 }
 
@@ -167,6 +168,7 @@ impl<'a> Iterator for SessionIterMut<'a> {
 
         // currently iterating panes
         if let Some(pane_idx) = self.pane_index {
+            let window_path = session.windows[self.window_index].path.clone();
             let num_panes = session.windows[self.window_index].panes.len();
 
             if pane_idx < num_panes {
@@ -176,6 +178,7 @@ impl<'a> Iterator for SessionIterMut<'a> {
                     window_index: self.window_index,
                     pane_index: pane_idx,
                     pane,
+                    window_path,
                 });
             } else {
                 // finished panes for this window

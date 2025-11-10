@@ -142,10 +142,7 @@ mod test {
         let args: Args = Default::default();
         let project_paths = ProjectPaths::try_from(&args).unwrap();
 
-        assert_eq!(
-            project_paths.project_directory,
-            temp_dir().join(".muxed")
-        )
+        assert_eq!(project_paths.project_directory, temp_dir().join(".muxed"))
     }
 
     #[test]
