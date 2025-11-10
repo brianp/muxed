@@ -18,7 +18,6 @@ mod test {
         use crate::helpers::test_with_contents;
         use common::project_paths::homedir;
         use common::rand_names;
-        use common::tmux::Session;
         use dirs::home_dir;
         use retry_test::retry_test;
         use std::env::temp_dir;
@@ -167,30 +166,28 @@ windows:
             assert_eq!(pane.path, home_dir().unwrap());
         }
 
-        //    #[test]
-        //    #[retry_test(3, 10)]
-        //    fn expect_window_path_to_take_priority() {
-        //        let dir = PathBuf::from("/tmp/special/");
-        //        if !dir.exists() {
-        //            println!("{:?}", fs::create_dir(&dir))
-        //        };
-        //        let contents = b"---
-        //root: ~/
-        //windows:
-        //  - editor:
-        //      panes:
-        //        - ls
-        //      path: /tmp/special/
-        //";
-        //        let session = test_with_contents(contents);
-        //        let window = session.find_window("editor").unwrap();
-        //        let pane = &window.panes[0];
-        //
-        //        assert_eq!(
-        //            PathBuf::from("/tmp/special/"),
-        //            pane.path
-        //        );
-        //    }
+        #[test]
+        #[retry_test(3, 10)]
+        fn expect_window_path_to_take_priority() {
+            let file = rand_names::project_file_in_tmp_dir();
+            let window_path = file.parent().unwrap();
+            let contents = format!(
+                "---
+root: ~/
+windows:
+  - editor:
+      panes:
+        - ls
+      path: {}
+",
+                window_path.display()
+            );
+            let session = test_with_contents(contents.as_bytes());
+            let window = session.find_window("editor").unwrap();
+            let pane = &window.panes[0];
+
+            assert_eq!(window_path.canonicalize().unwrap(), pane.path);
+        }
 
         #[test]
         #[retry_test(3, 10)]
