@@ -1,6 +1,6 @@
-use std::env::temp_dir;
 use crate::project_paths::CONFIG_EXTENSION;
 use rand::random;
+use std::env::temp_dir;
 use std::path::PathBuf;
 
 pub fn project_path_name() -> String {

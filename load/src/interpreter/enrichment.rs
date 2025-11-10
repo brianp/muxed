@@ -45,6 +45,7 @@ pub fn enrich(session: &mut Session, project_name: String, daemonize: bool, conf
         match node {
             NodeMut::Pane {
                 window_index,
+                window_path,
                 pane_index,
                 pane,
             } => {
@@ -53,7 +54,10 @@ pub fn enrich(session: &mut Session, project_name: String, daemonize: bool, conf
 
                 pane.path = match pane.path.as_ref() {
                     Some(path) => expand_path(path),
-                    None => root.clone(),
+                    None => match window_path.as_ref() {
+                        Some(path) => expand_path(path),
+                        None => root.clone(),
+                    },
                 };
 
                 pane.target = Some(Target::new(
@@ -297,6 +301,65 @@ mod test {
         // Since names match and nothing else set, session stays the same
         assert_eq!(sess.name, orig.name);
         assert_eq!(sess.root, orig.root);
+    }
+
+    #[test]
+    fn pane_path_inherits_from_window_if_none() {
+        // Session with root, one window, two panes
+        // Only window.path is set
+        let window_path = PathBuf::from("/tmp/from-window");
+        let mut sess = Session {
+            name: None,
+            windows: vec![Window {
+                name: "w".to_string(),
+                panes: vec![
+                    Pane {
+                        path: None,
+                        ..Default::default()
+                    }, // will inherit from window
+                    Pane {
+                        path: None,
+                        ..Default::default()
+                    }, // will inherit from window
+                ],
+                path: Some(window_path.clone()),
+                ..Default::default()
+            }],
+            root: Some(PathBuf::from("/tmp/not-used")),
+            ..Default::default()
+        };
+
+        enrich(&mut sess, "proj".into(), false, Config::default());
+
+        for pane in sess.windows[0].panes.iter() {
+            assert_eq!(pane.path, Some(window_path.clone()));
+        }
+    }
+
+    #[test]
+    fn pane_path_inherits_from_root_if_pane_and_window_none() {
+        // Session with root, but window.path and pane.path are None
+        let root_path = PathBuf::from("/tmp/fallback-root");
+        let mut sess = Session {
+            name: None,
+            windows: vec![Window {
+                name: "w".to_string(),
+                panes: vec![
+                    Pane {
+                        path: None,
+                        ..Default::default()
+                    }, // will inherit from root
+                ],
+                path: None,
+                ..Default::default()
+            }],
+            root: Some(root_path.clone()),
+            ..Default::default()
+        };
+
+        enrich(&mut sess, "demo".into(), false, Config::default());
+
+        assert_eq!(sess.windows[0].panes[0].path, Some(root_path));
     }
 
     #[cfg(test)]

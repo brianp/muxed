@@ -144,7 +144,8 @@ impl ToCommand for common::tmux::Window {
 
         if ctx.first {
             commands.push(
-                crate::command::Session::new(session_name, &self.name, self.path.clone()).into(),
+                crate::command::Session::new(session_name, &self.name, ctx.session.root.clone())
+                    .into(),
             );
         } else {
             commands.push(Window::new(&self.name, target.clone(), self.path.clone()).into());
