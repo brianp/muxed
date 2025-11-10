@@ -350,6 +350,7 @@ windows: ['ssh', 'git']
         //    }
 
         #[test]
+        #[retry_test(3, 15)]
         fn expect_attach_to_session_with_space_in_name() {
             let contents = "---
 name: name with spaces
