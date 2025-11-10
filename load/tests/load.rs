@@ -332,22 +332,22 @@ windows: ['ssh', 'git']
             assert_eq!(session.name.unwrap(), "Brians Session")
         }
 
-        // TODO: Fix
-        // This test should exist but we currently don't do anything to list panes.
-        //    #[test]
-        //    fn expect_focus_on_the_top_pane() {
-        //        let contents = b"---
-        //windows:
-        //  - ssh:
-        //    layout: main-horizontal
-        //    panes:
-        //      - ''
-        //      - ''
-        //  - git: ''
-        //";
-        //        let session = test_with_contents(contents);
-        //        assert_eq!(session.pane_active, "ssh.0")
-        //    }
+        #[test]
+        fn expect_default_focus_on_the_first_pane() {
+            let contents = b"---
+        windows:
+          - ssh:
+              layout: main-horizontal
+              panes:
+                - ''
+                - ''
+          - git: ''
+        ";
+            let session = test_with_contents(contents);
+            let window = session.find_window_by_name("ssh").unwrap();
+            assert_eq!(window.panes[0].active, true);
+            assert_eq!(window.panes[1].active, false);
+        }
 
         #[test]
         #[retry_test(3, 15)]
