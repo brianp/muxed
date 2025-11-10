@@ -1,9 +1,9 @@
 use crate::entity::Entity;
 use crate::error::SnapshotError;
+use common::DEBUG;
 use common::tmux::{Pane, Session, Target, Window};
 use std::collections::BTreeMap;
 use std::process::Output;
-use common::DEBUG;
 
 type Result<T> = std::result::Result<T, SnapshotError>;
 
@@ -56,9 +56,9 @@ impl TryFrom<SessionOutput> for Session {
 
 #[cfg(test)]
 mod test {
-    use std::os::unix::process::ExitStatusExt;
     use super::*;
-    use std::process::{Output};
+    use std::os::unix::process::ExitStatusExt;
+    use std::process::Output;
 
     fn create_mock_output(stdout: &str, stderr: &str, success: bool) -> Output {
         Output {

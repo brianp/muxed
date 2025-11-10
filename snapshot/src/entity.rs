@@ -148,9 +148,9 @@ fn find_foreground_process<'a>(sys: &'a System, proc: &'a Process) -> Option<&'a
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde::de::IntoDeserializer;
     use serde_json::json;
     use std::path::PathBuf;
-    use serde::de::IntoDeserializer;
 
     #[test]
     fn test_bool_from_int() {
@@ -181,7 +181,13 @@ mod tests {
         let ent: Entity = serde_json::from_str(s).unwrap();
         let index_i = ent.index();
         match ent {
-            Entity::Window { session, index, name, active, layout } => {
+            Entity::Window {
+                session,
+                index,
+                name,
+                active,
+                layout,
+            } => {
                 assert_eq!(session, "mysess");
                 assert_eq!(index, 7);
                 assert_eq!(name, "mywin");
@@ -207,7 +213,14 @@ mod tests {
         let ent: Entity = serde_json::from_str(s).unwrap();
         let index_i = ent.index();
         match ent {
-            Entity::Pane { session, window_index, index, active, path, pid } => {
+            Entity::Pane {
+                session,
+                window_index,
+                index,
+                active,
+                path,
+                pid,
+            } => {
                 assert_eq!(session, "mysess");
                 assert_eq!(window_index, 3);
                 assert_eq!(index, 2);
@@ -242,7 +255,10 @@ mod tests {
         };
         let w2 = Window::try_from(&ent_pane);
         assert!(w2.is_err());
-        assert_eq!(w2.unwrap_err().to_string(), "Failed to create window from snapshot");
+        assert_eq!(
+            w2.unwrap_err().to_string(),
+            "Failed to create window from snapshot"
+        );
     }
 
     #[test]
