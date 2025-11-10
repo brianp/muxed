@@ -42,7 +42,7 @@ pub fn call(args: &[&str]) -> Result<Output> {
         .map_err(TmuxError::Io)
 }
 
-/// Has session is used firgure out if a named session is already running.
+/// Has session is used to figure out if a named session is already running.
 ///
 /// `target`: A string represented by the `{named_session}`
 ///
@@ -52,7 +52,7 @@ pub fn call(args: &[&str]) -> Result<Output> {
 /// extern crate load;
 /// use load::tmux;
 ///
-/// let session = tmux::has_session("muxed");
+/// let session = tmux::has_session("muxed-abc-123");
 ///
 /// assert!(!session);
 /// ```

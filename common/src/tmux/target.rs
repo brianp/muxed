@@ -1,5 +1,5 @@
 use crate::error::CommonError;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// Represents a tmux target, which may include a session, window, and pane,
 /// and provides a combined string representation suitable for tmux commands.
@@ -33,7 +33,7 @@ use serde::Deserialize;
 /// assert_eq!(t.combined, "s:1.2");
 ///
 /// ```
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Serialize)]
 pub struct Target {
     pub session: String,
     pub window: Option<usize>,
@@ -73,6 +73,12 @@ impl Target {
             (None, None) => Ok(Self::new(&self.session, Some(value), None)),
             _ => Err(CommonError::Target),
         }
+    }
+}
+
+impl PartialEq for Target {
+    fn eq(&self, other: &Self) -> bool {
+        self.combined == other.combined
     }
 }
 

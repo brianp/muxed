@@ -116,7 +116,6 @@ where
 mod test {
     use super::*;
     use common::rand_names;
-    use std::env::temp_dir;
     use std::fs;
     use std::fs::File;
     use std::path::Path;

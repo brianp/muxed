@@ -5,7 +5,9 @@ use std::{fmt, io};
 pub enum SnapshotError {
     Common(CommonError),
     Io(io::Error),
-    NoSessionRunning,
+    SessionTargetRequired,
+    SerdeJson(serde_json::Error),
+    ToWindowFailed,
 }
 
 impl fmt::Display for SnapshotError {
@@ -13,7 +15,9 @@ impl fmt::Display for SnapshotError {
         match self {
             SnapshotError::Common(e) => write!(f, "{}", e),
             SnapshotError::Io(e) => write!(f, "{}", e),
-            SnapshotError::NoSessionRunning => write!(f, "No TMUX session was found running"),
+            SnapshotError::SessionTargetRequired => write!(f, "No TMUX session was provided"),
+            SnapshotError::SerdeJson(e) => write!(f, "{}", e),
+            SnapshotError::ToWindowFailed => write!(f, "Failed to create window from snapshot"),
         }
     }
 }
@@ -29,5 +33,11 @@ impl From<CommonError> for SnapshotError {
 impl From<io::Error> for SnapshotError {
     fn from(err: io::Error) -> SnapshotError {
         SnapshotError::Io(err)
+    }
+}
+
+impl From<serde_json::Error> for SnapshotError {
+    fn from(err: serde_json::Error) -> SnapshotError {
+        SnapshotError::SerdeJson(err)
     }
 }

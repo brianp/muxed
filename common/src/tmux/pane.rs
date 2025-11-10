@@ -1,12 +1,16 @@
-use crate::tmux::{Active, Target};
-use serde::Deserialize;
+use crate::tmux::{Active, Target, is_false};
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Pane {
+    #[serde(default, skip_serializing_if = "is_false")]
     pub active: Active,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub command: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<PathBuf>,
+    #[serde(skip_serializing)]
     pub target: Option<Target>,
 }
 
