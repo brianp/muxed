@@ -66,7 +66,7 @@ windows:
       panes: ['ls', 'vi']
 ";
             let session = test_with_contents(contents);
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             assert_eq!(window.panes.len(), 2)
         }
 
@@ -82,8 +82,8 @@ windows:
       panes: ['ls', 'vi', 'ls']
 ";
             let session = test_with_contents(contents);
-            let editor_window = session.find_window("editor").unwrap();
-            let tests_window = session.find_window("tests").unwrap();
+            let editor_window = session.find_window_by_name("editor").unwrap();
+            let tests_window = session.find_window_by_name("tests").unwrap();
             assert_eq!(editor_window.panes.len(), 2);
             assert_eq!(tests_window.panes.len(), 3)
         }
@@ -109,7 +109,7 @@ windows:
         -
 ";
             let session = test_with_contents(contents);
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             assert_eq!(window.panes.len(), 2)
         }
 
@@ -125,18 +125,14 @@ windows:
   - editor: ''
 ";
             let session = test_with_contents(contents);
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             let pane = &window.panes[0];
 
+            let right = dir.canonicalize().ok();
             let _ = fs::remove_dir(dir);
             // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
             // resulting in `pane_current_path` being `/private/tmp/Direct…`
-            assert!(
-                pane.path
-                    .to_str()
-                    .unwrap()
-                    .contains("/tmp/Directory With Spaces")
-            );
+            assert_eq!(pane.path, right);
         }
 
         #[test]
@@ -148,9 +144,9 @@ windows:
   - editor: ''
 ";
             let session = test_with_contents(contents);
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             let pane = &window.panes[0];
-            assert_eq!(pane.path, homedir().unwrap());
+            assert_eq!(pane.path, homedir());
         }
 
         #[test]
@@ -161,9 +157,9 @@ windows:
   - editor: ''
 ";
             let session = test_with_contents(contents);
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             let pane = &window.panes[0];
-            assert_eq!(pane.path, home_dir().unwrap());
+            assert_eq!(pane.path, home_dir());
         }
 
         #[test]
@@ -183,10 +179,10 @@ windows:
                 window_path.display()
             );
             let session = test_with_contents(contents.as_bytes());
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             let pane = &window.panes[0];
 
-            assert_eq!(window_path.canonicalize().unwrap(), pane.path);
+            assert_eq!(window_path.canonicalize().ok(), pane.path);
         }
 
         #[test]
@@ -200,14 +196,13 @@ windows:
         - ls
 ";
             let session = test_with_contents(contents);
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             let pane = &window.panes[0];
 
-            assert_eq!(homedir().unwrap(), pane.path);
+            assert_eq!(homedir(), pane.path);
         }
 
         #[test]
-        #[retry_test(3, 10)]
         fn first_window_path_shouldnt_be_default_path() {
             let file = rand_names::project_file_in_tmp_dir();
             let window_path = file.parent().unwrap();
@@ -224,18 +219,16 @@ windows:
                 window_path.display()
             );
             let session = test_with_contents(contents.as_bytes());
-            let window = session.find_window("editor").unwrap();
+            let window = session.find_window_by_name("editor").unwrap();
             let pane = &window.panes[0];
 
-            assert_eq!(
-                temp_dir().canonicalize().unwrap(),
-                pane.path.canonicalize().unwrap()
-            );
+            assert_eq!(temp_dir().canonicalize().ok(), pane.path);
 
-            let window = session.find_window("other").unwrap();
+            let window = session.find_window_by_name("other").unwrap();
+            dbg!(session);
             let pane = &window.panes[0];
 
-            assert_eq!(home_dir().unwrap(), pane.path);
+            assert_eq!(home_dir(), pane.path);
         }
 
         // TODO: should ssh or git be a command or window name?
@@ -336,7 +329,7 @@ name: 'Brians Session'
 windows: ['ssh', 'git']
 ";
             let session = test_with_contents(contents);
-            assert_eq!(session.name, "Brians Session")
+            assert_eq!(session.name.unwrap(), "Brians Session")
         }
 
         // TODO: Fix
@@ -364,7 +357,7 @@ windows: ['ls']
 "
             .to_string();
             let session = test_with_contents(contents.as_bytes());
-            assert_eq!(session.name, "name with spaces");
+            assert_eq!(session.name.unwrap(), "name with spaces");
         }
     }
 }

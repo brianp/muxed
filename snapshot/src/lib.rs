@@ -3,17 +3,27 @@ extern crate common;
 extern crate new;
 extern crate regex;
 extern crate serde;
-extern crate serde_yaml;
+extern crate sysinfo;
 
-mod capture;
+mod entity;
 mod error;
-pub mod tmux;
+pub mod session_data;
 
 use crate::error::SnapshotError;
+use crate::session_data::SessionOutput;
+use common::DEBUG;
 use common::args::Args;
 use common::first_run::check_first_run;
 use common::project_paths::ProjectPaths;
+use common::tmux::{Session, Target};
 use new::write_template as write_config;
+use std::process::{Command, Stdio};
+use std::result;
+
+static WINDOW_FORMAT: &str = r##"{"type": "window", "session":"#S", "index":#I,"name":"#W","active":#{window_active},"layout":"#{window_layout}"}"##;
+static PANE_FORMAT: &str = r##"{"type": "pane", "session":"#S", "window_index":#I,"index":#P,"active":#{pane_active},"path":"#{pane_current_path}", "pid":#{pane_pid}}"##;
+
+type Result<T> = result::Result<T, SnapshotError>;
 
 /// The main execution method.
 /// Accepts two arguments. -n for the name of the project file and -t to target
@@ -24,7 +34,7 @@ use new::write_template as write_config;
 /// You can run the command:
 ///
 /// ```console
-/// $ ./muxedsnapshot -n my_new_project -t existing_sesion
+/// $ ./muxedsnapshot -n my_new_project -t existing_session
 /// ```
 ///
 /// or
@@ -32,28 +42,68 @@ use new::write_template as write_config;
 /// ```console
 /// $ ./muxed snapshot -n jasper -t 1
 /// ```
-pub fn snapshot(args: Args) -> Result<(), SnapshotError> {
+pub fn snapshot(args: Args) -> Result<()> {
     let session_name = args
         .flag_t
         .as_ref()
-        .ok_or(SnapshotError::NoSessionRunning)?;
+        .ok_or(SnapshotError::SessionTargetRequired)?;
     let project_paths = ProjectPaths::try_from(&args)?;
 
     check_first_run(&project_paths.project_directory)?;
 
-    let session = tmux::inspect(session_name).unwrap();
-    let s = serde_yaml::to_string(&session).unwrap();
+    let session = inspect(session_name)?;
+    let s = serde_saphyr::to_string(&session).unwrap();
 
     write_config(s, &project_paths.project_file, args.flag_f).unwrap();
     println!("We made a snapshot of your session! \u{1F60A}");
+
     Ok(())
+}
+
+pub fn inspect(name: &str) -> result::Result<Session, SnapshotError> {
+    let target = Target::new(name, None, None);
+    let session_data = session_data(&target)?;
+
+    if DEBUG.load() {
+        dbg!(&session_data);
+    }
+
+    Session::try_from(session_data)
+}
+
+fn session_data(target: &Target) -> Result<SessionOutput> {
+    let output = Command::new("tmux")
+        .args([
+            "list-windows",
+            "-t",
+            target.combined.as_str(),
+            "-F",
+            WINDOW_FORMAT,
+            ";",
+        ])
+        .args([
+            "list-panes",
+            "-s",
+            "-t",
+            target.combined.as_str(),
+            "-F",
+            PANE_FORMAT,
+        ])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::inherit())
+        .output()?;
+
+    Ok(SessionOutput {
+        output,
+        target: target.clone(),
+    })
 }
 
 #[cfg(test)]
 mod test {
     use super::write_config;
     use common::rand_names;
-    use std::env::temp_dir;
     use std::fs;
     use std::fs::File;
     use std::io::{Read, Write};

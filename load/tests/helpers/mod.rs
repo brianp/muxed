@@ -4,7 +4,6 @@ use common::args::Args;
 use common::rand_names;
 use common::tmux::Session;
 use rand::random;
-use snapshot::tmux;
 use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
@@ -45,7 +44,7 @@ fn cleanup(project_name: &str, config_path: &PathBuf) {
     kill_session(project_name);
 }
 
-pub fn test_with_contents(contents: &[u8]) -> snapshot::tmux::session::Session {
+pub fn test_with_contents(contents: &[u8]) -> Session {
     let (project_name, config_path) = setup(contents);
     let _ = open_muxed(&project_name, config_path.parent().unwrap());
 
@@ -59,7 +58,7 @@ pub fn test_with_contents(contents: &[u8]) -> snapshot::tmux::session::Session {
     send_keys(&project_name, &exec);
     wait_on(&completed);
 
-    let session = tmux::inspect(&project_name).unwrap();
+    let session = snapshot::inspect(&project_name).unwrap();
     cleanup(&project_name, &config_path);
     session
 }

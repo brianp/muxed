@@ -1,20 +1,25 @@
 use crate::tmux::pane::Pane;
 use crate::tmux::window::Window;
 use crate::tmux::{Config, Pre, Target};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
-#[derive(Debug, Default, Clone, Deserialize)]
+#[derive(Debug, Default, Clone, Deserialize, Serialize)]
 pub struct Session {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pre: Option<Pre>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub pre_window: Option<Pre>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub root: Option<PathBuf>,
     pub windows: Vec<Window>,
+    #[serde(skip_serializing)]
     pub target: Option<Target>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub daemonize: Option<bool>,
+    #[serde(skip_serializing)]
     pub config: Option<Config>,
 }
 
@@ -55,6 +60,10 @@ impl Session {
 
     pub fn pre_window(&self) -> Option<&Pre> {
         self.pre.as_ref()
+    }
+
+    pub fn find_window_by_name(&self, name: &str) -> Option<Window> {
+        self.windows.iter().find(|w| w.name == name).cloned()
     }
 }
 

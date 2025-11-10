@@ -5,6 +5,10 @@ pub mod session;
 mod target;
 pub mod window;
 
+fn is_false(b: &bool) -> bool {
+    !b
+}
+
 pub type Active = bool;
 pub type Layout = String;
 

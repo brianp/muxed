@@ -1,17 +1,22 @@
 use crate::tmux::pane::Pane;
-use crate::tmux::{Active, Layout, Target};
-use serde::Deserialize;
+use crate::tmux::{Active, Layout, Target, is_false};
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Default, Clone, Serialize)]
 pub struct Window {
+    #[serde(default, skip_serializing_if = "is_false")]
     pub active: Active,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub command: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub layout: Option<Layout>,
     pub name: String,
     pub panes: Vec<Pane>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<PathBuf>,
+    #[serde(skip_serializing)]
     pub target: Option<Target>,
 }
 
