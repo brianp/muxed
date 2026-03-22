@@ -1,0 +1,100 @@
+name: release
+
+on:
+  workflow_run:
+    workflows: ["tests", "lints"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+  actions: read
+
+jobs:
+  gated-release:
+    name: Check and build release
+    if: >
+      github.event.workflow_run.conclusion == 'success' &&
+      startsWith(github.event.workflow_run.head_branch, 'v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Verify that both workflows succeeded for this tag
+        id: verify
+        run: |
+          echo "Verifying that both workflows passed for tag ${{ github.event.workflow_run.head_branch }}"
+
+          TAG="${{ github.event.workflow_run.head_branch }}"
+          REPO="${{ github.repository }}"
+
+          TESTS_STATUS=$(gh run list --workflow tests --branch "$TAG" --json conclusion --jq '.[0].conclusion')
+          LINTS_STATUS=$(gh run list --workflow lints --branch "$TAG" --json conclusion --jq '.[0].conclusion')
+
+          echo "tests: $TESTS_STATUS, lints: $LINTS_STATUS"
+
+          if [ "$TESTS_STATUS" != "success" ] || [ "$LINTS_STATUS" != "success" ]; then
+            echo "Required workflows not all successful. Skipping release."
+            exit 78
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Build muxed for Linux and macOS
+    needs: gated-release
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-latest
+            target: x86_64-apple-darwin
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: swatinem/rust-cache@v2.7.5
+
+      - name: Build muxed
+        run: cargo build --release
+
+      - name: Package release tarball
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          TARGET="${{ matrix.target }}"
+          DIST_DIR="dist/muxed-$VERSION-$TARGET"
+          mkdir -p "$DIST_DIR"
+
+          # Copy binary and documentation
+          cp "target/release/muxed" "$DIST_DIR/"
+          cp LICENSE CHANGELOG.md README.md "$DIST_DIR/"
+
+          # Create tarball
+          tar -czf "muxed-$VERSION-$TARGET.tar.gz" -C "dist" "muxed-$VERSION-$TARGET"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: muxed-${{ matrix.target }}
+          path: muxed-*.tar.gz
+
+  release:
+    name: Create draft GitHub release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: List artifacts
+        run: ls -R dist
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: dist/**/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
