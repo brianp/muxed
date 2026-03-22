@@ -225,7 +225,6 @@ windows:
             assert_eq!(temp_dir().canonicalize().ok(), pane.path);
 
             let window = session.find_window_by_name("other").unwrap();
-            dbg!(session);
             let pane = &window.panes[0];
 
             assert_eq!(home_dir(), pane.path);
