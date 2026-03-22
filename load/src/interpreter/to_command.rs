@@ -162,8 +162,10 @@ impl ToCommand for common::tmux::Window {
             }
         }
 
-        for _ in 0..self.panes.len().saturating_sub(1) {
-            commands.push(Split::new(target.clone(), self.path.clone()).into());
+        // Create splits for additional panes (skip the first pane which uses the window)
+        // Each split uses the individual pane's path, not the window's path
+        for pane in self.panes.iter().skip(1) {
+            commands.push(Split::new(target.clone(), pane.path.clone()).into());
         }
 
         if let Some(layout) = self.layout.as_ref() {
@@ -182,7 +184,8 @@ impl ToCommand for common::tmux::Window {
 /// Implementation of `ToCommand` for a tmux `Pane`.
 ///
 /// This method assembles a list of commands to realize a pane, typically
-/// only sending pre-window commands and the pane's custom command (if present).
+/// navigating to the pane's path if specified, running pre-window commands,
+/// and sending the pane's custom command (if present).
 impl ToCommand for common::tmux::Pane {
     fn to_commands(&self, ctx: PlanContext) -> Result<Vec<Commands>> {
         let mut commands: Vec<Commands> = vec![];
@@ -191,6 +194,11 @@ impl ToCommand for common::tmux::Pane {
             .target
             .clone()
             .ok_or(InterpreterError::PaneTargetRequired)?;
+
+        // Navigate to pane-specific path if set
+        if let Some(path) = self.path.as_ref() {
+            commands.push(SendKeys::new(target.clone(), format!("cd {}", path.display())).into());
+        }
 
         if let Some(pre) = ctx.session.pre_window.as_ref() {
             for cmd in pre.iter() {
@@ -440,5 +448,139 @@ mod tests {
             .filter(|x| matches!(x, Commands::Layout(_)))
             .collect();
         assert_eq!(remains.len(), 0);
+    }
+
+    #[test]
+    fn expect_split_uses_pane_path_not_window_path() {
+        use std::path::PathBuf;
+
+        let window = Window {
+            name: "editor".into(),
+            target: Some(Target::new("muxed", Some(0), None)),
+            path: Some(PathBuf::from("/window/path")),
+            panes: vec![
+                Pane {
+                    command: Some("vim".into()),
+                    target: Some(Target::new("muxed", Some(0), Some(0))),
+                    path: Some(PathBuf::from("/pane1/path")),
+                    ..Default::default()
+                },
+                Pane {
+                    command: Some("guard".into()),
+                    target: Some(Target::new("muxed", Some(0), Some(1))),
+                    path: Some(PathBuf::from("/pane2/path")),
+                    ..Default::default()
+                },
+            ],
+            ..Default::default()
+        };
+
+        let session = Session {
+            name: Some("muxed".into()),
+            target: Some(Target::new("muxed", None, None)),
+            windows: vec![window],
+            config: Some(basic_config()),
+            ..Default::default()
+        };
+
+        let commands = session.command_plan().unwrap();
+
+        // Find the Split command
+        let split_commands: Vec<_> = commands
+            .iter()
+            .filter_map(|cmd| {
+                if let Commands::Split(split) = cmd {
+                    Some(split)
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        assert_eq!(split_commands.len(), 1);
+        // The split should use the second pane's path, not the window's path
+        assert_eq!(split_commands[0].path, Some(PathBuf::from("/pane2/path")));
+    }
+
+    #[test]
+    fn expect_pane_cd_command_when_path_set() {
+        use std::path::PathBuf;
+
+        let pane = Pane {
+            command: Some("vim".into()),
+            target: Some(Target::new("muxed", Some(0), Some(0))),
+            path: Some(PathBuf::from("/pane/specific/path")),
+            ..Default::default()
+        };
+
+        let session = Session {
+            name: Some("muxed".into()),
+            target: Some(Target::new("muxed", None, None)),
+            windows: vec![],
+            config: Some(basic_config()),
+            ..Default::default()
+        };
+
+        let ctx = PlanContext {
+            first: false,
+            session: &session,
+        };
+
+        let commands = pane.to_commands(ctx).unwrap();
+
+        // First command should be a cd to the pane's path
+        let send_keys: Vec<_> = commands
+            .iter()
+            .filter_map(|cmd| {
+                if let Commands::SendKeys(sk) = cmd {
+                    Some(sk)
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        assert!(!send_keys.is_empty());
+        assert_eq!(send_keys[0].exec, "cd /pane/specific/path");
+    }
+
+    #[test]
+    fn expect_no_cd_command_when_pane_path_not_set() {
+        let pane = Pane {
+            command: Some("vim".into()),
+            target: Some(Target::new("muxed", Some(0), Some(0))),
+            path: None,
+            ..Default::default()
+        };
+
+        let session = Session {
+            name: Some("muxed".into()),
+            target: Some(Target::new("muxed", None, None)),
+            windows: vec![],
+            config: Some(basic_config()),
+            ..Default::default()
+        };
+
+        let ctx = PlanContext {
+            first: false,
+            session: &session,
+        };
+
+        let commands = pane.to_commands(ctx).unwrap();
+
+        // There should be only one SendKeys for the command "vim", no cd
+        let send_keys: Vec<_> = commands
+            .iter()
+            .filter_map(|cmd| {
+                if let Commands::SendKeys(sk) = cmd {
+                    Some(sk)
+                } else {
+                    None
+                }
+            })
+            .collect();
+
+        assert_eq!(send_keys.len(), 1);
+        assert_eq!(send_keys[0].exec, "vim");
     }
 }
