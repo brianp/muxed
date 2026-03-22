@@ -1,22 +1,17 @@
 use crate::tmux::pane::Pane;
 use crate::tmux::{Active, Layout, Target, is_false};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, ser::SerializeMap};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-#[derive(Debug, Default, Clone, Serialize)]
+#[derive(Debug, Default, Clone)]
 pub struct Window {
-    #[serde(default, skip_serializing_if = "is_false")]
     pub active: Active,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub command: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub layout: Option<Layout>,
     pub name: String,
     pub panes: Vec<Pane>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub path: Option<PathBuf>,
-    #[serde(skip_serializing)]
     pub target: Option<Target>,
 }
 
@@ -28,6 +23,49 @@ impl Window {
     }
 }
 
+/// Helper struct for serializing the inner fields of a Window (everything except name)
+#[derive(Serialize)]
+struct WindowInner<'a> {
+    #[serde(skip_serializing_if = "is_false")]
+    active: &'a Active,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    command: &'a Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    layout: &'a Option<Layout>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    panes: &'a Vec<Pane>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    path: &'a Option<PathBuf>,
+}
+
+impl Serialize for Window {
+    /// Custom serializer that outputs the map format: `{name: {inner_fields...}}`
+    ///
+    /// This produces YAML like:
+    /// ```yaml
+    /// editor:
+    ///   layout: even-horizontal
+    ///   panes: [htop, ranger]
+    ///   active: true
+    /// ```
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        let inner = WindowInner {
+            active: &self.active,
+            command: &self.command,
+            layout: &self.layout,
+            panes: &self.panes,
+            path: &self.path,
+        };
+
+        let mut map = serializer.serialize_map(Some(1))?;
+        map.serialize_entry(&self.name, &inner)?;
+        map.end()
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(untagged)]
 enum WindowRepr {
@@ -36,6 +74,12 @@ enum WindowRepr {
 
     // windows: [1, 2, 3]
     Num(i64),
+
+    // windows:
+    //   - name: editor
+    //     layout: main-vertical
+    //     panes: [...]
+    Direct(DirectWindow),
 
     // windows:
     //   - editor:
@@ -58,6 +102,22 @@ struct Inner {
     pub panes: Option<Vec<Pane>>,
     pub active: Option<Active>,
     pub path: Option<PathBuf>,
+    pub command: Option<String>,
+}
+
+/// Direct window format with name as a field (legacy format for backward compatibility)
+#[derive(Debug, Deserialize)]
+struct DirectWindow {
+    pub name: String,
+    #[serde(default)]
+    pub layout: Option<Layout>,
+    #[serde(default)]
+    pub panes: Option<Vec<Pane>>,
+    #[serde(default)]
+    pub active: Option<Active>,
+    #[serde(default)]
+    pub path: Option<PathBuf>,
+    #[serde(default)]
     pub command: Option<String>,
 }
 
@@ -154,6 +214,15 @@ impl<'de> Deserialize<'de> for Window {
                     }),
                 }
             }
+            WindowRepr::Direct(direct) => Ok(Window {
+                name: direct.name,
+                active: direct.active.unwrap_or(false),
+                command: direct.command,
+                layout: direct.layout,
+                panes: direct.panes.unwrap_or_default(),
+                path: direct.path,
+                target: None,
+            }),
         }
     }
 }
@@ -231,5 +300,70 @@ term:
         let yaml = ": bar";
         let error = serde_saphyr::from_str::<Window>(yaml);
         assert!(error.is_err());
+    }
+
+    #[test]
+    fn serializes_to_map_format() {
+        let window = Window {
+            name: "editor".to_string(),
+            active: true,
+            layout: Some("even-horizontal".into()),
+            panes: vec![],
+            command: Some("vim".to_string()),
+            path: Some(PathBuf::from("/tmp")),
+            target: None,
+        };
+
+        let yaml = serde_saphyr::to_string(&window).unwrap();
+        // Should serialize as: editor: {active: true, command: vim, layout: even-horizontal, path: /tmp}
+        assert!(yaml.contains("editor:"));
+        assert!(!yaml.contains("name:"));
+    }
+
+    #[test]
+    fn roundtrip_serialization() {
+        let window = Window {
+            name: "term".to_string(),
+            active: true,
+            layout: Some("even-horizontal".into()),
+            panes: vec![],
+            command: Some("mycmd".to_string()),
+            path: Some(PathBuf::from("/tmp")),
+            target: None,
+        };
+
+        let yaml = serde_saphyr::to_string(&window).unwrap();
+        let parsed: Window = serde_saphyr::from_str(&yaml).unwrap();
+
+        assert_eq!(parsed.name, window.name);
+        assert_eq!(parsed.active, window.active);
+        assert_eq!(parsed.layout, window.layout);
+        assert_eq!(parsed.command, window.command);
+        assert_eq!(parsed.path, window.path);
+    }
+
+    #[test]
+    fn deserializes_legacy_direct_format() {
+        // Legacy format with name as a field (for backward compatibility)
+        let yaml = "\
+name: editor
+layout: even-horizontal
+panes:
+  - htop
+  - ranger
+active: true
+command: mycmd
+path: /tmp
+";
+        let window: Window = serde_saphyr::from_str(yaml).unwrap();
+        assert_eq!(window.name, "editor");
+        assert_eq!(
+            window.layout.as_ref().unwrap().to_string(),
+            "even-horizontal"
+        );
+        assert_eq!(window.panes.len(), 2);
+        assert!(window.active);
+        assert_eq!(window.command.as_ref().unwrap(), "mycmd");
+        assert_eq!(window.path.as_ref().unwrap().to_str().unwrap(), "/tmp");
     }
 }
