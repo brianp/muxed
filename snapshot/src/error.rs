@@ -1,12 +1,15 @@
 use common::error::CommonError;
+use new::error::NewError;
 use std::{fmt, io};
 
 #[derive(Debug)]
 pub enum SnapshotError {
     Common(CommonError),
     Io(io::Error),
-    SessionTargetRequired,
+    New(NewError),
     SerdeJson(serde_json::Error),
+    SessionTargetRequired,
+    ToPaneFailed,
     ToWindowFailed,
 }
 
@@ -15,8 +18,10 @@ impl fmt::Display for SnapshotError {
         match self {
             SnapshotError::Common(e) => write!(f, "{}", e),
             SnapshotError::Io(e) => write!(f, "{}", e),
-            SnapshotError::SessionTargetRequired => write!(f, "No TMUX session was provided"),
+            SnapshotError::New(e) => write!(f, "{}", e),
             SnapshotError::SerdeJson(e) => write!(f, "{}", e),
+            SnapshotError::SessionTargetRequired => write!(f, "No TMUX session was provided"),
+            SnapshotError::ToPaneFailed => write!(f, "Failed to create pane from snapshot"),
             SnapshotError::ToWindowFailed => write!(f, "Failed to create window from snapshot"),
         }
     }
@@ -39,5 +44,11 @@ impl From<io::Error> for SnapshotError {
 impl From<serde_json::Error> for SnapshotError {
     fn from(err: serde_json::Error) -> SnapshotError {
         SnapshotError::SerdeJson(err)
+    }
+}
+
+impl From<NewError> for SnapshotError {
+    fn from(err: NewError) -> SnapshotError {
+        SnapshotError::New(err)
     }
 }

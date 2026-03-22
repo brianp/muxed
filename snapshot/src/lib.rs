@@ -54,7 +54,7 @@ pub fn snapshot(args: Args) -> Result<()> {
     let session = inspect(session_name)?;
     let s = serde_saphyr::to_string(&session).unwrap();
 
-    write_config(s, &project_paths.project_file, args.flag_f).unwrap();
+    write_config(s, &project_paths.project_file, args.flag_f)?;
     println!("We made a snapshot of your session! \u{1F60A}");
 
     Ok(())

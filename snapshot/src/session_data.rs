@@ -2,10 +2,79 @@ use crate::entity::Entity;
 use crate::error::SnapshotError;
 use common::DEBUG;
 use common::tmux::{Pane, Session, Target, Window};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
+use std::path::PathBuf;
 use std::process::Output;
 
 type Result<T> = std::result::Result<T, SnapshotError>;
+
+/// Derive the most common path among all panes to use as the session root.
+/// Only returns a root if a path appears more than once (i.e., is actually common).
+fn derive_root_path(windows: &[&mut Window]) -> Option<PathBuf> {
+    let mut path_counts: HashMap<PathBuf, usize> = HashMap::new();
+
+    for window in windows {
+        for pane in &window.panes {
+            if let Some(path) = &pane.path {
+                *path_counts.entry(path.clone()).or_insert(0) += 1;
+            }
+        }
+    }
+
+    // Only return a path if it appears more than once (is actually common)
+    path_counts
+        .into_iter()
+        .filter(|(_, count)| *count > 1)
+        .max_by_key(|(_, count)| *count)
+        .map(|(path, _)| path)
+}
+
+/// Derive the most common path among panes in a window.
+/// Returns the path only if it's used by the majority of panes.
+fn derive_window_path(panes: &[Pane]) -> Option<PathBuf> {
+    if panes.is_empty() {
+        return None;
+    }
+
+    let mut path_counts: HashMap<PathBuf, usize> = HashMap::new();
+
+    for pane in panes {
+        if let Some(path) = &pane.path {
+            *path_counts.entry(path.clone()).or_insert(0) += 1;
+        }
+    }
+
+    // Return the most common path if it's the majority
+    path_counts
+        .iter()
+        .max_by_key(|(_, count)| *count)
+        .filter(|(_, count)| **count * 2 > panes.len())
+        .map(|(path, _)| path.clone())
+}
+
+/// Clear redundant paths that match the root or window path.
+fn clear_redundant_paths(windows: &mut BTreeMap<usize, Window>, root: &Option<PathBuf>) {
+    for window in windows.values_mut() {
+        // If window path matches root, clear it
+        if let (Some(wp), Some(r)) = (&window.path, root)
+            && wp == r
+        {
+            window.path = None;
+        }
+
+        for pane in &mut window.panes {
+            // If pane path matches window path or root, clear it
+            let clear = match (&pane.path, &window.path, root) {
+                (Some(p), Some(wp), _) if p == wp => true,
+                (Some(p), None, Some(r)) if p == r => true,
+                _ => false,
+            };
+            if clear {
+                pane.path = None;
+            }
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct SessionOutput {
@@ -41,11 +110,23 @@ impl TryFrom<SessionOutput> for Session {
             }
         }
 
+        // Derive window paths from panes (most common path in each window)
+        for window in windows.values_mut() {
+            window.path = derive_window_path(&window.panes);
+        }
+
+        // Derive root path from all panes (most common path overall)
+        let window_refs: Vec<&mut Window> = windows.values_mut().collect();
+        let root = derive_root_path(&window_refs);
+
+        // Clear redundant paths that match root or window path
+        clear_redundant_paths(&mut windows, &root);
+
         Ok(Session {
             name: Some(session.target.combined.clone()),
             pre: None,
             pre_window: None,
-            root: None,
+            root,
             windows: windows.into_values().collect(),
             target: Some(session.target),
             daemonize: None,
@@ -257,5 +338,134 @@ invalid json line
         assert_eq!(session.root, None);
         assert_eq!(session.daemonize, None);
         assert_eq!(session.config, None);
+    }
+
+    #[test]
+    fn test_derives_root_from_common_pane_paths() {
+        let target = Target::new("test-session", None, None);
+        // All 3 panes have /tmp as their path
+        let json_output = r#"{"type":"window","session":"test-session","index":0,"name":"main","active":1,"layout":"even-horizontal"}
+{"type":"pane","session":"test-session","window_index":0,"index":0,"active":1,"path":"/tmp","pid":12345}
+{"type":"pane","session":"test-session","window_index":0,"index":1,"active":0,"path":"/tmp","pid":12346}
+{"type":"pane","session":"test-session","window_index":0,"index":2,"active":0,"path":"/tmp","pid":12347}
+"#;
+
+        let session_output = SessionOutput {
+            output: create_mock_output(json_output, "", true),
+            target: target.clone(),
+        };
+
+        let session = Session::try_from(session_output).unwrap();
+
+        // Root should be /tmp since all panes share it
+        assert_eq!(session.root, Some(std::path::PathBuf::from("/tmp")));
+
+        // Window path should also be /tmp (majority of panes)
+        let window = &session.windows[0];
+        assert_eq!(window.path, None); // Cleared because it matches root
+
+        // Pane paths should be cleared since they match root
+        for pane in &window.panes {
+            assert_eq!(pane.path, None);
+        }
+    }
+
+    #[test]
+    fn test_derives_root_from_majority_pane_paths() {
+        let target = Target::new("test-session", None, None);
+        // 2 panes have /tmp, 1 has /home
+        let json_output = r#"{"type":"window","session":"test-session","index":0,"name":"main","active":1,"layout":"even-horizontal"}
+{"type":"pane","session":"test-session","window_index":0,"index":0,"active":1,"path":"/tmp","pid":12345}
+{"type":"pane","session":"test-session","window_index":0,"index":1,"active":0,"path":"/tmp","pid":12346}
+{"type":"pane","session":"test-session","window_index":0,"index":2,"active":0,"path":"/home","pid":12347}
+"#;
+
+        let session_output = SessionOutput {
+            output: create_mock_output(json_output, "", true),
+            target: target.clone(),
+        };
+
+        let session = Session::try_from(session_output).unwrap();
+
+        // Root should be /tmp since it appears in 2 panes (more than once)
+        assert_eq!(session.root, Some(std::path::PathBuf::from("/tmp")));
+
+        // Window should have /tmp as path (2 out of 3 is majority)
+        let window = &session.windows[0];
+        assert_eq!(window.path, None); // Cleared because it matches root
+
+        // First two panes should have path cleared (matches root)
+        assert_eq!(window.panes[0].path, None);
+        assert_eq!(window.panes[1].path, None);
+        // Third pane keeps its unique path
+        assert_eq!(
+            window.panes[2].path,
+            Some(std::path::PathBuf::from("/home"))
+        );
+    }
+
+    #[test]
+    fn test_no_root_when_all_paths_unique() {
+        let target = Target::new("test-session", None, None);
+        // Each pane has a unique path
+        let json_output = r#"{"type":"window","session":"test-session","index":0,"name":"main","active":1,"layout":"even-horizontal"}
+{"type":"pane","session":"test-session","window_index":0,"index":0,"active":1,"path":"/home/user","pid":12345}
+{"type":"pane","session":"test-session","window_index":0,"index":1,"active":0,"path":"/tmp","pid":12346}
+{"type":"pane","session":"test-session","window_index":0,"index":2,"active":0,"path":"/var","pid":12347}
+"#;
+
+        let session_output = SessionOutput {
+            output: create_mock_output(json_output, "", true),
+            target: target.clone(),
+        };
+
+        let session = Session::try_from(session_output).unwrap();
+
+        // No root since no path appears more than once
+        assert_eq!(session.root, None);
+
+        // Window path should be None (no majority)
+        let window = &session.windows[0];
+        assert_eq!(window.path, None);
+
+        // All panes should retain their original paths
+        assert_eq!(
+            window.panes[0].path,
+            Some(std::path::PathBuf::from("/home/user"))
+        );
+        assert_eq!(window.panes[1].path, Some(std::path::PathBuf::from("/tmp")));
+        assert_eq!(window.panes[2].path, Some(std::path::PathBuf::from("/var")));
+    }
+
+    #[test]
+    fn test_window_path_derived_from_pane_majority() {
+        let target = Target::new("test-session", None, None);
+        // Window 0: 2/3 panes have /project, Window 1: all different
+        let json_output = r#"{"type":"window","session":"test-session","index":0,"name":"work","active":1,"layout":"even-horizontal"}
+{"type":"window","session":"test-session","index":1,"name":"misc","active":0,"layout":"even-horizontal"}
+{"type":"pane","session":"test-session","window_index":0,"index":0,"active":1,"path":"/project","pid":12345}
+{"type":"pane","session":"test-session","window_index":0,"index":1,"active":0,"path":"/project","pid":12346}
+{"type":"pane","session":"test-session","window_index":0,"index":2,"active":0,"path":"/tmp","pid":12347}
+{"type":"pane","session":"test-session","window_index":1,"index":0,"active":0,"path":"/home","pid":12348}
+{"type":"pane","session":"test-session","window_index":1,"index":1,"active":0,"path":"/var","pid":12349}
+"#;
+
+        let session_output = SessionOutput {
+            output: create_mock_output(json_output, "", true),
+            target: target.clone(),
+        };
+
+        let session = Session::try_from(session_output).unwrap();
+
+        // Root should be /project (appears twice, which is more than once)
+        assert_eq!(session.root, Some(std::path::PathBuf::from("/project")));
+
+        // First window should have path cleared (matches root)
+        let window0 = &session.windows[0];
+        assert_eq!(window0.path, None);
+
+        // Second window should have None (no majority)
+        let window1 = &session.windows[1];
+        assert_eq!(window1.path, None);
     }
 }

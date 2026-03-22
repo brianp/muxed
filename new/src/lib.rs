@@ -1,6 +1,6 @@
 //! Muxednew. A Muxed project Template Generator
 
-mod error;
+pub mod error;
 
 extern crate common;
 

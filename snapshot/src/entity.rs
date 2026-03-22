@@ -116,7 +116,7 @@ impl TryFrom<&Entity> for Pane {
                     target,
                 })
             }
-            Entity::Window { .. } => Err(SnapshotError::ToWindowFailed),
+            Entity::Window { .. } => Err(SnapshotError::ToPaneFailed),
         }
     }
 }
