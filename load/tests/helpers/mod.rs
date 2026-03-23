@@ -48,6 +48,9 @@ pub fn test_with_contents(contents: &[u8]) -> Session {
     let (project_name, config_path) = setup(contents);
     let _ = open_muxed(&project_name, config_path.parent().unwrap());
 
+    // Disable history in the test session to avoid polluting the user's shell history
+    send_keys(&project_name, " unset HISTFILE");
+
     let completed = PathBuf::from(format!(
         "/tmp/{}-{}.complete",
         project_name,
@@ -79,7 +82,9 @@ fn kill_session(target: &str) {
 }
 
 fn send_keys(target: &str, exec: &str) {
-    let _ = load::tmux::call(&["send-keys", "-t", target, exec, "KPEnter"]);
+    // Prefix with a space so shells with HISTCONTROL=ignorespace won't record it
+    let spaced = format!(" {}", exec);
+    let _ = load::tmux::call(&["send-keys", "-t", target, &spaced, "KPEnter"]);
 }
 
 fn wait_on(file: &PathBuf) {
