@@ -120,6 +120,8 @@ pub fn session_exists(project_name: &str) -> Option<Commands> {
 /// use load::command::{Attach, Commands, Command};
 /// use load::project::open;
 ///
+/// // Ensure we're not inside a tmux session for this test
+/// unsafe { std::env::remove_var("TMUX") };
 /// let correct_type = match open("muxed") {
 ///     Commands::Attach(_) => true,
 ///     _ => false,
@@ -190,6 +192,7 @@ mod test {
 
     #[test]
     fn open_returns_attach_in_bare_context() {
+        let _ = unsafe { env::remove_var(TMUX_ENV_VAR) };
         let attach_command = match open("muxed") {
             Commands::Attach(_) => true,
             _ => false,

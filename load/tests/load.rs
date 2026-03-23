@@ -126,13 +126,12 @@ windows:
 ";
             let session = test_with_contents(contents);
             let window = session.find_window_by_name("editor").unwrap();
-            let pane = &window.panes[0];
 
             let right = dir.canonicalize().ok();
             let _ = fs::remove_dir(dir);
-            // Use contains because OSX on travis ci symlinks /tmp/ to /private/tmp/
-            // resulting in `pane_current_path` being `/private/tmp/Direct…`
-            assert_eq!(pane.path, right);
+            // Path is derived to window level since all panes share it
+            // Use canonicalize because OSX symlinks /tmp/ to /private/tmp/
+            assert_eq!(window.path, right);
         }
 
         #[test]
@@ -145,8 +144,7 @@ windows:
 ";
             let session = test_with_contents(contents);
             let window = session.find_window_by_name("editor").unwrap();
-            let pane = &window.panes[0];
-            assert_eq!(pane.path, homedir());
+            assert_eq!(window.path, homedir());
         }
 
         #[test]
@@ -158,8 +156,7 @@ windows:
 ";
             let session = test_with_contents(contents);
             let window = session.find_window_by_name("editor").unwrap();
-            let pane = &window.panes[0];
-            assert_eq!(pane.path, home_dir());
+            assert_eq!(window.path, home_dir());
         }
 
         #[test]
@@ -180,9 +177,8 @@ windows:
             );
             let session = test_with_contents(contents.as_bytes());
             let window = session.find_window_by_name("editor").unwrap();
-            let pane = &window.panes[0];
 
-            assert_eq!(window_path.canonicalize().ok(), pane.path);
+            assert_eq!(window_path.canonicalize().ok(), window.path);
         }
 
         #[test]
@@ -197,9 +193,8 @@ windows:
 ";
             let session = test_with_contents(contents);
             let window = session.find_window_by_name("editor").unwrap();
-            let pane = &window.panes[0];
 
-            assert_eq!(homedir(), pane.path);
+            assert_eq!(homedir(), window.path);
         }
 
         #[test]
@@ -219,15 +214,11 @@ windows:
                 window_path.display()
             );
             let session = test_with_contents(contents.as_bytes());
-            let window = session.find_window_by_name("editor").unwrap();
-            let pane = &window.panes[0];
+            let editor = session.find_window_by_name("editor").unwrap();
+            assert_eq!(temp_dir().canonicalize().ok(), editor.path);
 
-            assert_eq!(temp_dir().canonicalize().ok(), pane.path);
-
-            let window = session.find_window_by_name("other").unwrap();
-            let pane = &window.panes[0];
-
-            assert_eq!(home_dir(), pane.path);
+            let other = session.find_window_by_name("other").unwrap();
+            assert_eq!(home_dir(), other.path);
         }
 
         // TODO: should ssh or git be a command or window name?
